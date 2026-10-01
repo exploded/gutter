@@ -68,7 +68,7 @@ AWS_SECRET_ACCESS_KEY=
 SCHEDULER=
 
 # Nightly DB backup to S3 (scripts/s3-backup-setup.sh prints these). Empty = no backups.
-BACKUP_S3_BUCKET=gutter-backups
+BACKUP_S3_BUCKET=warrandyte-gutters-backups
 BACKUP_AWS_ACCESS_KEY_ID=
 BACKUP_AWS_SECRET_ACCESS_KEY=
 EOF

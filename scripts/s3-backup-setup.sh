@@ -3,7 +3,7 @@
 # machine with an admin profile, not the server).
 #
 # What it does (idempotent — safe to re-run):
-#   1. Creates the private bucket `gutter-backups` in ap-southeast-2 with
+#   1. Creates the private bucket `warrandyte-gutters-backups` in ap-southeast-2 with
 #      public access blocked, SSE-S3 encryption and a lifecycle rule that
 #      expires objects after RETENTION_DAYS (default 90).
 #   2. Creates IAM user `gutter-backup` whose only permission is
@@ -17,7 +17,7 @@
 set -euo pipefail
 
 REGION=${AWS_REGION:-ap-southeast-2}
-BUCKET=${BACKUP_BUCKET:-gutter-backups}
+BUCKET=${BACKUP_BUCKET:-warrandyte-gutters-backups}
 RETENTION_DAYS=${RETENTION_DAYS:-90}
 USER_NAME=gutter-backup
 POLICY_NAME=s3-backup-gutter
