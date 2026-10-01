@@ -1,0 +1,152 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Gutter Cleaning {{.PageData.A.Name}} {{.PageData.A.Postcode}} — Fixed Prices, Book Online | Warrandyte Gutters</title>
+    <meta name="description" content="{{.PageData.A.MetaDesc}}">
+    <meta property="og:title" content="Gutter cleaning in {{.PageData.A.Name}} — fixed prices, book online">
+    <meta property="og:description" content="{{.PageData.A.MetaDesc}}">
+{{end}}
+
+{{define "og-image"}}
+    {{if .PageData.Image}}
+    <meta property="og:image" content="{{.Site.BaseURL}}{{.PageData.Image}}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="675">
+    <meta property="og:image:alt" content="{{.PageData.A.Name}}, Victoria">
+    {{else}}
+    <meta property="og:image" content="{{.Site.BaseURL}}/static/img/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Warrandyte Gutters — gutter cleaning for Warrandyte and surrounds">
+    {{end}}
+{{end}}
+
+{{define "head"}}
+    {{$a := .PageData.A}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Service areas" "/areas" $a.Name $a.URL)}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Gutter cleaning in {{$a.Name}}",
+      "serviceType": "Gutter cleaning",
+      "description": "{{$a.MetaDesc}}",
+      "url": "{{.Site.BaseURL}}{{$a.URL}}",{{if .PageData.Image}}
+      "image": "{{.Site.BaseURL}}{{.PageData.Image}}",{{end}}
+      "provider": {"@id": "{{.Site.BaseURL}}/#business"},
+      "areaServed": {"@type": "City", "name": "{{$a.Name}}", "address": {"@type": "PostalAddress", "addressLocality": "{{$a.Name}}", "postalCode": "{{$a.Postcode}}", "addressRegion": "VIC", "addressCountry": "AU"}},
+      "offers": [{{range $i, $t := .Site.Prices.Types}}{{if $i}}, {{end}}{"@type": "Offer", "priceCurrency": "AUD", "price": "{{$t.Price}}", "name": "{{$t.Name}}"}{{end}}]
+    }
+    </script>
+{{end}}
+
+{{define "content"}}
+    {{$a := .PageData.A}}
+    <div class="page-header">
+        <div class="container area-hero{{if .PageData.Image}} area-hero--photo{{end}}">
+            <div class="area-hero-text">
+                <div class="section-label"><a href="/areas" class="crumb">Service areas</a> &middot; {{$a.LGA}} &middot; {{$a.Postcode}}</div>
+                <h1 class="section-title">Gutter cleaning in {{$a.Name}}.</h1>
+                <p class="page-header-intro">{{$a.Blurb}}</p>
+            </div>
+            {{if .PageData.Image}}
+            <figure class="area-photo">
+                <div class="area-photo-frame">
+                    <img src="{{.PageData.Image}}" alt="{{$a.Name}}, Victoria — in the service area for gutter cleaning" width="1200" height="675" decoding="async" fetchpriority="high">
+                    <span class="area-photo-tag">{{$a.Name}} &middot; {{$a.Postcode}}</span>
+                </div>
+                {{with $a.Photo}}<figcaption>Photo: <a href="{{.Source}}" rel="noopener nofollow" target="_blank">{{.Artist}}</a>{{if .LicenceURL}} &middot; <a href="{{.LicenceURL}}" rel="noopener nofollow" target="_blank">{{.Licence}}</a>{{else}} &middot; {{.Licence}}{{end}}<span class="area-photo-via"> &middot; Wikimedia Commons</span></figcaption>{{end}}
+            </figure>
+            {{end}}
+        </div>
+    </div>
+
+    <section class="service-section">
+        <div class="container">
+            <div class="help-banner help-banner--slim reveal">
+                <div><strong>About {{$a.DriveMin}} minutes from Warrandyte.</strong> {{$a.Name}} is inside the service area, so there's no call-out fee — the price for your type of house is the whole price.</div>
+                <div class="help-banner-actions">
+                    <a href="/book" class="btn btn--primary">Book a clean in {{$a.Name}} &#8594;</a>
+                    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+                </div>
+            </div>
+
+            <div class="service-layout">
+                <div class="service-body">
+                    <h2>What's included in {{$a.Name}}</h2>
+                    <ul class="checklist">
+                        <li><a href="/services/gutter-cleaning">Every gutter cleared by hand</a>, and the roof valleys too</li>
+                        <li><a href="/services/downpipe-unblocking">Downpipes flushed</a> so you know they run</li>
+                        <li>Leaves bagged and taken away — never burnt, never left in the garden</li>
+                        <li>Before-and-after photos emailed with your receipt</li>
+                        <li><a href="/services/gutter-guard-homes">Gutter guard</a> lifted and refitted if you have it</li>
+                    </ul>
+
+                    <h2>Before fire season</h2>
+                    <p>The CFA tells people in bushfire areas to clear their gutters in early spring, before the Fire Danger Period, and to keep them clear through the season. A <a href="/services/bushfire-preparation">fire-season clean</a> comes with a dated photo report you can show the council or your insurer, and the <a href="/services/fire-ready-plan">Fire-ready plan</a> books you in every spring and autumn at {{.Site.Prices.PlanPct}}% off.</p>
+
+                    <h2>How it works</h2>
+                    <div class="steps steps--compact">
+                        <div class="step">
+                            <div class="step-num">01</div>
+                            <h3>Book</h3>
+                            <p>Pick your type of house online and see the price{{if .Site.Phone}}, or call{{end}}.</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">02</div>
+                            <h3>The clean</h3>
+                            <p>On the day we agree. You don't need to be home, as long as I can get to the side of the house.</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">03</div>
+                            <h3>Photos, then pay</h3>
+                            <p>Before-and-after photos come with the invoice. Tap your card or pay online.</p>
+                        </div>
+                    </div>
+
+                    {{if .PageData.Guides}}
+                    <h2>Read more</h2>
+                    <p>Plain-English <a href="/guides">guides</a> on looking after your gutters.</p>
+                    <ul class="checklist checklist--plain">
+                        {{range .PageData.Guides}}<li><a href="/guides/{{.Slug}}">{{.Title}}</a></li>{{end}}
+                    </ul>
+                    {{end}}
+                </div>
+
+                <aside class="service-aside">
+                    {{template "price-card" (dict "Site" .Site
+                        "Kicker" (printf "Fixed prices in %s" $a.Name)
+                        "BookURL" "/book")}}
+                    <ul class="aside-guarantees">
+                        <li>No call-out fee</li>
+                        <li>Before-and-after photo report</li>
+                        <li>Mess bagged and taken away</li>
+                    </ul>
+                    {{if .PageData.Nearby}}
+                    <div class="aside-links">
+                        <div class="price-card-kicker">Nearby suburbs</div>
+                        <ul>
+                            {{range .PageData.Nearby}}<li><a href="{{.URL}}">Gutter cleaning in {{.Name}}</a></li>{{end}}
+                        </ul>
+                        <p class="aside-note"><a href="/areas">All {{len .Site.Areas}} suburbs &#8594;</a></p>
+                    </div>
+                    {{end}}
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section">
+        <div class="container">
+            <div class="section-label reveal">Services</div>
+            <h2 class="section-title reveal">Everything I do, available in {{$a.Name}}.</h2>
+            <div class="services-grid">
+                {{range .PageData.Services}}{{template "service-card" .}}{{end}}
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+{{end}}

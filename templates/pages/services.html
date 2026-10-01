@@ -1,0 +1,51 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Gutter Cleaning Services — Warrandyte &amp; Surrounds | Warrandyte Gutters</title>
+    <meta name="description" content="Gutter cleaning, fire-season cleans, the twice-a-year Fire-ready plan, blocked downpipes, gutter guard homes, and pre-sale or rental cleans — around Warrandyte VIC.">
+    <meta property="og:title" content="Gutter cleaning services — Warrandyte &amp; surrounds">
+    <meta property="og:description" content="Everything I do, with fixed prices published up front.">
+{{end}}
+
+{{define "head"}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Services" "/services")}}
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Services</div>
+            <h1 class="section-title">What I do.</h1>
+            <p class="page-header-intro">Gutters, roof valleys and downpipes, around Warrandyte and the green wedge. Every clean comes with a before-and-after photo report. I don't do repairs or plumbing — if I spot a problem, I'll photograph it and tell you who to call.</p>
+        </div>
+    </div>
+
+    <section class="services-section">
+        <div class="container">
+            <div class="services-grid">
+                {{range .PageData.Services}}{{template "service-card" .}}{{end}}
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-label reveal">Pricing</div>
+            <h2 class="section-title reveal">Fixed prices, published up front.</h2>
+            <div class="reveal">{{template "pricing" .Site}}</div>
+            <div class="reveal">{{template "payment-methods" .}}</div>
+        </div>
+    </section>
+
+    <section class="guarantee-section">
+        <div class="container">
+            <div class="section-label reveal">The promise</div>
+            <h2 class="section-title reveal">Three things you can hold me to.</h2>
+            <div class="reveal">{{template "guarantees" .}}</div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+{{end}}

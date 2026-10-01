@@ -1,0 +1,233 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Gutter Cleaning Warrandyte, Park Orchards &amp; Eltham — Fixed Prices | Warrandyte Gutters</title>
+    <meta name="description" content="Local gutter cleaning around Warrandyte, Park Orchards, Wonga Park, Donvale and Eltham. Fixed prices from ${{(index .Site.Prices.Types 0).Price}}, book online, before-and-after photos with every clean.">
+    <meta property="og:title" content="Gutter cleaning for Warrandyte &amp; surrounds — fixed prices, book online">
+    <meta property="og:description" content="Every gutter cleared by hand, valleys done, downpipes flushed, mess taken away, and a photo report. Get fire-ready before summer.">
+{{end}}
+
+{{define "head"}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "HomeAndConstructionBusiness",
+          "@id": "{{.Site.BaseURL}}/#business",
+          "name": "{{.Site.Name}}",
+          "url": "{{.Site.BaseURL}}/",
+          "image": "{{.Site.BaseURL}}/static/img/og.png",
+          "logo": "{{.Site.BaseURL}}/static/img/icon-512.png",{{if .Site.SameAs}}
+          "sameAs": [{{range $i, $u := .Site.SameAs}}{{if $i}}, {{end}}"{{$u}}"{{end}}],{{end}}
+          "email": "{{.Site.Email}}",{{if .Site.Phone}}
+          "telephone": "{{.Site.Phone}}",{{end}}
+          "priceRange": "{{.Site.Prices.Range}} per clean (AUD)",
+          "address": {"@type": "PostalAddress", "addressLocality": "Warrandyte", "addressRegion": "VIC", "postalCode": "3113", "addressCountry": "AU"},
+          "geo": {"@type": "GeoCoordinates", "latitude": -37.75, "longitude": 145.22},
+          "areaServed": [{{range $i, $s := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$s}}"}{{end}}],
+          "knowsAbout": ["Gutter cleaning", "Downpipe clearing", "Roof valley cleaning", "Gutter guard cleaning", "Bushfire preparation"],
+          "paymentAccepted": "Visa, Mastercard, Amex, eftpos, Apple Pay, Google Pay",
+          "openingHours": [{{range $i, $h := .Site.HoursLD}}{{if $i}}, {{end}}"{{$h}}"{{end}}],
+          "founder": {"@type": "Person", "name": "{{.Site.Owner}}"},
+          "potentialAction": {
+            "@type": "ReserveAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "{{.Site.BaseURL}}/book",
+              "actionPlatform": ["https://schema.org/DesktopWebPlatform", "https://schema.org/MobileWebPlatform"]
+            },
+            "result": {"@type": "Reservation", "name": "Gutter clean"}
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "{{.Site.BaseURL}}/#website",
+          "url": "{{.Site.BaseURL}}/",
+          "name": "{{.Site.Name}}",
+          "publisher": {"@id": "{{.Site.BaseURL}}/#business"},
+          "inLanguage": "en-AU"
+        }
+      ]
+    }
+    </script>
+{{end}}
+
+{{define "content"}}
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <p class="hero-overline">Gutter cleaning &middot; Warrandyte &amp; surrounds</p>
+                <h1>Clear gutters,<br>before the gums fill them again.</h1>
+                <p class="hero-desc">
+                    I'm {{.Site.Owner}}, and I clean gutters around Warrandyte, Park Orchards, Wonga Park,
+                    Donvale and Eltham. Every gutter cleared by hand, valleys done, downpipes flushed,
+                    the mess taken away — and photos to prove it.
+                </p>
+                <div class="hero-actions">
+                    <a href="/book" class="btn btn--primary">See your price &amp; book</a>
+                    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+                </div>
+                <ul class="hero-points">
+                    <li>Fixed prices from ${{(index .Site.Prices.Types 0).Price}} — no call-out fee</li>
+                    <li>Before-and-after photo report with every clean</li>
+                    <li>Book online in two minutes</li>
+                </ul>
+            </div>
+        </div>
+        <div class="hero-decoration" aria-hidden="true">
+            <div class="line"></div>
+            <div class="dot"></div>
+            <div class="line"></div>
+            <div class="dot"></div>
+            <div class="line"></div>
+        </div>
+    </section>
+
+    <!-- Fire season -->
+    <section class="diy-section">
+        <div class="container">
+            <div class="portfolio-cta reveal">
+                <div class="portfolio-cta-text">
+                    <div class="section-label">Bushfire season</div>
+                    <h2 class="section-title">Get your gutters fire-ready before summer.</h2>
+                    <p class="portfolio-cta-desc">The CFA tells people in bushfire areas to clear their gutters in early spring, before the Fire Danger Period is declared. Dry leaves in a gutter are where embers land. Book now and you'll get a dated photo report you can show the council or your insurer.</p>
+                </div>
+                <div class="portfolio-cta-actions">
+                    <a href="/services/bushfire-preparation" class="btn btn--primary">Fire-season clean &#8594;</a>
+                    <a href="/services/fire-ready-plan" class="btn btn--ghost">Twice-a-year plan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services -->
+    <section class="services-section" id="services">
+        <div class="container">
+            <div class="section-label reveal">What I do</div>
+            <h2 class="section-title reveal">Gutters, downpipes and valleys —<br>done properly, from one local person.</h2>
+            <p class="section-intro reveal">I don't do repairs or plumbing; if I spot a problem I'll photograph it and tell you who to call.</p>
+            <div class="services-grid">
+                {{range .PageData.Services}}{{template "service-card" .}}{{end}}
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-section">
+        <div class="container">
+            <div class="section-label reveal">How it works</div>
+            <h2 class="section-title reveal">Three steps, no runaround.</h2>
+            <div class="steps reveal">
+                <div class="step">
+                    <div class="step-num">01</div>
+                    <h3>Book online</h3>
+                    <p>Pick your type of house and see the price straight away. Tell me which days suit{{if .Site.Phone}}, or just call{{end}}.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">02</div>
+                    <h3>I clean the gutters</h3>
+                    <p>You don't need to be home, as long as I can get to the side of the house. Everything is bagged and taken away.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">03</div>
+                    <h3>Photos, then pay</h3>
+                    <p>You get before-and-after photos with the invoice. Tap your card on the day, or pay online.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-label reveal">Pricing</div>
+            <h2 class="section-title reveal">Fixed prices, published up front.</h2>
+            <p class="section-intro reveal">Most gutter cleaners won't give you a price until they've seen the house. Here's mine.</p>
+            <div class="reveal">{{template "pricing" .Site}}</div>
+            <div class="reveal">{{template "payment-methods" .}}</div>
+        </div>
+    </section>
+
+    <!-- Guarantees -->
+    <section class="guarantee-section">
+        <div class="container">
+            <div class="section-label reveal">The promise</div>
+            <h2 class="section-title reveal">Three things you can hold me to.</h2>
+            <div class="reveal">{{template "guarantees" .}}</div>
+        </div>
+    </section>
+
+    <!-- Guides -->
+    {{if .PageData.Guides}}
+    <section class="services-section">
+        <div class="container">
+            <div class="section-label reveal">Guides</div>
+            <h2 class="section-title reveal">Know your gutters.</h2>
+            <p class="section-intro reveal">Plain-English answers to the questions I get asked most: how often, what to check from the ground, and how to get ready for fire season.</p>
+            <div class="services-grid">
+                {{range $i, $g := .PageData.Guides}}{{if lt $i 3}}
+                <a href="/guides/{{$g.Slug}}" class="service-card reveal">
+                    <div class="service-icon">{{$g.Kicker}} &mdash; {{$g.Time}}</div>
+                    <h3>{{$g.Title}}</h3>
+                    <p>{{$g.Summary}}</p>
+                    <span class="service-card-more">Read the guide &#8594;</span>
+                </a>
+                {{end}}{{end}}
+            </div>
+            <p class="area-note reveal"><a href="/guides">All guides &#8594;</a></p>
+        </div>
+    </section>
+    {{end}}
+
+    <!-- Service areas -->
+    <section class="areas-section" id="areas">
+        <div class="container">
+            <div class="section-label reveal">Service area</div>
+            <h2 class="section-title reveal">Based in Warrandyte, covering the green wedge.</h2>
+            <div class="reveal">{{template "areas" .Site}}</div>
+        </div>
+    </section>
+    <script src="{{asset "js/areamap.js"}}" defer></script>
+
+    <!-- Contact -->
+    <section class="contact-section" id="contact">
+        <div class="container">
+            <div class="contact-inner">
+                <div class="contact-text">
+                    <div class="section-label reveal">Contact</div>
+                    <h2 class="section-title reveal">Let's get those gutters done.</h2>
+                    <p class="contact-desc reveal">
+                        Book online and you'll see the price before you send anything. Questions first? Email or call.
+                    </p>
+                    <div class="hero-actions reveal">
+                        <a href="/book" class="btn btn--primary">Book now</a>
+                        {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+                    </div>
+                    <p class="reveal" style="margin-top:1.5rem"><a href="mailto:{{.Site.Email}}" class="contact-email">{{.Site.Email}} &#8594;</a></p>
+                </div>
+                <div class="contact-details reveal">
+                    <div class="contact-detail-item">
+                        <div class="contact-detail-label">Business</div>
+                        <div class="contact-detail-value">{{.Site.Name}} ({{.Site.Owner}}) — residential gutter cleaning</div>
+                    </div>
+                    {{if .Site.ABN}}
+                    <div class="contact-detail-item">
+                        <div class="contact-detail-label">ABN</div>
+                        <div class="contact-detail-value">{{.Site.ABN}}</div>
+                    </div>
+                    {{end}}
+                    <div class="contact-detail-item">
+                        <div class="contact-detail-label">Based in</div>
+                        <div class="contact-detail-value">Warrandyte VIC 3113 — servicing Manningham, Nillumbik and nearby</div>
+                    </div>
+                    <div class="contact-detail-item">
+                        <div class="contact-detail-label">Hours</div>
+                        <div class="contact-detail-value">{{.Site.Hours}}. No outdoor work on Extreme or Catastrophic fire danger days.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{{end}}

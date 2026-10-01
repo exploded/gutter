@@ -1,0 +1,158 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Book a Gutter Clean — See Your Price | Warrandyte Gutters</title>
+    <meta name="description" content="Book gutter cleaning in Warrandyte and nearby. Pick your type of house, see the fixed price straight away, and tell me which days suit.">
+    <meta property="og:title" content="Book a gutter clean — Warrandyte &amp; surrounds">
+    <meta property="og:description" content="Fixed prices, photo report with every clean, and no payment until the job's done.">
+{{end}}
+
+{{define "content"}}
+    {{$f := .PageData.Form}}
+    {{$e := .PageData.Errors}}
+    {{$p := .Site.Prices}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Book</div>
+            <h1 class="section-title">Book a gutter clean.</h1>
+            <p class="page-header-intro">Pick your type of house to see the price, then tell me where and when. I'll confirm a time within a day. Nothing to pay until the job's done.</p>
+        </div>
+    </div>
+
+    <section class="quote-section book-section">
+        <div class="container">
+            <div class="book-layout">
+                <form method="POST" action="/book" class="book-form" id="book-form" novalidate
+                      data-guard="{{$p.Guard}}" data-plan-pct="{{$p.PlanPct}}">
+                    <input type="hidden" name="ts" value="{{.PageData.TS}}">
+                    <div class="hp-field" aria-hidden="true">
+                        <label for="website">Website</label>
+                        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    {{if $e}}
+                    <div class="form-alert" role="alert">
+                        Please check the highlighted fields below.
+                        {{with $e.contact}}<div>{{.}}</div>{{end}}
+                    </div>
+                    {{end}}
+
+                    <div class="quote-group">
+                        <h2 class="quote-group-title">Your property</h2>
+                        <fieldset class="property-picker{{if $e.property}} quote-field--error{{end}}">
+                            <legend class="sr-only">Type of property</legend>
+                            {{range .PageData.Types}}
+                            <label class="property-option">
+                                <input type="radio" name="property" value="{{.Slug}}" data-price="{{.Price}}"{{if eq .Slug $f.PropertyType}} checked{{end}} required>
+                                <span class="property-option-body">
+                                    <span class="property-option-name">{{.Name}}</span>
+                                    <span class="property-option-note">{{.Note}}</span>
+                                </span>
+                                <span class="property-option-price">${{.Price}}</span>
+                            </label>
+                            {{end}}
+                            {{with $e.property}}<span class="field-error">{{.}}</span>{{end}}
+                        </fieldset>
+                        <div class="property-extras">
+                            <label class="check-option">
+                                <input type="checkbox" name="guard" value="1"{{if $f.Guard}} checked{{end}}>
+                                <span>Gutter guard is fitted <span class="check-option-note">+${{$p.Guard}} — lifted, cleaned underneath, refitted</span></span>
+                            </label>
+                            <label class="check-option">
+                                <input type="checkbox" name="plan" value="1"{{if $f.Plan}} checked{{end}}>
+                                <span>Put me on the Fire-ready plan <span class="check-option-note">{{$p.PlanPct}}% off this clean and the next; I'll remind you each spring and autumn</span></span>
+                            </label>
+                        </div>
+                        <div class="price-total" aria-live="polite">
+                            <span class="price-total-label">Your price</span>
+                            <span class="price-total-amount" id="price-total">${{$f.Price}}</span>
+                            <span class="price-total-note">Includes downpipes flushed, valleys cleared, mess taken away and a photo report.</span>
+                        </div>
+                    </div>
+
+                    <div class="quote-group">
+                        <h2 class="quote-group-title">Your details</h2>
+                        <div class="quote-fields">
+                            <div class="quote-field{{if $e.name}} quote-field--error{{end}}">
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required maxlength="100" autocomplete="name" value="{{$f.Name}}">
+                                {{with $e.name}}<span class="field-error">{{.}}</span>{{end}}
+                            </div>
+                            <div class="quote-field{{if or $e.phone $e.contact}} quote-field--error{{end}}">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" name="phone" maxlength="40" autocomplete="tel" placeholder="04xx xxx xxx" value="{{$f.Phone}}">
+                                {{with $e.phone}}<span class="field-error">{{.}}</span>{{end}}
+                            </div>
+                            <div class="quote-field{{if or $e.email $e.contact}} quote-field--error{{end}}">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" maxlength="120" autocomplete="email" placeholder="you@example.com" value="{{$f.Email}}">
+                                {{with $e.email}}<span class="field-error">{{.}}</span>{{end}}
+                            </div>
+                            <div class="quote-field quote-field--full addr-wrap{{if $e.address}} quote-field--error{{end}}">
+                                <label for="address">Address <span class="addr-verified{{if $f.AddrStreet}} visible{{end}}">&#10003; verified</span></label>
+                                <input type="text" id="address" name="address" required maxlength="200"
+                                       placeholder="Start typing your address&#8230;" autocomplete="one-time-code"
+                                       data-search-url="/book/address-search" class="addr-input" value="{{$f.Address}}">
+                                <ul class="addr-suggestions" hidden></ul>
+                                {{with $e.address}}<span class="field-error">{{.}}</span>{{end}}
+                            </div>
+                            <input type="hidden" name="addr_street" value="{{$f.AddrStreet}}">
+                            <input type="hidden" name="addr_suburb" value="{{$f.AddrSuburb}}">
+                            <input type="hidden" name="addr_state" value="{{$f.AddrState}}">
+                            <input type="hidden" name="addr_postcode" value="{{$f.AddrPostcode}}">
+                        </div>
+                    </div>
+
+                    <div class="quote-group">
+                        <h2 class="quote-group-title">The job</h2>
+                        <div class="quote-fields">
+                            <div class="quote-field">
+                                <label for="service">Main reason</label>
+                                <select id="service" name="service">
+                                    <option value=""{{if not $f.Service}} selected{{end}}>Just a regular clean</option>
+                                    {{range .PageData.Services}}
+                                    <option value="{{.Slug}}"{{if eq .Slug $f.Service}} selected{{end}}>{{.Title}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                            <div class="quote-field">
+                                <label for="preferred_time">When suits you?</label>
+                                <input type="text" id="preferred_time" name="preferred_time" maxlength="200" placeholder="e.g. any weekday, or before 20 Nov" value="{{$f.PreferredTime}}">
+                            </div>
+                        </div>
+                        <div class="quote-field quote-field--full{{if $e.issue}} quote-field--error{{end}}">
+                            <label for="issue">Anything I should know? <span class="label-optional">(optional)</span></label>
+                            <textarea id="issue" name="issue" rows="4" maxlength="2000" placeholder="e.g. Side gate is locked — code 1234. Friendly dog. Solar panels on the north side. Council fire notice due 15 Dec.">{{$f.Issue}}</textarea>
+                            {{with $e.issue}}<span class="field-error">{{.}}</span>{{end}}
+                        </div>
+                    </div>
+
+                    <div class="book-submit">
+                        <button type="submit" class="btn btn--primary quote-btn">Send booking request &#8594;</button>
+                        <p class="quote-submit-note">No payment now. I'll confirm a time before anything is booked in, and you pay after the clean.</p>
+                    </div>
+                </form>
+
+                <aside class="service-aside book-aside">
+                    <div class="price-card">
+                        <div class="price-card-kicker">What happens next</div>
+                        <ol class="aside-steps">
+                            <li>I read your request and get back to you within a day to lock in a time.</li>
+                            <li>On the day, I clean every gutter, clear the valleys and flush the downpipes. You don't need to be home.</li>
+                            <li>You get before-and-after photos with the invoice. Tap your card or pay online.</li>
+                        </ol>
+                    </div>
+                    <ul class="aside-guarantees">
+                        <li>The price above is the price you pay</li>
+                        <li>Anything extra only with your OK</li>
+                        <li>Mess bagged and taken away</li>
+                    </ul>
+                    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost aside-btn">Prefer to call? {{.Site.Phone}}</a>{{end}}
+                    <p class="aside-area">Or email <a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a></p>
+                </aside>
+            </div>
+        </div>
+    </section>
+    <script src="{{asset "js/address.js"}}" defer></script>
+    <script src="{{asset "js/book.js"}}" defer></script>
+{{end}}

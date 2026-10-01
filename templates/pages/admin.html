@@ -1,0 +1,93 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Admin — Dashboard</title>
+    <meta name="robots" content="noindex">
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Administration</div>
+            <h1 class="section-title">Dashboard</h1>
+            {{template "admin-nav" .Path}}
+        </div>
+    </div>
+
+    <section class="admin-section">
+        <div class="container">
+            <div class="admin-stats">
+                <a class="admin-stat" href="/admin/bookings?status=new">
+                    <span class="admin-stat-n">{{.PageData.NewCount}}</span>
+                    <span class="admin-stat-l">New enquiries</span>
+                </a>
+                <a class="admin-stat" href="/admin/bookings?status=booked">
+                    <span class="admin-stat-n">{{.PageData.BookedCount}}</span>
+                    <span class="admin-stat-l">Booked</span>
+                </a>
+                <a class="admin-stat" href="/admin/bookings?status=done">
+                    <span class="admin-stat-n">{{.PageData.DoneCount}}</span>
+                    <span class="admin-stat-l">Done, to invoice</span>
+                </a>
+                <a class="admin-stat" href="/admin/invoices?status=sent">
+                    <span class="admin-stat-n">{{money .PageData.Outstanding}}</span>
+                    <span class="admin-stat-l">Outstanding ({{.PageData.SentCount}} invoiced)</span>
+                </a>
+            </div>
+
+            {{if .PageData.Sources}}
+            <h2 class="admin-heading">Where work comes from</h2>
+            <div class="admin-quotes-table-wrap">
+                <table class="admin-quotes-table">
+                    <thead><tr><th>Source</th><th>Bookings</th><th>Paid jobs</th><th>Paid</th></tr></thead>
+                    <tbody>
+                        {{range .PageData.Sources}}
+                        <tr>
+                            <td><a href="/admin/bookings?source={{.Value}}">{{.Label}}</a></td>
+                            <td>{{.N}}</td>
+                            <td>{{if .Jobs}}{{.Jobs}}{{else}}<span class="admin-muted">–</span>{{end}}</td>
+                            <td>{{if .Cents}}{{money .Cents}}{{else}}<span class="admin-muted">–</span>{{end}}</td>
+                        </tr>
+                        {{end}}
+                        {{if .PageData.Unattributed}}
+                        <tr class="admin-muted">
+                            <td>Unattributed <span class="admin-muted">(invoices with no booking)</span></td>
+                            <td>–</td>
+                            <td>–</td>
+                            <td>{{money .PageData.Unattributed}}</td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{if .PageData.AdClicks}}
+            <p class="admin-note admin-note--small">Google Ads, last {{.PageData.AdDays}} days: {{.PageData.AdClicks}} click{{if ne .PageData.AdClicks 1}}s{{end}} &rarr; {{.PageData.AdBookings}} booking{{if ne .PageData.AdBookings 1}}s{{end}}{{if .PageData.AdBookings}} (one in {{div .PageData.AdClicks .PageData.AdBookings}}){{end}}</p>
+            {{end}}
+            {{end}}
+
+            <h2 class="admin-heading">This week <a class="admin-heading-link" href="/admin/calendar">Calendar &#8594;</a></h2>
+            <p class="admin-note admin-note--small">Google Calendar sync: {{if .PageData.CalendarOn}}connected{{else}}not connected{{end}} &middot; <a href="/admin/calendar/settings">settings</a></p>
+            {{if .PageData.Week}}
+            <div class="admin-quotes-table-wrap">
+                <table class="admin-quotes-table">
+                    <thead><tr><th>When</th><th>Name</th><th>Suburb</th><th>Service</th><th>Status</th></tr></thead>
+                    <tbody>
+                    {{range .PageData.Week}}
+                        <tr>
+                            <td><a href="/admin/bookings/{{.ID}}">{{.When}}</a></td>
+                            <td>{{.Name}}</td>
+                            <td>{{.Suburb}}</td>
+                            <td>{{.ServiceTitle}}</td>
+                            <td>{{template "badge" .Status}}</td>
+                        </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+            </div>
+            {{else}}
+            <p class="admin-empty">Nothing booked this week.</p>
+            {{end}}
+        </div>
+    </section>
+
+{{end}}

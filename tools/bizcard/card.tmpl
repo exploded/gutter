@@ -1,0 +1,199 @@
+{{/*
+Business card, Officeworks spec: 90 × 55 mm trim with 5 mm bleed on every
+side, so each page is 100 × 65 mm. Backgrounds run to the page edge (the
+bleed); everything else sits inside .safe, 10 mm in from the page edge (5 mm
+inside the trim). An in-page check (bottom of the file) verifies that and
+reports through <html data-check>, which bizcard reads before printing.
+
+Mode: "print" = both sides as two PDF pages; "front" / "back" = one side for a
+PNG preview, offset so the viewport shows the trimmed card (or the whole page
+with trim and safe guides when .Guides is set).
+*/}}
+<!doctype html>
+<html lang="en-AU" data-mode="{{.Mode}}"{{if .Guides}} data-guides{{end}}>
+<head>
+<meta charset="utf-8">
+<title>Warrandyte Gutters business card</title>
+<style>
+{{template "fonts-css" .}}
+/* Printed 1 mm oversize: Chrome snaps page sizes to its own grid, so bizcard
+   crops each page back to exactly 100 × 65 mm afterwards (see pdfbox.go). */
+@page{size:101mm 66mm;margin:0}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#fff}
+body{font-family:"WG Sans",sans-serif;color:var(--ink);font-kerning:normal;
+  -webkit-font-smoothing:antialiased;text-rendering:geometricPrecision}
+.page{position:relative;width:100mm;height:65mm;overflow:hidden;break-after:page;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.page:last-of-type{break-after:auto}
+.safe{position:absolute;left:10mm;top:10mm;width:80mm;height:45mm}
+
+/* Previews show the card as cut: shift the page so the trim box is the viewport. */
+html[data-mode="front"]:not([data-guides]) .page,
+html[data-mode="back"]:not([data-guides]) .page{margin:-5mm 0 0 -5mm}
+
+{{template "lockup-css" .}}
+
+/* ── Front ──
+   Gum green to the bleed with the lockup reversed out. The mark's badge is
+   itself gum green, so drawn as-is it would dissolve into the field and leave
+   a loose roof and gutter floating on the card. Two fixes were on the table:
+   invert the front to paper, or redraw the badge darker. Darker wins: the
+   rounded-square silhouette is what makes the mark recognisable, the green
+   front is what makes the card easy to find in a wallet, and a paper front
+   would leave both sides pale. So the badge goes gum dark with a hairline
+   sage edge, and the leaf vein follows it. */
+.front{background:var(--green);color:var(--paper)}
+.front .safe{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.front .lockup{font-size:22pt}
+.front .lockup .w{color:var(--paper)}
+.front .lockup .g{color:var(--ochre)}
+.front .rule{width:9mm;height:.55mm;border-radius:.3mm;background:var(--ochre);margin:4.6mm 0 3.6mm}
+.front .tagline{font-weight:500;font-size:7.5pt;letter-spacing:.02em;color:var(--sage);white-space:nowrap}
+
+/* ── Back ── */
+.back{background:var(--paper)}
+.back .top{display:flex;justify-content:space-between;align-items:flex-start}
+.back .who{flex:1;min-width:0}
+.back .name{font-family:"WG Fraunces",serif;font-weight:600;font-size:13pt;line-height:1.25;
+  letter-spacing:-.005em;color:var(--gum-dark);white-space:nowrap}
+.back .title{margin-top:1mm;font-weight:700;font-size:6.5pt;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ochre-text);white-space:nowrap}
+.back .phone{margin-top:3.4mm;font-weight:700;font-size:12pt;line-height:1.1;letter-spacing:.01em;color:var(--ink);
+  white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.back .contact{margin-top:1mm;font-weight:500;font-size:7.5pt;line-height:1.35;color:var(--ink);
+  white-space:nowrap}
+.back .contact.web{color:var(--green)}
+/* The figure is the width of the QR symbol, so the symbol lines up with the
+   safe edge like everything else; the svg's blank quiet zone hangs outside it
+   (that's clear space, not content, and it stays well inside the trim). */
+.back .qr{flex:none;width:{{.QRSymbolMM}}mm;margin-left:4mm;display:flex;flex-direction:column;align-items:center}
+.back .qr svg{display:block;flex:none;width:{{.QRTotalMM}}mm;height:{{.QRTotalMM}}mm;margin:0 -{{.QRQuietMM}}mm}
+.back .qr figcaption{margin-top:.3mm;margin-right:-.06em;font-weight:700;font-size:6.5pt;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--green);white-space:nowrap}
+.back .bottom{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:space-between}
+.back .bottom .text{min-width:0}
+.back .gutter{position:absolute;left:0;right:0;top:-3.6mm;height:1.4mm}
+.back .gutter svg{display:block;width:100%;height:100%}
+.back .badge{flex:none;width:7.5mm;height:7.5mm;margin-left:3mm}
+.back .badge svg{display:block;width:100%;height:100%}
+.back .services{font-weight:700;font-size:7pt;letter-spacing:.01em;color:var(--green);white-space:nowrap}
+.back .area{margin-top:.4mm;font-weight:400;font-size:6.5pt;color:var(--ink);white-space:nowrap}
+.back .abn{margin-top:.4mm;font-weight:400;font-size:6.5pt;color:var(--ink);white-space:nowrap}
+
+/* Design-review stamp: faint, diagonal, never on a print run. */
+.stamp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.stamp span{transform:rotate(-24deg);font-weight:700;font-size:44pt;letter-spacing:.3em;margin-right:-.3em}
+.front .stamp span{color:rgba(248,246,240,.16)}
+.back .stamp span{color:rgba(29,38,34,.09)}
+
+/* Guides (preview only): trim in magenta, safe area in cyan. */
+.guides{position:absolute;inset:0;pointer-events:none}
+.guides .trim{position:absolute;left:5mm;top:5mm;width:90mm;height:55mm;outline:.2mm dashed #e0218a}
+.guides .safeg{position:absolute;left:10mm;top:10mm;width:80mm;height:45mm;outline:.2mm dashed #10a5d8}
+</style>
+</head>
+<body>
+{{if ne .Mode "back"}}
+<section class="page front">
+  <div class="safe">
+    {{template "lockup" .}}
+    <div class="rule" aria-hidden="true"></div>
+    <p class="tagline">{{.Tagline}}</p>
+  </div>
+  {{if .Proof}}<div class="stamp" aria-hidden="true"><span>PROOF</span></div>{{end}}
+  {{if .Guides}}<div class="guides"><div class="trim"></div><div class="safeg"></div></div>{{end}}
+</section>
+{{end}}
+{{if ne .Mode "front"}}
+<section class="page back">
+  <div class="safe">
+    <div class="top">
+      <div class="who">
+        <h1 class="name" data-fit="9">{{.Name}}</h1>
+        {{with .Title}}<p class="title" data-fit="6.5">{{.}}</p>{{end}}
+        <p class="phone" data-fit="9">{{.Phone}}</p>
+        {{with .Email}}<p class="contact email" data-fit="6.5">{{.}}</p>{{end}}
+        <p class="contact web" data-fit="6.5">{{.Web}}</p>
+      </div>
+      <figure class="qr" data-quiet>{{.QR}}<figcaption>Book online</figcaption></figure>
+    </div>
+    <div class="bottom">
+      <div class="gutter" aria-hidden="true"><svg viewBox="0 0 80 1.4" preserveAspectRatio="none"><path d="M.2 .2V.5A.7 .7 0 0 0 .9 1.2H79.1A.7 .7 0 0 0 79.8 .5V.2" fill="none" stroke="#E0A13B" stroke-width=".35" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="text">
+        <p class="services" data-fit="6.5">{{.Services}}</p>
+        <p class="area" data-fit="6.5">{{.Area}}</p>
+        {{with .ABN}}<p class="abn">ABN {{.}}</p>{{end}}
+      </div>
+      <div class="badge" aria-hidden="true">{{.Mark}}</div>
+    </div>
+  </div>
+  {{if .Proof}}<div class="stamp" aria-hidden="true"><span>PROOF</span></div>{{end}}
+  {{if .Guides}}<div class="guides"><div class="trim"></div><div class="safeg"></div></div>{{end}}
+</section>
+{{end}}
+<script>
+// Fit, then check. Long names or emails shrink in 0.25 pt steps down to their
+// data-fit floor; anything still overflowing, poking out of the safe area, or
+// set below 6.5 pt is reported in <html data-check> and bizcard refuses to print.
+(async () => {
+  const PT = 96 / 72, problems = [];
+  try {
+    await Promise.all([
+      document.fonts.load('600 12pt "WG Fraunces"'),
+      document.fonts.load('400 12pt "WG Sans"'),
+      document.fonts.load('500 12pt "WG Sans"'),
+      document.fonts.load('700 12pt "WG Sans"'),
+    ]);
+    await document.fonts.ready;
+    for (const f of ['600 12pt "WG Fraunces"', '400 12pt "WG Sans"', '500 12pt "WG Sans"', '700 12pt "WG Sans"']) {
+      if (!document.fonts.check(f)) problems.push('font not loaded: ' + f);
+    }
+  } catch (e) { problems.push('font loading failed: ' + e); }
+
+  for (const el of document.querySelectorAll('[data-fit]')) {
+    const floor = parseFloat(el.dataset.fit) * PT;
+    let size = parseFloat(getComputedStyle(el).fontSize);
+    while (el.scrollWidth > el.clientWidth + 0.5 && size > floor) {
+      size = Math.max(floor, size - 0.25 * PT);
+      el.style.fontSize = size + 'px';
+    }
+  }
+
+  const label = el => {
+    const cls = typeof el.className === 'string' ? el.className : '';
+    const t = el.textContent.trim();
+    return (cls || el.tagName.toLowerCase()) + (t ? ' "' + t.slice(0, 30) + '"' : '');
+  };
+  const outside = (r, s) => r.left < s.left - 0.5 || r.top < s.top - 0.5 || r.right > s.right + 0.5 || r.bottom > s.bottom + 0.5;
+  for (const safe of document.querySelectorAll('.safe')) {
+    const s = safe.getBoundingClientRect();
+    const side = safe.closest('.page').classList.contains('front') ? 'front' : 'back';
+    for (const el of safe.querySelectorAll('*')) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) continue;
+      // A QR's quiet zone is blank, so only its modules (the path) must be inside.
+      if (el.matches('[data-quiet] > svg')) continue;
+      if (outside(r, s)) problems.push(side + ': ' + label(el) + ' leaves the safe area');
+      if (el.scrollWidth > el.clientWidth + 0.5 && getComputedStyle(el).whiteSpace === 'nowrap' && !el.closest('.lockup')) {
+        problems.push(side + ': ' + label(el) + ' is too long to fit');
+      }
+      for (const n of el.childNodes) {
+        if (n.nodeType !== Node.TEXT_NODE || !n.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(n);
+        for (const tr of range.getClientRects()) {
+          if (outside(tr, s)) { problems.push(side + ': text of ' + label(el) + ' leaves the safe area'); break; }
+        }
+        const pt = parseFloat(getComputedStyle(el).fontSize) / PT;
+        if (pt < 6.5 - 0.01) problems.push(side + ': ' + label(el) + ' is ' + pt.toFixed(2) + ' pt, under 6.5 pt');
+      }
+    }
+  }
+  const phone = document.querySelector('.phone');
+  if (phone && parseFloat(getComputedStyle(phone).fontSize) / PT < 9 - 0.01) problems.push('back: phone is under 9 pt');
+  document.documentElement.dataset.check = problems.length ? problems.join(' | ') : 'ok';
+})();
+</script>
+</body>
+</html>

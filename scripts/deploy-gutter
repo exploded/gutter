@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+
+APP_DIR="/var/www/gutter"
+BINARY="$APP_DIR/gutter"
+SERVICE="gutter"
+STAGING="${1:-/tmp/gutter-deploy}"
+
+# Self-update: if the bundle contains a newer version of this script, install and re-exec
+BUNDLE_SCRIPT="$STAGING/scripts/deploy-gutter"
+if [ -f "$BUNDLE_SCRIPT" ] && ! diff -q /usr/local/bin/deploy-gutter "$BUNDLE_SCRIPT" > /dev/null 2>&1; then
+    echo "[deploy] Updating deploy script from bundle..."
+    install -m 755 "$BUNDLE_SCRIPT" /usr/local/bin/deploy-gutter
+    exec /usr/local/bin/deploy-gutter "$@"
+fi
+
+echo "[deploy] Deploying gutter (Warrandyte Gutters)..."
+
+# Stop service
+systemctl stop "$SERVICE" 2>/dev/null || true
+
+# Remove old binary (avoids "text file busy")
+rm -f "$BINARY"
+
+# Copy new binary
+cp "$STAGING/gutter" "$BINARY"
+chmod +x "$BINARY"
+
+# Replace templates and static assets (rm+cp instead of rsync: not installed on the box)
+rm -rf "$APP_DIR/templates" "$APP_DIR/static"
+cp -r "$STAGING/templates" "$APP_DIR/templates"
+cp -r "$STAGING/static" "$APP_DIR/static"
+
+# Fix ownership
+chown -R www-data:www-data "$APP_DIR"
+
+# Start service (enable so it survives reboots — provisioning can't, binary didn't exist yet)
+systemctl enable "$SERVICE" >/dev/null 2>&1 || true
+systemctl start "$SERVICE"
+
+echo "[deploy] Verifying service is active..."
+sleep 2
+if ! systemctl is-active --quiet "$SERVICE"; then
+    echo "[deploy] ERROR: Service failed to start. Status:"
+    systemctl status "$SERVICE" --no-pager --lines=30
+    exit 1
+fi
+
+# Cleanup
+rm -rf "$STAGING"
+
+echo "[deploy] Done — gutter is running."

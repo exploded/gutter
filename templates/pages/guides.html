@@ -1,0 +1,59 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Gutter Guides — How Often, Fire Season, Downpipes &amp; Ladder Safety | Warrandyte Gutters</title>
+    <meta name="description" content="Plain-English gutter guides for Warrandyte homes: how often to clean, getting fire-ready, spotting blockages from the ground, downpipes, gutter guard and ladder safety.">
+    <meta property="og:title" content="Gutter guides — plain English, local advice">
+    <meta property="og:description" content="How often to clean, fire-season prep, and what you can safely check from the ground.">
+{{end}}
+
+{{define "head"}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Guides" "/guides")}}
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Guides</div>
+            <h1 class="section-title">Know your gutters.</h1>
+            <p class="page-header-intro">Plain-English answers to the questions I get asked most. Most of what's here you can check from the ground — and every guide says when to stop and leave the ladder to someone else.</p>
+        </div>
+    </div>
+
+    <section class="guides-section">
+        <div class="container">
+            <div class="help-banner reveal">
+                <div>
+                    <strong>Rather not climb a ladder?</strong> Sensible. Book a clean — fixed prices, and you'll get photos of the result.
+                </div>
+                <div class="help-banner-actions">
+                    <a href="/book" class="btn btn--primary">Book a clean &#8594;</a>
+                    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+                </div>
+            </div>
+
+            {{range .PageData.Groups}}
+            <div class="guide-group">
+                <div class="section-label reveal">{{.Kicker}}</div>
+                <div class="guides-grid">
+                    {{range .Guides}}
+                    <a href="/guides/{{.Slug}}" class="guide-card reveal">
+                        <div class="guide-card-meta">
+                            <span class="guide-level guide-level--{{if eq .Level "Easy"}}easy{{else}}fiddly{{end}}">{{.Level}}</span>
+                            <span class="guide-time">{{.Time}}</span>
+                        </div>
+                        <h3>{{.Title}}</h3>
+                        <p>{{.Summary}}</p>
+                        <span class="service-card-more">Read the guide &#8594;</span>
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+{{end}}

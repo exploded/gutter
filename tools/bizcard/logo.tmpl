@@ -1,0 +1,33 @@
+{{/*
+Logo export page. Variant "light" (for light backgrounds), "dark" (for dark
+backgrounds) or "mark" (the badge alone, filling the viewport). The lockup is
+placed at .X/.Y on a transparent canvas; bizcard trims the screenshot to the
+artwork. With .PDF set it becomes a vector page cropped to the same box.
+*/}}
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<title>Warrandyte Gutters logo</title>
+<style>
+{{template "fonts-css" .}}
+{{/* Oversize on purpose: bizcard crops the PDF page to the exact box. */}}
+{{if .PDF}}@page{size:{{.PageW}}px {{.PageH}}px;margin:0}{{end}}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:transparent}
+body{font-kerning:normal;-webkit-font-smoothing:antialiased;text-rendering:geometricPrecision;
+  print-color-adjust:exact;-webkit-print-color-adjust:exact}
+{{template "lockup-css" .}}
+.stage{position:absolute;left:{{.X}}px;top:{{.Y}}px}
+.lockup{font-size:{{.Size}}px}
+.light .lockup .w{color:var(--gum-dark)}
+.light .lockup .g{color:var(--ochre-text)}
+.dark .lockup .w{color:var(--paper)}
+.dark .lockup .g{color:var(--ochre)}
+.mark-only svg{display:block;width:100vw;height:100vh}
+</style>
+</head>
+<body class="{{.Variant}}">
+{{if eq .Variant "mark-only"}}{{.Mark}}{{else}}<div class="stage">{{template "lockup" .}}</div>{{end}}
+</body>
+</html>

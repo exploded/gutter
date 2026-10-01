@@ -1,0 +1,92 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Admin — {{.PageData.C.Name}}</title>
+    <meta name="robots" content="noindex">
+{{end}}
+
+{{define "content"}}
+    {{$d := .PageData}}{{$c := $d.C}}{{$csrf := .CSRF}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label"><a href="/admin/customers">Customers</a> / #{{$c.ID}}</div>
+            <h1 class="section-title">{{if $c.Name}}{{$c.Name}}{{else}}(no name){{end}}</h1>
+            {{template "admin-nav" .Path}}
+        </div>
+    </div>
+
+    <section class="admin-section">
+        <div class="container">
+            <div id="admin-flash">{{template "flash" $d.Flash}}</div>
+            <div class="admin-grid">
+                <div class="admin-col">
+                    <div class="admin-card">
+                        <h2 class="admin-card-title">Details</h2>
+                        <form method="POST" action="/admin/customers/{{$c.ID}}" class="admin-form-stack">
+                            {{template "csrf" $csrf}}
+                            <div class="admin-field"><label for="name">Name</label><input class="admin-input" id="name" name="name" value="{{$c.Name}}" maxlength="120"></div>
+                            <div class="admin-form-inline">
+                                <div class="admin-field"><label for="phone">Phone</label><input class="admin-input" id="phone" name="phone" value="{{$c.Phone}}" maxlength="40"></div>
+                                <div class="admin-field admin-field--wide"><label for="email">Email</label><input class="admin-input" id="email" name="email" type="email" value="{{$c.Email}}" maxlength="120"></div>
+                            </div>
+                            <div class="admin-field addr-wrap">
+                                <label for="address">Address (shown on invoices) <span class="addr-verified">&#10003; verified</span></label>
+                                <input class="admin-input addr-input" id="address" name="address" value="{{$c.Address}}" maxlength="200"
+                                       placeholder="Start typing the address&#8230;" autocomplete="one-time-code" data-suburb-target="#suburb">
+                                <ul class="addr-suggestions" hidden></ul>
+                            </div>
+                            <div class="admin-field"><label for="suburb">Suburb</label><input class="admin-input" id="suburb" name="suburb" value="{{$c.Suburb}}" maxlength="80"></div>
+                            <div class="admin-field"><label for="notes">Notes (private)</label><textarea class="admin-input" id="notes" name="notes" rows="4">{{$c.Notes}}</textarea></div>
+                            <div><button class="btn btn--primary btn--sm" type="submit">Save</button></div>
+                        </form>
+                    </div>
+                </div>
+                <div class="admin-col">
+                    <div class="admin-card">
+                        <h2 class="admin-card-title">Bookings</h2>
+                        {{if $d.Bookings}}
+                        <ul class="admin-list">
+                            {{range $d.Bookings}}<li><a href="/admin/bookings/{{.ID}}">#{{.ID}}</a> {{if .When}}{{.When}}{{else}}{{.CreatedAt.Format "2 Jan 2006"}}{{end}}{{if .ServiceTitle}} — {{.ServiceTitle}}{{end}} {{template "badge" .Status}}</li>{{end}}
+                        </ul>
+                        {{else}}<p class="admin-empty">None yet.</p>{{end}}
+                        <form method="POST" action="/admin/customers/{{$c.ID}}/bookings" class="admin-form-stack">
+                            {{template "csrf" $csrf}}
+                            <div class="admin-form-inline">
+                                <div class="admin-field"><label for="service">Service</label>
+                                    <select class="admin-input" id="service" name="service">
+                                        <option value="">Not sure / something else</option>
+                                        {{range $d.Services}}<option value="{{.Slug}}">{{.Title}}</option>{{end}}
+                                    </select>
+                                </div>
+                                <div class="admin-field admin-field--wide"><label for="issue">What's needed</label><input class="admin-input" id="issue" name="issue" maxlength="500" placeholder="e.g. Laptop won't boot"></div>
+                            </div>
+                            <div><button class="btn btn--ghost btn--sm" type="submit">New booking</button></div>
+                        </form>
+                    </div>
+                    <div class="admin-card">
+                        <h2 class="admin-card-title">Invoices</h2>
+                        {{if $d.Invoices}}
+                        <ul class="admin-list">
+                            {{range $d.Invoices}}<li><a href="/admin/invoices/{{.ID}}">{{.Ref}}</a> {{money .TotalCents}}{{if .Issued}} · {{.Issued}}{{end}} {{template "badge" .Status}}</li>{{end}}
+                        </ul>
+                        {{else}}<p class="admin-empty">None yet.</p>{{end}}
+                        <form method="POST" action="/admin/invoices/new" class="admin-form-stack">
+                            {{template "csrf" $csrf}}
+                            <input type="hidden" name="customer" value="{{$c.ID}}">
+                            <div class="admin-form-inline">
+                                <div class="admin-field"><label for="kind">Starting lines</label>
+                                    <select class="admin-input" id="kind" name="kind">
+                                        <option value="blank">Blank</option>
+                                        {{range $.Site.Prices.Types}}<option value="{{.Slug}}">{{.Name}} (${{.Price}})</option>{{end}}
+                                    </select>
+                                </div>
+                            </div>
+                            <div><button class="btn btn--ghost btn--sm" type="submit">New invoice</button></div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script src="{{asset "js/address.js"}}" defer></script>
+{{end}}

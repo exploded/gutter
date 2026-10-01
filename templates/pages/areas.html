@@ -1,0 +1,52 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Service Areas — Gutter Cleaning Around Warrandyte | Warrandyte Gutters</title>
+    <meta name="description" content="Gutter cleaning across {{.PageData.Count}} suburbs around Warrandyte in Manningham, Nillumbik and Maroondah. Fixed prices, no call-out fee.">
+    <meta property="og:title" content="Where I work — gutter cleaning around Warrandyte">
+    <meta property="og:description" content="{{.PageData.Count}} suburbs within about 15 minutes of Warrandyte. Fixed prices, no call-out fee.">
+{{end}}
+
+{{define "head"}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Service areas" "/areas")}}
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Service areas</div>
+            <h1 class="section-title">Where I work.</h1>
+            <p class="page-header-intro">I'm based in Warrandyte and work the suburbs around it — about 15 minutes' drive in any direction. There's no call-out fee anywhere on this list. Pick your suburb for local details, or <a href="/book">book a clean</a>.</p>
+        </div>
+    </div>
+
+    <section class="areas-section">
+        <div class="container">
+            <div class="reveal">{{template "areas" .Site}}</div>
+        </div>
+    </section>
+
+    <section class="services-section">
+        <div class="container">
+            {{range .PageData.Groups}}
+            <div class="guide-group">
+                <div class="section-label reveal">{{.LGA}}</div>
+                <div class="areas-index-grid">
+                    {{range .Suburbs}}
+                    <a href="{{.URL}}" class="area-index-card reveal">
+                        <span class="area-index-name">{{.Name}}</span>
+                        <span class="area-index-meta">{{.Postcode}} &middot; about {{.DriveMin}} min from Warrandyte</span>
+                    </a>
+                    {{end}}
+                </div>
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+
+    <script src="{{asset "js/areamap.js"}}" defer></script>
+{{end}}

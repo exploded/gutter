@@ -1,0 +1,109 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Terms of Service | Warrandyte Gutters</title>
+    <meta name="description" content="How Warrandyte Gutters works: bookings, fixed prices, weather and fire danger days, access and safety, payment, and your rights under Australian Consumer Law.">
+    <meta property="og:title" content="Terms of Service — Warrandyte Gutters">
+    <meta property="og:description" content="Bookings, pricing, safety, payment terms and liability — in plain English.">
+{{end}}
+
+{{define "content"}}
+    {{$p := .Site.Prices}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Legal</div>
+            <h1 class="section-title">Terms of service.</h1>
+            <p class="page-header-intro">The deal, in plain English. Nothing here takes away your rights under Australian Consumer Law. Last updated 1 October 2026.</p>
+        </div>
+    </div>
+
+    <section class="service-section">
+        <div class="container">
+            <div class="legal-body">
+                <p>These terms cover work done by <strong>{{.Site.Owner}}</strong>, trading as <strong>{{.Site.Name}}</strong>{{if .Site.ABN}}
+                    (ABN {{.Site.ABN}}){{end}}. By booking a clean you're agreeing to them.</p>
+
+                <h2>What I do</h2>
+
+                <p>Cleaning of gutters, roof valleys and downpipes on homes in my <a href="/areas">service area</a> — see
+                    <a href="/services">services</a> for the full list. I don't do repairs or replacement of gutters,
+                    downpipes or roofing: that's licensed plumbing work in Victoria. If I find a problem I'll photograph
+                    it and tell you.</p>
+
+                <h2>Bookings</h2>
+
+                <p>A booking form is a <em>request</em>, not a locked-in appointment. It becomes a confirmed clean when I
+                    email or call you back with a day. All times are Melbourne time.</p>
+
+                <p>You don't need to be home, but I need safe access to the outside of the house. Tell me about locked
+                    gates, dogs, alarms and anything on the roof — solar panels, aerials, skylights — when you book.</p>
+
+                <p>If you need to cancel or move a clean, let me know as early as you can — there's no cancellation fee.</p>
+
+                <h2>Weather and fire danger days</h2>
+
+                <p>I don't work on roofs or ladders in rain, high wind, storms, or on days with an Extreme or Catastrophic
+                    fire danger rating. If the weather turns, I'll move your clean to the next suitable day and let you
+                    know as soon as I can.</p>
+
+                <h2>Pricing</h2>
+
+                <p>Prices are fixed by type of property and published on the <a href="/pricing">pricing page</a>. The
+                    price shown when you booked is the price you pay, unless the property turns out to be a different
+                    type from the one picked (for example a double storey booked as a single) — in which case I'll tell
+                    you before I start, and you can cancel at no charge.</p>
+
+                <p>A blocked downpipe that needs jetting is ${{$p.Downpipe}} each, and only with your OK on the day.
+                    No GST is charged — I'm not registered for GST.</p>
+
+                <h2>The Fire-ready plan</h2>
+
+                <p>The plan books you in for two cleans a year at {{$p.PlanPct}}% off each. There's no contract and
+                    nothing is charged in advance: you pay after each clean, and you can leave the plan any time by
+                    telling me.</p>
+
+                <h2>Safety and access</h2>
+
+                <p>Safety comes first, mine and yours. I may decline or stop work on any part of a roof I judge unsafe —
+                    for example brittle or broken tiles, a roof that may contain asbestos, rotten fascias, or no safe
+                    ladder position. If that happens you'll only pay for the part of the job that was done.</p>
+
+                <p>Please keep children and pets away from ladders and the work area while I'm working.</p>
+
+                <h2>Paying</h2>
+
+                <p>You can tap a card on the day, or I'll email you an invoice — due within <strong>7 days</strong>, and
+                    payable by the card payment link on the invoice{{if .Site.BankBSB}} or bank transfer{{end}}.</p>
+
+                <p>If an invoice is heading overdue I'll send a reminder, not a debt collector. Talk to me if money is
+                    tight and we'll work something out.</p>
+
+                <h2>Damage and liability</h2>
+
+                <p>My services come with guarantees that can't be excluded under Australian Consumer Law — including that
+                    the work will be done with due care and skill. Nothing in these terms limits those rights.</p>
+
+                <p>Gutters, roofs and downpipes that are already rusted, cracked or loose can fail when they're touched.
+                    I'll take reasonable care and point out anything I see before I start, but I'm not responsible for
+                    pre-existing damage or wear, or for problems that come from it.</p>
+
+                <p>Beyond your Australian Consumer Law rights, and to the extent the law allows, what I owe you if
+                    something goes wrong is capped at redoing the work or refunding what you paid for it. I'm not liable
+                    for indirect losses. If I damage something of yours, tell me — I'd rather fix it than argue about it.</p>
+
+                <h2>The boring bits</h2>
+
+                <p>These terms are governed by the law of Victoria, Australia. How I handle your details is set out in the
+                    <a href="/privacy">privacy policy</a>. If any part of these terms turns out to be unenforceable, the
+                    rest still stands.</p>
+
+                <p>If these terms change, the date at the top changes too. The terms that apply to your job are the ones
+                    on this page when I confirmed your booking.</p>
+
+                <p class="legal-footnote">Anything here you'd like clarified before booking? Email
+                    <a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a>{{if .Site.Phone}} or call
+                    <a href="{{.Site.PhoneHref}}">{{.Site.Phone}}</a>{{end}} and ask.</p>
+            </div>
+        </div>
+    </section>
+{{end}}

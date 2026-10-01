@@ -1,0 +1,107 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>{{.PageData.S.MetaTitle}}</title>
+    <meta name="description" content="{{.PageData.S.MetaDesc}}">
+    <meta property="og:title" content="{{.PageData.S.Title}} — {{.Site.Name}}">
+    <meta property="og:description" content="{{.PageData.S.MetaDesc}}">
+{{end}}
+
+{{define "head"}}
+    {{$s := .PageData.S}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Services" "/services" $s.Title $s.URL)}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "{{$s.Title}}",
+      "serviceType": "{{$s.Kicker}}",
+      "description": "{{$s.MetaDesc}}",
+      "url": "{{.Site.BaseURL}}{{$s.URL}}",
+      "provider": {"@id": "{{.Site.BaseURL}}/#business"},
+      "areaServed": [{{range $i, $n := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$n}}"}{{end}}]
+    }
+    </script>
+{{end}}
+
+{{define "content"}}
+    {{$s := .PageData.S}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label"><a href="/services" class="crumb">Services</a> &middot; {{$s.Number}} &middot; {{$s.Kicker}}</div>
+            <h1 class="section-title">{{$s.Title}}</h1>
+            <p class="page-header-intro">{{$s.Intro}}</p>
+        </div>
+    </div>
+
+    <section class="service-section">
+        <div class="container">
+            <div class="service-layout">
+                <div class="service-body">
+                    {{range $s.Body}}<p>{{.}}</p>{{end}}
+
+                    <h2>Signs it's time</h2>
+                    <ul class="checklist">
+                        {{range $s.Problems}}<li>{{.}}</li>{{end}}
+                    </ul>
+
+                    <h2>How it works</h2>
+                    <div class="steps steps--compact">
+                        <div class="step">
+                            <div class="step-num">01</div>
+                            <h3>Book</h3>
+                            <p>Pick your type of house online and see the price{{if $.Site.Phone}}, or call{{end}}. Tell me which days suit.</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">02</div>
+                            <h3>The clean</h3>
+                            <p>Every gutter cleared, valleys done, downpipes flushed. You don't need to be home.</p>
+                        </div>
+                        <div class="step">
+                            <div class="step-num">03</div>
+                            <h3>Photos, then pay</h3>
+                            <p>Before-and-after photos come with the invoice. Tap your card on the day or pay online.</p>
+                        </div>
+                    </div>
+
+                    {{if .PageData.Guides}}
+                    <h2>Read more</h2>
+                    <p>Plain-English <a href="/guides">guides</a> on looking after your gutters, including what you can check from the ground.</p>
+                    <ul class="checklist checklist--plain">
+                        {{range .PageData.Guides}}<li><a href="/guides/{{.Slug}}">{{.Title}}</a></li>{{end}}
+                    </ul>
+                    {{end}}
+                </div>
+
+                <aside class="service-aside">
+                    {{template "price-card" (dict "Site" $.Site)}}
+                    {{if $s.PriceNote}}<p class="aside-note">{{$s.PriceNote}}</p>{{end}}
+                    <ul class="aside-guarantees">
+                        <li>The price is the price</li>
+                        <li>Before-and-after photo report</li>
+                        <li>Mess bagged and taken away</li>
+                    </ul>
+                    <a href="/book?service={{$s.Slug}}" class="btn btn--primary aside-btn">Book this service &#8594;</a>
+                    {{if $.Site.Phone}}<a href="{{$.Site.PhoneHref}}" class="btn btn--ghost aside-btn">Call {{$.Site.Phone}}</a>{{end}}
+                    <p class="aside-area">Warrandyte, Park Orchards, Wonga Park, Donvale, Eltham and <a href="/areas">surrounding suburbs</a>.</p>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    {{if .PageData.Related}}
+    <section class="related-section">
+        <div class="container">
+            <div class="section-label reveal">Related</div>
+            <h2 class="section-title reveal">You might also need</h2>
+            <div class="services-grid services-grid--related">
+                {{range .PageData.Related}}{{template "service-card" .}}{{end}}
+            </div>
+        </div>
+    </section>
+    {{end}}
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+{{end}}

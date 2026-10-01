@@ -1,0 +1,211 @@
+{{/* Shared fragments. Parsed into every page template. */}}
+
+{{/* service-card: takes a Service */}}
+{{define "service-card"}}
+<a href="{{.URL}}" class="service-card reveal">
+    <div class="service-icon">{{.Number}} &mdash; {{.Kicker}}</div>
+    <h3>{{.Title}}</h3>
+    <p>{{.Short}}</p>
+    <span class="service-card-more">Learn more &#8594;</span>
+</a>
+{{end}}
+
+{{/* price-card: the fixed price list. Takes a dict — "Site" (required), plus
+     optional "Kicker", "Note", "BookURL" and "BookLabel" (a book button, and a
+     call button when a phone is set). */}}
+{{define "price-card"}}
+<div class="price-card price-card--highlight">
+    <div class="price-card-kicker">{{or .Kicker "Fixed prices, everything included"}}</div>
+    <table class="price-list">
+        <tbody>
+        {{range .Site.Prices.Types}}
+        <tr>
+            <th scope="row">{{.Name}}<span class="price-list-note">{{.Note}}</span></th>
+            <td class="price-list-amount">${{.Price}}</td>
+        </tr>
+        {{end}}
+        <tr class="price-list-extra">
+            <th scope="row">Gutter guard fitted<span class="price-list-note">Lifted, cleaned underneath, refitted</span></th>
+            <td class="price-list-amount">+${{.Site.Prices.Guard}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="price-card-note">{{or .Note "The price you see is the price you pay. Downpipes flushed, valleys cleared, mess taken away and a photo report — all included."}}</p>
+    {{if .BookURL}}<a href="{{.BookURL}}" class="btn btn--primary aside-btn">{{or .BookLabel "Book a clean"}} &#8594;</a>
+    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost aside-btn">Call {{.Site.Phone}}</a>{{end}}{{end}}
+</div>
+{{end}}
+
+{{/* price-points: takes .Site */}}
+{{define "price-points"}}
+<ul class="price-points">
+    <li>Every gutter cleared by hand, and the roof valleys too</li>
+    <li>Downpipes flushed so you know they run</li>
+    <li>Leaves bagged and taken away — never burnt, never left in the garden</li>
+    <li>Before-and-after photos emailed with your receipt</li>
+    <li>Fire-ready plan: two cleans a year at {{.Prices.PlanPct}}% off each</li>
+    <li>Same street, same day? ${{.Prices.Neighbour}} off each house</li>
+    {{if .SeniorsPct}}<li>Seniors Card holders get {{.SeniorsPct}}% off the total</li>{{end}}
+    <li>A downpipe that needs jetting is ${{.Prices.Downpipe}} — and only if you say yes</li>
+</ul>
+{{end}}
+
+{{/* pricing: takes .Site */}}
+{{define "pricing"}}
+<div class="pricing-grid pricing-grid--single">
+    {{template "price-card" (dict "Site" .)}}
+    {{template "price-points" .}}
+</div>
+{{end}}
+
+{{/* guarantees: no data */}}
+{{define "guarantees"}}
+<div class="guarantee-grid">
+    <div class="guarantee-badge">
+        <div class="guarantee-title">The price is the price</div>
+        <p>Fixed prices on the website, not "call for a quote". If anything extra comes up, I'll ask before I do it.</p>
+    </div>
+    <div class="guarantee-badge">
+        <div class="guarantee-title">Photos, not promises</div>
+        <p>Before-and-after photos of your gutters come with the receipt, so you can see the job without climbing a ladder.</p>
+    </div>
+    <div class="guarantee-badge">
+        <div class="guarantee-title">Left tidy</div>
+        <p>Everything is bagged and taken away. Paths, decks and garden beds are left the way I found them.</p>
+    </div>
+</div>
+{{end}}
+
+{{/* payment-methods: no data */}}
+{{define "payment-methods"}}
+<div class="payment-methods">
+    <span class="payment-label">Pay by</span>
+    <span class="payment-chip">Visa</span>
+    <span class="payment-chip">Mastercard</span>
+    <span class="payment-chip">Amex</span>
+    <span class="payment-chip">eftpos</span>
+    <span class="payment-chip">Apple Pay</span>
+    <span class="payment-chip">Google Pay</span>
+    <span class="payment-note">Tap your card on my phone on the day, or pay the emailed invoice online.</span>
+</div>
+{{end}}
+
+{{/* areas: takes .Site */}}
+{{define "areas"}}
+<div class="areas-grid">
+    <div class="area-map-wrap">
+        <div id="area-map" class="area-map" role="img" aria-label="Map of Melbourne's outer north-east with a shaded circle showing the approximate service area around Warrandyte"></div>
+        <p class="area-map-caption">Approximate service area — about 15 minutes' drive from Warrandyte.</p>
+    </div>
+    <div>
+        <div class="area-list">
+            {{range .Areas}}<a href="{{.URL}}" class="area-chip">{{.Name}}</a>{{end}}
+        </div>
+        <p class="area-note">A bit further out? Ask — if I'm working nearby I can usually fit you in. <a href="/areas">All service areas &#8594;</a></p>
+    </div>
+</div>
+{{end}}
+
+{{/* book-cta: takes .Site */}}
+{{define "book-cta"}}
+<div class="book-cta reveal">
+    <div class="book-cta-text">
+        <div class="section-label">Ready when you are</div>
+        <h2 class="section-title">Book a gutter clean.</h2>
+        <p>Pick your property, see the price, and tell me which days suit. I'll confirm a time within a day.</p>
+    </div>
+    <div class="book-cta-actions">
+        <a href="/book" class="btn btn--primary">Book now &#8594;</a>
+        {{if .Phone}}<a href="{{.PhoneHref}}" class="btn btn--ghost">Call {{.Phone}}</a>{{end}}
+        <a href="mailto:{{.Email}}" class="book-cta-email">{{.Email}}</a>
+    </div>
+</div>
+{{end}}
+
+{{/* ld-breadcrumbs: takes the result of (crumbs "Home" "/" "Services" "/services" ...) — a BreadcrumbList JSON-LD block. */}}
+{{define "ld-breadcrumbs"}}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{{range $i, $c := .Items}}{{if $i}},{{end}}{"@type":"ListItem","position":{{add $i 1}},"name":{{$c.Name}},"item":"{{$.BaseURL}}{{$c.URL}}"}{{end}}]}
+</script>
+{{end}}
+
+{{/* admin-nav: takes .Path */}}
+{{define "admin-nav"}}
+<div class="admin-nav" role="navigation" aria-label="Admin sections">
+    <a href="/admin"{{if eq . "/admin"}} class="active"{{end}}>Dashboard</a>
+    <a href="/admin/bookings"{{if hasPrefix . "/admin/bookings"}} class="active"{{end}}>Bookings</a>
+    <a href="/admin/calendar"{{if hasPrefix . "/admin/calendar"}} class="active"{{end}}>Calendar</a>
+    <a href="/admin/invoices"{{if hasPrefix . "/admin/invoices"}} class="active"{{end}}>Invoices</a>
+    <a href="/admin/customers"{{if hasPrefix . "/admin/customers"}} class="active"{{end}}>Customers</a>
+    <a href="/admin/review-card"{{if hasPrefix . "/admin/review-card"}} class="active"{{end}}>Review card</a>
+</div>
+{{end}}
+
+{{/* google-tag: takes the whole pageData. Loads gtag.js (Analytics and/or Ads) and
+     tracks clicks on phone and email links, which GA4 does not count on its own.
+     Renders nothing unless a tag ID is configured, and never for the signed-in
+     admin — my own visits shouldn't show up as traffic or conversions. */}}
+{{define "google-tag"}}
+{{if and .Site.Analytics (not .IsAdmin)}}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{.Site.TagID}}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+{{if .Site.GA4ID}}gtag('config', '{{.Site.GA4ID}}');{{end}}
+{{if .Site.AdsID}}gtag('config', '{{.Site.AdsID}}');{{end}}
+document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest && e.target.closest('a[href^="tel:"], a[href^="mailto:"]');
+    if (!a) return;
+    if (a.getAttribute('href').indexOf('tel:') === 0) {
+        gtag('event', 'phone_call_click');
+        {{if .Site.AdsCallLabel}}gtag('event', 'conversion', {send_to: '{{.Site.AdsID}}/{{.Site.AdsCallLabel}}'});{{end}}
+    } else {
+        gtag('event', 'email_click');
+    }
+});
+</script>
+{{end}}
+{{end}}
+
+{{/* conversion: reports one conversion on page load. Takes a dict — "Site" and
+     "IsAdmin" from the pageData, "Event" (GA4 event name) and "Label" (the Ads
+     conversion label, which may be empty). Self-contained: it re-declares gtag()
+     so it works wherever it is placed, and pushes to the same dataLayer that
+     "google-tag" set up under the identical condition. */}}
+{{define "conversion"}}
+{{if and .Site.Analytics (not .IsAdmin)}}
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('event', '{{.Event}}');
+{{if .Label}}gtag('event', 'conversion', {send_to: '{{.Site.AdsID}}/{{.Label}}'});{{end}}
+</script>
+{{end}}
+{{end}}
+
+{{/* csrf: takes the session token */}}
+{{define "csrf"}}<input type="hidden" name="csrf" value="{{.}}">{{end}}
+
+{{/* flash: takes {OK, Err} */}}
+{{define "flash"}}
+{{if .OK}}<div class="admin-status admin-status--success admin-flash" role="status">{{.OK}}</div>{{end}}
+{{if .Err}}<div class="admin-status admin-status--error admin-flash" role="alert">{{.Err}}</div>{{end}}
+{{end}}
+
+{{/* flash-swap: the flash region as an htmx side-swap, for responses that have
+     no redirect to carry the message. Always emitted, even when empty, so the
+     previous action's message is cleared rather than left sitting there.
+
+     Deliberately a body swap rather than an HX-Trigger toast: HTTP headers are
+     ASCII-only, and these messages carry em dashes and apostrophes. */}}
+{{define "flash-swap"}}<hx-partial hx-target="#admin-flash" hx-swap="innerHTML">{{template "flash" .}}</hx-partial>{{end}}
+
+{{/* flash-response: the whole htmx reply for an action that changes nothing on
+     the page except the message. Pair it with hx-swap="none" on the form —
+     htmx still applies hx-partial swaps when the main swap is none. Works for
+     any page whose data struct has a Flash field. */}}
+{{define "flash-response"}}{{template "flash-swap" .PageData.Flash}}{{end}}
+
+{{/* badge: takes a status string */}}
+{{define "badge"}}<span class="status-badge status-badge--{{.}}">{{.}}</span>{{end}}

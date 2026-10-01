@@ -1,0 +1,36 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Thanks — Booking Request Received | Warrandyte Gutters</title>
+    <meta name="robots" content="noindex">
+{{end}}
+
+{{define "head"}}
+    {{template "conversion" (dict "Site" .Site "IsAdmin" .IsAdmin "Event" "booking_request" "Label" .Site.AdsBookLabel)}}
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Booking request sent</div>
+            <h1 class="section-title">Thanks — I'll be in touch within a day.</h1>
+            <p class="page-header-intro">I'll get back to you to lock in a time. If there's a deadline, like a council Fire Prevention Notice, {{if .Site.Phone}}call <a href="{{.Site.PhoneHref}}">{{.Site.Phone}}</a>{{else}}email <a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a>{{end}}.</p>
+        </div>
+    </div>
+    <section class="quote-section">
+        <div class="container">
+            <div class="quote-group">
+                <h2 class="quote-group-title">Before the day</h2>
+                <ul class="checklist">
+                    <li>You don't need to be home, as long as I can get to the side of the house.</li>
+                    <li>Let me know about locked gates, dogs, or solar panels on the roof.</li>
+                    <li>If you can, move cars away from the downpipes and the edges of the house.</li>
+                </ul>
+                <div class="hero-actions" style="margin-top:2rem">
+                    <a href="/" class="btn btn--ghost">Back to home</a>
+                    <a href="/guides" class="btn btn--ghost">Read the gutter guides</a>
+                </div>
+            </div>
+        </div>
+    </section>
+{{end}}

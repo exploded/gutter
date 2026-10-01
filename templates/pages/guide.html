@@ -1,0 +1,107 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>{{.PageData.G.Title}} | Warrandyte Gutters</title>
+    <meta name="description" content="{{.PageData.G.MetaDesc}}">
+    <meta property="og:title" content="{{.PageData.G.Title}}">
+    <meta property="og:description" content="{{.PageData.G.MetaDesc}}">
+{{end}}
+
+{{define "head"}}
+    {{$g := .PageData.G}}
+    {{template "ld-breadcrumbs" (crumbs "Home" "/" "Guides" "/guides" $g.Title (print "/guides/" $g.Slug))}}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "{{$g.Title}}",
+      "description": "{{$g.MetaDesc}}",
+      "articleSection": "{{$g.Kicker}}",
+      "inLanguage": "en-AU",
+      "url": "{{.Site.BaseURL}}/guides/{{$g.Slug}}",
+      "mainEntityOfPage": "{{.Site.BaseURL}}/guides/{{$g.Slug}}",
+      "author": {"@type": "Person", "name": "{{.Site.Owner}}", "url": "{{.Site.BaseURL}}/"},
+      "publisher": {"@id": "{{.Site.BaseURL}}/#business"},
+      "image": "{{.Site.BaseURL}}/static/img/og.png",
+      "articleBody": {{stripTags $g.Summary}}
+    }
+    </script>
+{{end}}
+
+{{define "content"}}
+    {{$g := .PageData.G}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label"><a href="/guides" class="crumb">Guides</a> &middot; {{$g.Kicker}}</div>
+            <h1 class="section-title guide-title">{{$g.Title}}</h1>
+            <p class="page-header-intro">{{$g.Summary}}</p>
+            <div class="guide-card-meta guide-card-meta--header">
+                <span class="guide-level guide-level--{{if eq $g.Level "Easy"}}easy{{else}}fiddly{{end}}">{{$g.Level}}</span>
+                <span class="guide-time">About {{$g.Time}}</span>
+            </div>
+        </div>
+    </div>
+
+    <section class="service-section">
+        <div class="container">
+            <div class="help-banner help-banner--slim reveal">
+                <div><strong>Rather not climb a ladder?</strong> <a href="/book{{with $g.RelatedService}}?service={{.Slug}}{{end}}">Book a clean</a>{{if $.Site.Phone}} or call <a href="{{$.Site.PhoneHref}}">{{$.Site.Phone}}</a>{{end}} — fixed prices, photos of the result.</div>
+            </div>
+
+            <div class="service-layout">
+                <div class="service-body guide-body">
+                    {{if $g.Before}}
+                    <div class="guide-before">
+                        <strong>Before you start:</strong> {{safeHTML $g.Before}}
+                    </div>
+                    {{end}}
+
+                    <h2>Steps</h2>
+                    <ol class="guide-steps">
+                        {{range $g.Steps}}<li>{{.}}</li>{{end}}
+                    </ol>
+
+                    {{if $g.IfNot}}
+                    <h2>If that didn't help</h2>
+                    <ul class="checklist checklist--plain">
+                        {{range $g.IfNot}}<li>{{.}}</li>{{end}}
+                    </ul>
+                    {{end}}
+
+                    <div class="guide-stop">
+                        <div class="guide-stop-title">When to call me instead</div>
+                        <p>{{$g.StopWhen}}</p>
+                        <a href="/book{{with $g.RelatedService}}?service={{.Slug}}{{end}}" class="btn btn--primary">Book a clean &#8594;</a>
+                    </div>
+                </div>
+
+                <aside class="service-aside">
+                    {{with $g.RelatedService}}
+                    <div class="price-card">
+                        <div class="price-card-kicker">Related service</div>
+                        <div class="aside-service-title">{{.Title}}</div>
+                        <p class="price-card-note">{{.Short}}</p>
+                        <a href="{{.URL}}" class="btn btn--ghost aside-btn">About this service &#8594;</a>
+                    </div>
+                    {{end}}
+                    {{$burl := "/book"}}{{with $g.RelatedService}}{{$burl = printf "/book?service=%s" .Slug}}{{end}}
+                    {{template "price-card" (dict "Site" $.Site
+                        "Kicker" "If you'd rather I did it"
+                        "BookURL" $burl)}}
+                    {{if .PageData.Others}}
+                    <div class="aside-links">
+                        <div class="price-card-kicker">More {{$g.Kicker}} guides</div>
+                        <ul>
+                            {{range .PageData.Others}}<li><a href="/guides/{{.Slug}}">{{.Title}}</a></li>{{end}}
+                        </ul>
+                    </div>
+                    {{end}}
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">{{template "book-cta" .Site}}</div>
+    </section>
+{{end}}

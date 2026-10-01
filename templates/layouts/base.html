@@ -1,0 +1,98 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{template "google-tag" .}}
+    {{block "meta" .}}
+    <title>Warrandyte Gutters — Gutter Cleaning in Warrandyte &amp; Surrounds</title>
+    <meta name="description" content="Gutter cleaning around Warrandyte, Park Orchards, Wonga Park, Donvale and Eltham. Fixed prices, book online, photo report with every clean.">
+    {{end}}
+    <link rel="canonical" href="{{.Site.BaseURL}}{{.Path}}">
+    <meta property="og:site_name" content="{{.Site.Name}}">
+    <meta property="og:url" content="{{.Site.BaseURL}}{{.Path}}">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="en_AU">
+    {{block "og-image" .}}
+    <meta property="og:image" content="{{.Site.BaseURL}}/static/img/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Warrandyte Gutters — gutter cleaning for Warrandyte and surrounds">
+    {{end}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="geo.region" content="AU-VIC">
+    <meta name="geo.placename" content="Warrandyte">
+    <meta name="theme-color" content="#2f5d4e">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
+    <link rel="manifest" href="/static/site.webmanifest">
+    <link rel="preload" href="/static/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{asset "css/styles.css"}}">
+    {{/* htmx is admin-only: the public pages are static server-rendered content
+         and must not pay for it. */}}
+    {{if .IsAdmin}}<script src="{{asset "js/htmx.min.js"}}" defer></script>{{end}}
+    {{block "head" .}}{{end}}
+</head>
+{{/* htmx 4 needs :inherited or the CSRF header never reaches the elements
+     inside, and every admin POST is rejected by requireCSRF. */}}
+<body{{if .IsAdmin}} hx-headers:inherited='{"X-CSRF-Token": "{{.CSRF}}"}'{{end}}>
+
+<div class="glow-orb glow-orb--amber"></div>
+<div class="glow-orb glow-orb--blue"></div>
+
+<div class="page-wrapper">
+
+    <!-- Navigation -->
+    <nav>
+        <a href="/" class="nav-brand"><img src="/static/img/logo-mark.svg" alt="" width="30" height="30" class="nav-brand-icon">{{.Site.Name}}</a>
+        <div class="nav-links">
+            <a href="/services"{{if hasPrefix .Path "/services"}} class="active"{{end}}>Services</a>
+            <a href="/pricing"{{if hasPrefix .Path "/pricing"}} class="active"{{end}}>Pricing</a>
+            <a href="/guides"{{if hasPrefix .Path "/guides"}} class="active"{{end}}>Guides</a>
+            <a href="/areas"{{if hasPrefix .Path "/areas"}} class="active"{{end}}>Areas</a>
+            {{if .IsAdmin}}<a href="/admin"{{if hasPrefix .Path "/admin"}} class="active"{{end}}>Admin</a>{{end}}
+            {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="nav-phone">{{.Site.Phone}}</a>{{end}}
+            <a href="/book" class="btn btn--primary nav-cta">Book a clean</a>
+            {{if .User}}
+            <div class="nav-user">
+                {{if .User.Picture}}<img src="{{.User.Picture}}" alt="" class="nav-avatar" referrerpolicy="no-referrer">{{end}}
+                <span class="nav-user-name">{{.User.Name}}</span>
+                <form method="POST" action="/auth/logout" class="nav-logout-form">
+                    <button type="submit" class="nav-logout-btn">Sign out</button>
+                </form>
+            </div>
+            {{end}}
+        </div>
+    </nav>
+
+    <main>
+    {{block "content" .}}{{end}}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-copy"><img src="/static/img/logo-mark.svg" alt="" width="20" height="20" class="footer-icon">&copy; 2026 {{.Site.Name}} &middot; {{.Site.Owner}}, Warrandyte VIC{{if .Site.ABN}} &middot; ABN {{.Site.ABN}}{{end}}</div>
+            <div class="footer-links">
+                <a href="/services">Services</a>
+                <a href="/pricing">Pricing</a>
+                <a href="/guides">Guides</a>
+                <a href="/areas">Areas</a>
+                <a href="/book">Book</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}">{{.Site.Phone}}</a>{{end}}
+                <a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a>
+            </div>
+        </div>
+    </footer>
+
+</div>
+
+<script src="{{asset "js/reveal.js"}}" defer></script>
+</body>
+</html>
+{{end}}

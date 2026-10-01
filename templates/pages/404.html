@@ -1,0 +1,48 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Page not found — Warrandyte Gutters</title>
+    <meta name="description" content="That page doesn't exist. Here's where to find services, prices, gutter guides, and how to book a clean.">
+    <meta name="robots" content="noindex">
+{{end}}
+
+{{define "content"}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">404</div>
+            <h1 class="section-title">That page isn't here.</h1>
+            <p class="page-header-intro">The link may be old or mistyped. The rest of the site is very much here — try one of these.</p>
+        </div>
+    </div>
+
+    <section class="service-section">
+        <div class="container">
+            <div class="notfound-grid">
+                <a href="/services" class="service-card">
+                    <div class="service-icon">Services</div>
+                    <h3>What I do</h3>
+                    <p>Gutter cleaning, fire-season cleans, downpipes and gutter guard homes.</p>
+                    <span class="service-card-more">See services &#8594;</span>
+                </a>
+                <a href="/guides" class="service-card">
+                    <div class="service-icon">Guides</div>
+                    <h3>Know your gutters</h3>
+                    <p>How often to clean, getting fire-ready, and what to check from the ground.</p>
+                    <span class="service-card-more">Browse guides &#8594;</span>
+                </a>
+                <a href="/areas" class="service-card">
+                    <div class="service-icon">Areas</div>
+                    <h3>Where I work</h3>
+                    <p>Warrandyte and the suburbs around it — about 15 minutes' drive.</p>
+                    <span class="service-card-more">Service areas &#8594;</span>
+                </a>
+                <a href="/book" class="service-card">
+                    <div class="service-icon">Book</div>
+                    <h3>Book a clean</h3>
+                    <p>Pick your type of house, see the price, and tell me which days suit.</p>
+                    <span class="service-card-more">Book now &#8594;</span>
+                </a>
+            </div>
+        </div>
+    </section>
+{{end}}

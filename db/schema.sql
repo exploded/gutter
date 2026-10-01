@@ -1,0 +1,132 @@
+CREATE TABLE IF NOT EXISTS users (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    google_id  TEXT    NOT NULL UNIQUE,
+    email      TEXT    NOT NULL DEFAULT '',
+    name       TEXT    NOT NULL DEFAULT '',
+    picture    TEXT    NOT NULL DEFAULT '',
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    name           TEXT    NOT NULL DEFAULT '',
+    phone          TEXT    NOT NULL DEFAULT '',
+    email          TEXT    NOT NULL DEFAULT '',
+    suburb         TEXT    NOT NULL DEFAULT '',
+    service_slug   TEXT    NOT NULL DEFAULT '',
+    property_type  TEXT    NOT NULL DEFAULT '',      -- unit | single | large | double (see cmd/server/pricing.go)
+    issue          TEXT    NOT NULL DEFAULT '',      -- customer's notes: access, dogs, solar panels, known problems
+    preferred_time TEXT    NOT NULL DEFAULT '',
+    status         TEXT    NOT NULL DEFAULT 'new',   -- new | contacted | booked | done | invoiced | paid | cancelled | spam
+    ip             TEXT    NOT NULL DEFAULT '',
+    created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
+    customer_id       INTEGER NOT NULL DEFAULT 0,
+    start_at          TEXT    NOT NULL DEFAULT '',   -- 'YYYY-MM-DD HH:MM' Australia/Melbourne local; '' = unscheduled
+    duration_min      INTEGER NOT NULL DEFAULT 90,
+    admin_notes       TEXT    NOT NULL DEFAULT '',
+    parent_booking_id INTEGER NOT NULL DEFAULT 0,   -- follow-up visits (e.g. the next plan clean) point at the original booking
+    updated_at        TEXT    NOT NULL DEFAULT '',
+    address           TEXT    NOT NULL DEFAULT '',  -- full street address, e.g. '12 Smith St, Warrandyte VIC 3113'
+    reminder_sent_at    TEXT  NOT NULL DEFAULT '',  -- UTC datetime the day-before reminder was emailed to the customer
+    admin_alert_sent_at TEXT  NOT NULL DEFAULT '',  -- UTC datetime the 1-hour heads-up was emailed to the admin
+    gcal_event_id       TEXT  NOT NULL DEFAULT '',  -- Google Calendar event id; '' = no event pushed yet
+    gcal_synced_at      TEXT  NOT NULL DEFAULT '',  -- UTC datetime of the last successful push; < updated_at = dirty
+    source              TEXT  NOT NULL DEFAULT '',  -- where the booking came from: google-ads, phone, referral…
+    has_guard           INTEGER NOT NULL DEFAULT 0, -- 1 = gutter guard fitted (lift, clean, refit surcharge)
+    on_plan             INTEGER NOT NULL DEFAULT 0, -- 1 = customer joined the Fire-ready plan (two cleans a year, plan price)
+    quote_cents         INTEGER NOT NULL DEFAULT 0  -- price shown when they booked (base + guard, less plan discount)
+);
+
+CREATE INDEX IF NOT EXISTS idx_bookings_start_at ON bookings(start_at);
+CREATE INDEX IF NOT EXISTS idx_bookings_customer ON bookings(customer_id);
+
+-- Ad clicks: one row per paid click that lands on the site, so a booking can be
+-- traced back to the keyword that bought it. Rows still holding booking_id = 0
+-- are clicks that never booked - that's the denominator, not junk to prune.
+CREATE TABLE IF NOT EXISTS ad_clicks (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    token      TEXT    NOT NULL UNIQUE,     -- value of the wg_click cookie
+    source     TEXT    NOT NULL DEFAULT '', -- same vocabulary as bookings.source
+    gclid      TEXT    NOT NULL DEFAULT '', -- Google's auto-tagging click id
+    keyword    TEXT    NOT NULL DEFAULT '', -- utm_term, i.e. the Ads {keyword} that matched
+    campaign   TEXT    NOT NULL DEFAULT '', -- utm_campaign, i.e. {campaignid}
+    landing    TEXT    NOT NULL DEFAULT '', -- path only, no query string
+    booking_id INTEGER NOT NULL DEFAULT 0,  -- set when the click turns into a booking
+    created_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_ad_clicks_booking ON ad_clicks(booking_id);
+
+-- Customers: the people we do work for (no login). Linked from bookings and invoices.
+CREATE TABLE IF NOT EXISTS customers (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    name       TEXT    NOT NULL DEFAULT '',
+    email      TEXT    NOT NULL DEFAULT '',   -- stored lower-cased
+    phone      TEXT    NOT NULL DEFAULT '',
+    phone_norm TEXT    NOT NULL DEFAULT '',   -- digits only, for matching
+    address    TEXT    NOT NULL DEFAULT '',
+    suburb     TEXT    NOT NULL DEFAULT '',
+    notes      TEXT    NOT NULL DEFAULT '',
+    created_at TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_email      ON customers(email) WHERE email <> '';
+CREATE INDEX        IF NOT EXISTS idx_customers_phone_norm ON customers(phone_norm);
+
+-- Invoices: numbers start at 1000 (see InsertInvoice); money is integer cents; no GST.
+CREATE TABLE IF NOT EXISTS invoices (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    number         INTEGER NOT NULL UNIQUE,
+    booking_id     INTEGER NOT NULL DEFAULT 0,
+    customer_id    INTEGER NOT NULL DEFAULT 0,
+    status         TEXT    NOT NULL DEFAULT 'draft',  -- draft | sent | paid | void
+    issued_at      TEXT    NOT NULL DEFAULT '',       -- 'YYYY-MM-DD' local
+    due_at         TEXT    NOT NULL DEFAULT '',
+    paid_at        TEXT    NOT NULL DEFAULT '',
+    payment_method TEXT    NOT NULL DEFAULT '',       -- zeller_link | bank_transfer | card_on_day | cash | other
+    payment_ref    TEXT    NOT NULL DEFAULT '',
+    payment_link   TEXT    NOT NULL DEFAULT '',       -- Zeller payment link pasted by admin
+    total_cents    INTEGER NOT NULL DEFAULT 0,
+    notes          TEXT    NOT NULL DEFAULT '',
+    view_token     TEXT    NOT NULL DEFAULT '',       -- public /invoice/{token}
+    review_asked_at TEXT   NOT NULL DEFAULT '',       -- 'YYYY-MM-DD' a Google review was requested
+    created_at     TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at     TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_invoices_view_token ON invoices(view_token);
+CREATE INDEX IF NOT EXISTS idx_invoices_customer   ON invoices(customer_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_booking    ON invoices(booking_id);
+
+CREATE TABLE IF NOT EXISTS invoice_items (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_id  INTEGER NOT NULL REFERENCES invoices(id) ON DELETE CASCADE,
+    description TEXT    NOT NULL DEFAULT '',
+    qty         REAL    NOT NULL DEFAULT 1,
+    unit_cents  INTEGER NOT NULL DEFAULT 0,
+    line_cents  INTEGER NOT NULL DEFAULT 0,   -- round(qty * unit_cents), computed at save
+    sort_order  INTEGER NOT NULL DEFAULT 0
+);
+
+-- Scheduler: one row per (job, local date) the job has run, so once-a-day jobs
+-- (the morning digest) survive restarts without double-sending.
+CREATE TABLE IF NOT EXISTS scheduler_runs (
+    job    TEXT NOT NULL,
+    ran_on TEXT NOT NULL,   -- 'YYYY-MM-DD' Melbourne local
+    PRIMARY KEY (job, ran_on)
+);
+
+-- Google Calendar sync: a single row (id = 1) holding the admin's refresh token
+-- and the calendar bookings are pushed to. Deleting the row disconnects sync.
+CREATE TABLE IF NOT EXISTS google_calendar (
+    id             INTEGER PRIMARY KEY CHECK (id = 1),
+    account_email  TEXT NOT NULL DEFAULT '',   -- must match ADMIN_EMAIL
+    refresh_token  TEXT NOT NULL DEFAULT '',
+    calendar_id    TEXT NOT NULL DEFAULT '',   -- the "Warrandyte Gutters" secondary calendar
+    calendar_name  TEXT NOT NULL DEFAULT '',
+    skip_calendars TEXT NOT NULL DEFAULT '',   -- newline-separated calendar ids excluded from busy times
+    connected_at   TEXT NOT NULL DEFAULT '',   -- UTC
+    last_sync_at   TEXT NOT NULL DEFAULT '',   -- UTC; last successful push or busy query
+    last_error     TEXT NOT NULL DEFAULT ''
+);

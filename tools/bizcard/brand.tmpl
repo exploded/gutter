@@ -1,0 +1,38 @@
+{{/*
+Shared brand pieces for the card and logo pages: the @font-face block, the
+palette, and the horizontal lockup (mark left; "Warrandyte" in Fraunces
+SemiBold over tracked "GUTTERS" in DM Sans Bold at 38% of its size).
+
+The lockup is sized in em, so set font-size on .lockup to scale the whole
+thing: 1em is the cap-to-baseline reference size of "Warrandyte".
+*/}}
+
+{{define "fonts-css"}}
+@font-face{font-family:"WG Fraunces";src:url("{{.Fonts.Fraunces}}") format("truetype");font-weight:600;font-style:normal}
+@font-face{font-family:"WG Sans";src:url("{{.Fonts.Sans400}}") format("truetype");font-weight:400;font-style:normal}
+@font-face{font-family:"WG Sans";src:url("{{.Fonts.Sans500}}") format("truetype");font-weight:500;font-style:normal}
+@font-face{font-family:"WG Sans";src:url("{{.Fonts.Sans700}}") format("truetype");font-weight:700;font-style:normal}
+:root{
+  --green:#2F5D4E; --gum-dark:#1F3F35; --ochre:#E0A13B; --ochre-text:#9A5F12;
+  --ink:#1D2622; --paper:#F8F6F0; --sage:#E4ECE4; --white:#FFFFFF;
+}
+{{end}}
+
+{{define "lockup-css"}}
+.lockup{display:inline-flex;align-items:center;gap:.34em;line-height:1;white-space:nowrap}
+.lockup .mark{flex:none;width:1.5em;height:1.5em}
+.lockup .mark svg{display:block;width:100%;height:100%;overflow:visible}
+.lockup .words{display:flex;flex-direction:column;align-items:flex-start}
+/* text-box trims each line to cap height and baseline, so the gaps below are
+   true optical gaps and the block centres on the mark without fudge factors. */
+.lockup .w{font-family:"WG Fraunces",serif;font-weight:600;font-size:1em;letter-spacing:-.01em;
+  font-kerning:normal;text-box:trim-both cap alphabetic}
+.lockup .g{font-family:"WG Sans",sans-serif;font-weight:700;font-size:.38em;letter-spacing:.34em;
+  margin-right:-.34em;margin-top:.66em;text-box:trim-both cap alphabetic}
+/* On a gum-green field the badge would vanish into the background, so it is
+   redrawn in gum dark with a hairline sage edge (see card.tmpl for why). */
+.lockup.on-green .mark rect{fill:var(--gum-dark);stroke:rgba(228,236,228,.55);stroke-width:.9}
+.lockup.on-green .mark path[stroke="#2F5D4E"]{stroke:var(--gum-dark)}
+{{end}}
+
+{{define "lockup"}}<div class="lockup {{.LockupClass}}"><div class="mark">{{.Mark}}</div><div class="words"><span class="w">Warrandyte</span><span class="g">GUTTERS</span></div></div>{{end}}

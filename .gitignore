@@ -1,0 +1,10 @@
+.DS_Store
+Thumbs.db
+.vscode/
+.env
+gutter
+gutter.exe
+*.db*
+.local/
+*.exe
+*.exe~

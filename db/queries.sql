@@ -1,0 +1,365 @@
+-- Users
+
+-- name: UpsertUser :exec
+INSERT INTO users (google_id, email, name, picture)
+VALUES (?, ?, ?, ?)
+ON CONFLICT(google_id) DO UPDATE SET
+    email = excluded.email,
+    name = excluded.name,
+    picture = excluded.picture;
+
+-- name: GetUserByGoogleID :one
+SELECT id, google_id, email, name, picture, created_at
+FROM users WHERE google_id = ?;
+
+-- Bookings
+
+-- name: InsertBooking :one
+INSERT INTO bookings (name, phone, email, suburb, address, service_slug, property_type, issue, preferred_time, ip, customer_id, source, admin_notes, has_guard, on_plan, quote_cents, duration_min, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+RETURNING id;
+
+-- name: InsertFollowupBooking :one
+INSERT INTO bookings (name, phone, email, suburb, address, service_slug, property_type, issue, preferred_time, ip, customer_id, parent_booking_id, source, has_guard, on_plan, quote_cents, duration_min, status, updated_at)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, '', '', ?, ?, ?, ?, ?, ?, ?, 'new', datetime('now'))
+RETURNING id;
+
+-- name: GetBooking :one
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings WHERE id = ?;
+
+-- name: ListBookings :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings ORDER BY id DESC;
+
+-- name: ListBookingsByStatus :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings WHERE status = ? ORDER BY id DESC;
+
+-- name: ListBookingsBetween :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings
+WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam')
+ORDER BY start_at;
+
+-- name: ListBookingsByCustomer :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings WHERE customer_id = ? ORDER BY id DESC;
+
+-- name: ListChildBookings :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings WHERE parent_booking_id = ? ORDER BY id;
+
+-- name: ListUnlinkedBookings :many
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings WHERE customer_id = 0 AND status <> 'spam' ORDER BY id;
+
+-- name: CountBookingsByStatus :many
+SELECT status, COUNT(*) AS n FROM bookings GROUP BY status;
+
+-- name: CountBookingsBySource :many
+-- Spam never came from anywhere worth counting.
+SELECT source, COUNT(*) AS n FROM bookings WHERE status <> 'spam' GROUP BY source;
+
+-- name: CountBookingsBySourceSince :one
+-- One source over a window, to sit beside a click count for the same window.
+SELECT COUNT(*) AS n FROM bookings
+WHERE source = ? AND status <> 'spam' AND created_at >= ?;
+
+-- name: UpdateBookingStatus :exec
+UPDATE bookings SET status = ?, updated_at = datetime('now') WHERE id = ?;
+
+-- name: UpdateBookingSchedule :exec
+-- Rescheduling clears the reminder stamps so the new time gets its own reminder + heads-up.
+UPDATE bookings SET start_at = ?, duration_min = ?, status = 'booked', reminder_sent_at = '', admin_alert_sent_at = '', updated_at = datetime('now') WHERE id = ?;
+
+-- name: UpdateBookingNotes :exec
+UPDATE bookings SET admin_notes = ?, updated_at = datetime('now') WHERE id = ?;
+
+-- name: UpdateBookingIssue :exec
+UPDATE bookings SET issue = ?, updated_at = datetime('now') WHERE id = ?;
+
+-- name: SetBookingCustomer :exec
+UPDATE bookings SET customer_id = ? WHERE id = ?;
+
+-- name: UpdateBookingAddress :exec
+UPDATE bookings SET address = ?, suburb = ?, updated_at = datetime('now') WHERE id = ?;
+
+-- name: ListBookingsForReminder :many
+-- Scheduled visits in [from, to) whose customer has an email and no reminder
+-- yet. Any status short of cancelled/spam counts - same rule as the calendar.
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings
+WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam') AND email <> '' AND reminder_sent_at = ''
+ORDER BY start_at;
+
+-- name: ListBookingsForAdminAlert :many
+-- Scheduled visits in [from, to) the admin has not been alerted about yet.
+-- Any status short of cancelled/spam counts - same rule as the calendar.
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings
+WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam') AND admin_alert_sent_at = ''
+ORDER BY start_at;
+
+-- name: MarkBookingReminderSent :exec
+UPDATE bookings SET reminder_sent_at = datetime('now') WHERE id = ?;
+
+-- name: MarkBookingAdminAlertSent :exec
+UPDATE bookings SET admin_alert_sent_at = datetime('now') WHERE id = ?;
+
+-- Google Calendar sync
+
+-- name: ListBookingsForCalendarSync :many
+-- Bookings needing a push to Google Calendar, restricted to a start-time
+-- window (plus any row still holding an event id, so cancellations outside the
+-- window are still deleted). A row qualifies when either:
+--   * it changed since the last successful push, or
+--   * its stored state disagrees with what Google should hold - a visit with no
+--     event, or an event on a booking that should no longer have one. The rule
+--     (mirroring wantsEvent) is: any scheduled visit belongs in Google unless
+--     it is cancelled or spam.
+-- The second test matters because updated_at and gcal_synced_at only have
+-- one-second resolution: an edit landing in the same second as a push would
+-- otherwise look clean. It also retries anything Google rejected last time.
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings
+WHERE (
+        gcal_synced_at = '' OR gcal_synced_at < updated_at
+        OR (gcal_event_id =  '' AND start_at <> '' AND status NOT IN ('cancelled', 'spam'))
+        OR (gcal_event_id <> '' AND (start_at =  '' OR status IN ('cancelled', 'spam')))
+      )
+  AND ((start_at >= ? AND start_at < ?) OR gcal_event_id <> '')
+ORDER BY start_at, id
+LIMIT ?;
+
+-- name: ListBookingsForCalendarBackfill :many
+-- Every booking that should have an event, for the "resync all" button.
+SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, has_guard, on_plan, quote_cents
+FROM bookings
+WHERE (start_at >= ? AND start_at < ?) OR gcal_event_id <> ''
+ORDER BY start_at, id;
+
+-- name: SetBookingCalendarEvent :exec
+-- Records the pushed event id and stamps the sync time. updated_at is left
+-- alone so the row does not immediately look dirty again.
+UPDATE bookings SET gcal_event_id = ?, gcal_synced_at = datetime('now') WHERE id = ?;
+
+-- name: ClearBookingCalendarEventIDs :exec
+UPDATE bookings SET gcal_event_id = '', gcal_synced_at = '' WHERE gcal_event_id <> '';
+
+-- name: GetGoogleCalendar :one
+SELECT account_email, refresh_token, calendar_id, calendar_name, skip_calendars, connected_at, last_sync_at, last_error
+FROM google_calendar WHERE id = 1;
+
+-- name: SaveGoogleCalendar :exec
+INSERT INTO google_calendar (id, account_email, refresh_token, calendar_id, calendar_name, skip_calendars, connected_at, last_sync_at, last_error)
+VALUES (1, ?, ?, ?, ?, '', datetime('now'), '', '')
+ON CONFLICT(id) DO UPDATE SET
+    account_email = excluded.account_email,
+    refresh_token = excluded.refresh_token,
+    calendar_id   = excluded.calendar_id,
+    calendar_name = excluded.calendar_name,
+    connected_at  = datetime('now'),
+    last_error    = '';
+
+-- name: SetGoogleCalendarSkips :exec
+UPDATE google_calendar SET skip_calendars = ? WHERE id = 1;
+
+-- name: MarkGoogleCalendarSynced :exec
+UPDATE google_calendar SET last_sync_at = datetime('now'), last_error = '' WHERE id = 1;
+
+-- name: SetGoogleCalendarError :exec
+UPDATE google_calendar SET last_error = ? WHERE id = 1;
+
+-- name: DeleteGoogleCalendar :exec
+DELETE FROM google_calendar WHERE id = 1;
+
+-- Scheduler
+
+-- name: InsertSchedulerRun :execrows
+INSERT OR IGNORE INTO scheduler_runs (job, ran_on) VALUES (?, ?);
+
+-- name: DeleteSchedulerRun :exec
+DELETE FROM scheduler_runs WHERE job = ? AND ran_on = ?;
+
+-- Customers
+
+-- name: InsertCustomer :one
+INSERT INTO customers (name, email, phone, phone_norm, address, suburb, notes)
+VALUES (?, ?, ?, ?, ?, ?, ?)
+RETURNING id;
+
+-- name: GetCustomer :one
+SELECT id, name, email, phone, phone_norm, address, suburb, notes, created_at, updated_at
+FROM customers WHERE id = ?;
+
+-- name: GetCustomerByEmail :one
+SELECT id, name, email, phone, phone_norm, address, suburb, notes, created_at, updated_at
+FROM customers WHERE email = ? AND email <> '';
+
+-- name: GetCustomerByPhoneNorm :one
+SELECT id, name, email, phone, phone_norm, address, suburb, notes, created_at, updated_at
+FROM customers WHERE phone_norm = ? AND phone_norm <> '' ORDER BY id LIMIT 1;
+
+-- name: ListCustomers :many
+SELECT id, name, email, phone, phone_norm, address, suburb, notes, created_at, updated_at
+FROM customers ORDER BY name COLLATE NOCASE, id;
+
+-- name: SearchCustomers :many
+SELECT id, name, email, phone, phone_norm, address, suburb, notes, created_at, updated_at
+FROM customers
+WHERE name LIKE ? OR email LIKE ? OR phone_norm LIKE ? OR suburb LIKE ?
+ORDER BY name COLLATE NOCASE, id;
+
+-- name: UpdateCustomer :exec
+UPDATE customers SET name = ?, email = ?, phone = ?, phone_norm = ?, address = ?, suburb = ?, notes = ?, updated_at = datetime('now')
+WHERE id = ?;
+
+-- name: TouchCustomerContact :exec
+UPDATE customers SET
+    name       = CASE WHEN name = ''       THEN ? ELSE name END,
+    email      = CASE WHEN email = ''      THEN ? ELSE email END,
+    phone      = CASE WHEN phone = ''      THEN ? ELSE phone END,
+    phone_norm = CASE WHEN phone_norm = '' THEN ? ELSE phone_norm END,
+    suburb     = CASE WHEN suburb = ''     THEN ? ELSE suburb END,
+    updated_at = datetime('now')
+WHERE id = ?;
+
+-- Invoices
+
+-- name: InsertInvoice :one
+INSERT INTO invoices (number, booking_id, customer_id, status, issued_at, due_at, notes, view_token)
+VALUES ((SELECT COALESCE(MAX(number), 999) + 1 FROM invoices), ?, ?, 'draft', ?, ?, ?, ?)
+RETURNING id;
+
+-- name: GetInvoice :one
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE id = ?;
+
+-- name: GetInvoiceByToken :one
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE view_token = ? AND view_token <> '';
+
+-- name: ListInvoices :many
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices ORDER BY number DESC;
+
+-- name: ListInvoicesByStatus :many
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE status = ? ORDER BY number DESC;
+
+-- name: ListInvoicesByCustomer :many
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE customer_id = ? ORDER BY number DESC;
+
+-- name: ListInvoicesByBooking :many
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE booking_id = ? ORDER BY number DESC;
+
+-- name: ListOverdueInvoices :many
+-- Sent, unpaid invoices whose due date is before the given local date.
+SELECT id, number, booking_id, customer_id, status, issued_at, due_at, paid_at, payment_method, payment_ref, payment_link,
+       total_cents, notes, view_token, review_asked_at, created_at, updated_at
+FROM invoices WHERE status = 'sent' AND due_at <> '' AND due_at < ? ORDER BY due_at;
+
+-- name: SumOutstandingCents :one
+-- The CAST is load-bearing: COALESCE(SUM(...)) on its own types as interface{}
+-- and a bare SUM(...) as sql.NullFloat64. Neither is any use for cents.
+SELECT CAST(COALESCE(SUM(total_cents), 0) AS INTEGER) AS cents
+FROM invoices WHERE status = 'sent';
+
+-- name: SumPaidCents :one
+-- Every paid dollar, including invoices raised without a booking. The
+-- denominator for SumPaidBySource, which can only see invoices that have one.
+SELECT CAST(COALESCE(SUM(total_cents), 0) AS INTEGER) AS cents
+FROM invoices WHERE status = 'paid';
+
+-- name: SumPaidBySource :many
+-- Paid revenue grouped by where the booking came from. Counting distinct
+-- bookings, not invoices: a job split across a deposit and a final invoice is
+-- still one job.
+SELECT b.source,
+       COUNT(DISTINCT b.id) AS jobs,
+       CAST(COALESCE(SUM(i.total_cents), 0) AS INTEGER) AS cents
+FROM invoices i
+JOIN bookings b ON b.id = i.booking_id
+WHERE i.status = 'paid'
+GROUP BY b.source
+ORDER BY cents DESC;
+
+-- name: UpdateInvoiceDraft :exec
+UPDATE invoices SET due_at = ?, notes = ?, payment_link = ?, total_cents = ?, updated_at = datetime('now')
+WHERE id = ? AND status = 'draft';
+
+-- name: UpdateInvoicePaymentLink :exec
+UPDATE invoices SET payment_link = ?, updated_at = datetime('now')
+WHERE id = ? AND status IN ('draft', 'sent');
+
+-- name: MarkInvoiceSent :execrows
+UPDATE invoices SET status = 'sent', issued_at = ?, due_at = ?, updated_at = datetime('now')
+WHERE id = ? AND status = 'draft';
+
+-- name: MarkInvoicePaid :execrows
+UPDATE invoices SET status = 'paid', paid_at = ?, payment_method = ?, payment_ref = ?,
+    issued_at = CASE WHEN issued_at = '' THEN ? ELSE issued_at END, updated_at = datetime('now')
+WHERE id = ? AND status IN ('draft', 'sent');
+
+-- name: MarkInvoiceReviewAsked :exec
+UPDATE invoices SET review_asked_at = ?, updated_at = datetime('now')
+WHERE id = ?;
+
+-- name: VoidInvoice :execrows
+UPDATE invoices SET status = 'void', updated_at = datetime('now')
+WHERE id = ? AND status IN ('draft', 'sent');
+
+-- name: DeleteInvoiceItems :exec
+DELETE FROM invoice_items WHERE invoice_id = ?;
+
+-- name: InsertInvoiceItem :exec
+INSERT INTO invoice_items (invoice_id, description, qty, unit_cents, line_cents, sort_order)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: ListInvoiceItems :many
+SELECT id, invoice_id, description, qty, unit_cents, line_cents, sort_order
+FROM invoice_items WHERE invoice_id = ? ORDER BY sort_order, id;
+
+-- name: CountBookingsWithCalendarEvent :one
+SELECT COUNT(*) AS n FROM bookings WHERE gcal_event_id <> '';
+
+-- Ad clicks
+
+-- name: InsertAdClick :exec
+INSERT INTO ad_clicks (token, source, gclid, keyword, campaign, landing)
+VALUES (?, ?, ?, ?, ?, ?);
+
+-- name: LinkAdClick :execrows
+-- Claim-once: a click already spent on an earlier booking is never re-linked.
+UPDATE ad_clicks SET booking_id = ? WHERE token = ? AND booking_id = 0;
+
+-- name: GetAdClickByToken :one
+SELECT id, token, source, gclid, keyword, campaign, landing, booking_id, created_at
+FROM ad_clicks WHERE token = ?;
+
+-- name: GetAdClickByBooking :one
+SELECT id, token, source, gclid, keyword, campaign, landing, booking_id, created_at
+FROM ad_clicks WHERE booking_id = ? ORDER BY id LIMIT 1;
+
+-- name: CountAdClicksSince :one
+SELECT COUNT(*) AS n FROM ad_clicks WHERE created_at >= ?;
