@@ -27,11 +27,10 @@ var propertyTypes = []PropertyType{
 }
 
 const (
-	guardPrice     = 180 // AUD: gutter guard lifted, gutters cleaned underneath, guard refitted
-	downpipePrice  = 90  // AUD per blocked downpipe that needs jetting (agreed on site, never assumed)
-	planPct        = 12  // Fire-ready plan: % off each of the two cleans a year
-	neighbourOff   = 30  // AUD off each house when two or more on one street book the same day
-	referralCredit = 20  // AUD off the next clean for both the referrer and the new customer
+	downpipePrice  = 90 // AUD per blocked downpipe that needs jetting (agreed on site, never assumed)
+	planPct        = 12 // Fire-ready plan: % off each of the two cleans a year
+	neighbourOff   = 30 // AUD off each house when two or more on one street book the same day
+	referralCredit = 20 // AUD off the next clean for both the referrer and the new customer
 )
 
 // defaultPropertyType is the row the booking form starts on.
@@ -50,14 +49,11 @@ func findPropertyType(slug string) (*PropertyType, bool) {
 	return p, ok
 }
 
-// quoteDollars is the price of one clean: the base price, plus the guard
-// surcharge, less the plan discount, rounded to whole dollars. It is the number
-// the booking form shows and the booking records.
-func quoteDollars(p *PropertyType, guard, plan bool) int {
+// quoteDollars is the price of one clean: the base price, less the plan
+// discount, rounded to whole dollars. It is the number the booking form shows
+// and the booking records.
+func quoteDollars(p *PropertyType, plan bool) int {
 	price := p.Price
-	if guard {
-		price += guardPrice
-	}
 	if plan {
 		price = planPrice(price)
 	}
@@ -69,7 +65,7 @@ func planPrice(price int) int {
 	return int(math.Round(float64(price) * float64(100-planPct) / 100))
 }
 
-// PlanPrice is the per-clean plan price for this property (no guard).
+// PlanPrice is the per-clean plan price for this property.
 func (p *PropertyType) PlanPrice() int { return planPrice(p.Price) }
 
 // PlanYear is what two plan cleans cost over a year.
@@ -90,7 +86,6 @@ func priceRange() string {
 // pricingInfo is the price list as templates see it (.Site.Prices).
 type pricingInfo struct {
 	Types     []PropertyType
-	Guard     int
 	Downpipe  int
 	PlanPct   int
 	Neighbour int
@@ -101,7 +96,6 @@ type pricingInfo struct {
 func pricing() pricingInfo {
 	return pricingInfo{
 		Types:     propertyTypes,
-		Guard:     guardPrice,
 		Downpipe:  downpipePrice,
 		PlanPct:   planPct,
 		Neighbour: neighbourOff,

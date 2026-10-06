@@ -22,7 +22,7 @@ type bookingRow struct {
 	When         string // "Thu 20 Aug, 9:30 am" or ""
 	ServiceTitle string
 	Preview      string // first ~90 chars of the issue
-	Property     string // "Double-storey house, gutter guard fitted" — what was booked
+	Property     string // "Double-storey house, Fire-ready plan" — what was booked
 	Price        string // price shown when they booked, "" if none
 }
 
@@ -456,7 +456,7 @@ func handleAdminBookingFollowup(w http.ResponseWriter, r *http.Request) {
 type phoneBookingForm struct {
 	Name, Phone, Email, Suburb, Service, Issue string
 	PropertyType                               string // price-list row; "" = not known yet
-	Guard, Plan                                bool
+	Plan                                       bool
 	Notes                                      string // private admin notes, saved with the booking
 	Address                                    string // the visible autocomplete field
 	AddrStreet, AddrSuburb                     string // hidden structured parts, set only when a suggestion is picked
@@ -491,7 +491,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 		Address: trim("address"), AddrStreet: trim("addr_street"), AddrSuburb: trim("addr_suburb"),
 		AddrState: strings.ToUpper(trim("addr_state")), AddrPostcode: trim("addr_postcode"),
 		Source: trim("source"), Notes: trim("notes"),
-		PropertyType: trim("property"), Guard: r.FormValue("guard") == "1", Plan: r.FormValue("plan") == "1",
+		PropertyType: trim("property"), Plan: r.FormValue("plan") == "1",
 	}
 	if !db.ValidSource(f.Source) {
 		f.Source = db.SourcePhone
@@ -566,9 +566,9 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 		Source: f.Source, AdminNotes: f.Notes,
 	}
 	if pt, ok := findPropertyType(f.PropertyType); ok {
-		nb.PropertyType, nb.HasGuard, nb.OnPlan = pt.Slug, f.Guard, f.Plan
-		nb.QuoteCents = int64(quoteDollars(pt, f.Guard, f.Plan)) * 100
-		nb.DurationMin = jobMinutes(pt, f.Guard)
+		nb.PropertyType, nb.OnPlan = pt.Slug, f.Plan
+		nb.QuoteCents = int64(quoteDollars(pt, f.Plan)) * 100
+		nb.DurationMin = pt.Minutes
 	}
 	id, err := db.InsertBooking(nb)
 	if err != nil {

@@ -32,9 +32,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     gcal_event_id       TEXT  NOT NULL DEFAULT '',  -- Google Calendar event id; '' = no event pushed yet
     gcal_synced_at      TEXT  NOT NULL DEFAULT '',  -- UTC datetime of the last successful push; < updated_at = dirty
     source              TEXT  NOT NULL DEFAULT '',  -- where the booking came from: google-ads, phone, referral…
-    has_guard           INTEGER NOT NULL DEFAULT 0, -- 1 = gutter guard fitted (lift, clean, refit surcharge)
     on_plan             INTEGER NOT NULL DEFAULT 0, -- 1 = customer joined the Fire-ready plan (two cleans a year, plan price)
-    quote_cents         INTEGER NOT NULL DEFAULT 0  -- price shown when they booked (base + guard, less plan discount)
+    quote_cents         INTEGER NOT NULL DEFAULT 0  -- price shown when they booked (base, less plan discount)
 );
 
 CREATE INDEX IF NOT EXISTS idx_bookings_start_at ON bookings(start_at);

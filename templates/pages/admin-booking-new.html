@@ -76,7 +76,6 @@
                                         {{range $d.Types}}<option value="{{.Slug}}"{{if eq .Slug $f.PropertyType}} selected{{end}}>{{.Name}} — ${{.Price}}</option>{{end}}
                                     </select>
                                 </div>
-                                <label class="admin-check"><input type="checkbox" name="guard" value="1"{{if $f.Guard}} checked{{end}}> Gutter guard (+${{$.Site.Prices.Guard}})</label>
                                 <label class="admin-check"><input type="checkbox" name="plan" value="1"{{if $f.Plan}} checked{{end}}> Fire-ready plan (&minus;{{$.Site.Prices.PlanPct}}%)</label>
                             </div>
                             <div class="admin-field admin-field--wide">

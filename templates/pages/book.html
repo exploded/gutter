@@ -23,7 +23,7 @@
         <div class="container">
             <div class="book-layout">
                 <form method="POST" action="/book" class="book-form" id="book-form" novalidate
-                      data-guard="{{$p.Guard}}" data-plan-pct="{{$p.PlanPct}}">
+                      data-plan-pct="{{$p.PlanPct}}">
                     <input type="hidden" name="ts" value="{{.PageData.TS}}">
                     <div class="hp-field" aria-hidden="true">
                         <label for="website">Website</label>
@@ -54,10 +54,6 @@
                             {{with $e.property}}<span class="field-error">{{.}}</span>{{end}}
                         </fieldset>
                         <div class="property-extras">
-                            <label class="check-option">
-                                <input type="checkbox" name="guard" value="1"{{if $f.Guard}} checked{{end}}>
-                                <span>Gutter guard is fitted <span class="check-option-note">+${{$p.Guard}} — lifted, cleaned underneath, refitted</span></span>
-                            </label>
                             <label class="check-option">
                                 <input type="checkbox" name="plan" value="1"{{if $f.Plan}} checked{{end}}>
                                 <span>Put me on the Fire-ready plan <span class="check-option-note">{{$p.PlanPct}}% off this clean and the next; I'll remind you each spring and autumn</span></span>

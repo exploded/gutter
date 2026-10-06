@@ -85,7 +85,7 @@
                             {{template "csrf" $csrf}}
                             <input type="hidden" name="booking" value="{{$b.ID}}">
                             <button class="btn btn--primary btn--sm" type="submit">{{if $d.Invoices}}New invoice{{else}}Create invoice{{end}}</button>
-                            <span class="admin-muted">Prefilled from the price list (property, guard, plan); add any downpipe jetting on the next screen. Paid on the day? Create it, then “Mark paid”.</span>
+                            <span class="admin-muted">Prefilled from the price list (property, plan); add any downpipe jetting on the next screen. Paid on the day? Create it, then “Mark paid”.</span>
                         </form>
                         {{else}}
                         <p class="admin-muted">Link a customer (and un-cancel) to invoice.</p>

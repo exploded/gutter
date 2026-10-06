@@ -30,7 +30,7 @@ func TestTemplatesRender(t *testing.T) {
 		t.Fatal("no gutter-cleaning service")
 	}
 	booked := db.Booking{ID: 1, CustomerID: 9, Name: "B <b>x</b>", Phone: "1", Email: "b@x", Suburb: "Donvale", ServiceSlug: "gutter-cleaning",
-		PropertyType: "double", HasGuard: true, OnPlan: true, QuoteCents: 58900,
+		PropertyType: "double", OnPlan: true, QuoteCents: 43000,
 		Issue: "Gate code 1234", Status: "booked", StartAt: time.Date(2026, 8, 20, 9, 30, 0, 0, db.Melbourne), DurationMin: 60, CreatedAt: time.Now(), ParentBookingID: 1}
 	cust := &db.Customer{ID: 9, Name: "Ann", Email: "ann@x", Phone: "0400 000 000", Suburb: "Donvale", CreatedAt: time.Now()}
 	inv := sampleInvoiceView(db.InvoiceSent).Inv
@@ -44,7 +44,7 @@ func TestTemplatesRender(t *testing.T) {
 			Guides  []*Guide
 		}{svc, relatedServices(svc), guidesForService(svc.Slug)},
 		"book": bookPageData{Services: services, Types: propertyTypes,
-			Form:   bookForm{PropertyType: "double", Guard: true, Plan: true, Service: "fire-ready-plan"},
+			Form:   bookForm{PropertyType: "double", Plan: true, Service: "fire-ready-plan"},
 			Errors: map[string]string{"name": "x", "contact": "y", "property": "p", "address": "a", "issue": "i"}, TS: 1},
 		"book-plain":  newBookPage(bookForm{PropertyType: defaultPropertyType}, map[string]string{}),
 		"pricing":     nil,
@@ -79,7 +79,7 @@ func TestTemplatesRender(t *testing.T) {
 		"admin-booking-nocust": adminBookingData{B: &db.Booking{ID: 3, Name: "X", Status: "new"}, Row: newBookingRow(db.Booking{ID: 3}), Durations: durationChoices, StartValue: "2026-08-20T09:30"},
 		"admin-booking-new": adminBookingNewData{Flash: flash{OK: "x"},
 			Form: phoneBookingForm{Name: "Ann", Address: "1 Example Ct, Donvale VIC 3111", AddrStreet: "1 Example Ct", AddrSuburb: "Donvale", AddrState: "VIC", AddrPostcode: "3111",
-				PropertyType: "large", Guard: true, Plan: true, Source: db.SourcePhone},
+				PropertyType: "large", Plan: true, Source: db.SourcePhone},
 			Errors: map[string]string{"contact": "y", "address": "z"}, Services: services, Types: propertyTypes, Sources: db.BookingSources},
 		"admin-calendar": calendarData{WeekStart: time.Now(), WeekLabel: "w", Prev: "p", Next: "n", ThisWeek: "t", Hours: []int{7, 8},
 			SlotPx: 14, ColPx: 672, ForID: 1, ForName: "Ann", BusyOn: true, BusyErr: "google says no",
@@ -195,7 +195,7 @@ func TestServiceCatalogue(t *testing.T) {
 		}
 	}
 	// The booking form, llms.txt and the plan reminders link to these by slug.
-	for _, slug := range []string{"gutter-cleaning", "bushfire-preparation", "fire-ready-plan", "downpipe-unblocking", "gutter-guard-homes", "pre-sale-and-rentals"} {
+	for _, slug := range []string{"gutter-cleaning", "bushfire-preparation", "fire-ready-plan", "downpipe-unblocking", "pre-sale-and-rentals"} {
 		if !seen[slug] {
 			t.Errorf("service %q is missing from the catalogue", slug)
 		}

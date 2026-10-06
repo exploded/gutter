@@ -26,7 +26,7 @@
           "address": {"@type": "PostalAddress", "addressLocality": "Warrandyte", "addressRegion": "VIC", "postalCode": "3113", "addressCountry": "AU"},
           "geo": {"@type": "GeoCoordinates", "latitude": -37.75, "longitude": 145.22},
           "areaServed": [{{range $i, $s := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$s}}"}{{end}}],
-          "knowsAbout": ["Gutter cleaning", "Downpipe clearing", "Roof valley cleaning", "Gutter guard cleaning", "Bushfire preparation"],
+          "knowsAbout": ["Gutter cleaning", "Downpipe clearing", "Roof valley cleaning", "Bushfire preparation"],
           "paymentAccepted": "Visa, Mastercard, Amex, eftpos, Apple Pay, Google Pay",
           "openingHours": [{{range $i, $h := .Site.HoursLD}}{{if $i}}, {{end}}"{{$h}}"{{end}}],
           "founder": {"@type": "Person", "name": "{{.Site.Owner}}"},

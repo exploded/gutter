@@ -184,9 +184,6 @@ func bookingSummary(b *db.Booking) (property, price string) {
 	if p, ok := findPropertyType(b.PropertyType); ok {
 		property = p.Name
 	}
-	if b.HasGuard {
-		property += ", gutter guard fitted"
-	}
 	if b.OnPlan {
 		property += ", Fire-ready plan"
 	}

@@ -16,11 +16,11 @@ the shared mechanics in more depth.
 ## Structure
 
 - `cmd/server/main.go` — server, routes, Google sign-in for `/admin`, site config, trading hours
-- `cmd/server/pricing.go` — **the price list** (property types, gutter guard, downpipes, Fire-ready plan, neighbour and referral offers). Everything that shows or charges a price reads from here.
-- `cmd/server/services.go` — the six services and their copy
+- `cmd/server/pricing.go` — **the price list** (property types, downpipes, Fire-ready plan, neighbour and referral offers). Everything that shows or charges a price reads from here.
+- `cmd/server/services.go` — the five services and their copy
 - `cmd/server/suburbs.go` — the service area: one entry per suburb with a unique blurb → `/areas` and `/areas/{slug}`
 - `cmd/server/guides.go` — `/guides` articles
-- `cmd/server/pages.go` — public pages and the `/book` form (property, guard, plan, live price)
+- `cmd/server/pages.go` — public pages and the `/book` form (property, plan, live price)
 - `cmd/server/admin_bookings.go`, `admin_invoices.go` — admin bookings, calendar, invoices, customers
 - `cmd/server/gcal*.go` — Google Calendar sync; `scheduler.go` — reminders, digest, backups
 - `cmd/server/seo.go`, `llms.go` — robots, sitemap, JSON-LD helpers, `/llms.txt`, `/api/pricing`
@@ -49,19 +49,18 @@ Edit `cmd/server/pricing.go` and redeploy. Current list:
 | Single-storey house | $289 |
 | Large single storey or split level | $389 |
 | Double-storey house | $489 |
-| Gutter guard fitted | +$180 |
 | Blocked downpipe jetted (with the customer's OK) | $90 each |
 
 The Fire-ready plan takes 12% off each of two cleans a year. No GST is charged.
 
 ## Bookings → invoices
 
-1. **Booking** (`/book`): the customer picks a property type, gutter guard and
+1. **Booking** (`/book`): the customer picks a property type and the
    plan, sees the price, and submits. The booking stores the property, extras,
    the price shown, and a default duration from the price list.
 2. **Schedule** it on the booking page or the week calendar. The customer gets a
    confirmation with an `.ics` invite; it also lands in Vin's Google Calendar.
-3. **Done** → **Create invoice**: prefilled from the price list (clean, guard,
+3. **Done** → **Create invoice**: prefilled from the price list (clean,
    plan discount), so the total matches what the customer saw. Add downpipe
    jetting or the neighbour deal with the editor buttons.
 4. **Zeller**: there's no public Zeller API for payment links. Create a payment

@@ -142,7 +142,7 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		"name": {"Zoë O'Brien"}, "phone": {"0400 000 001"}, "email": {"Zoe@Example.test"},
 		"address": {"12 Sample St, Donvale VIC 3111"}, "addr_street": {"12 Sample St"},
 		"addr_suburb": {"Donvale"}, "addr_state": {"VIC"}, "addr_postcode": {"3111"},
-		"property": {"double"}, "guard": {"1"}, "plan": {"1"},
+		"property": {"double"}, "plan": {"1"},
 		"service": {"bushfire-preparation"}, "issue": {"Side gate code 1234. Friendly dog."},
 		"preferred_time": {"Tue morning"}, "ts": {itoa(time.Now().Unix() - 10)},
 	}, false)
@@ -175,10 +175,10 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		t.Fatalf("enquiry address not stored: %q / %q", b.Address, b.Suburb)
 	}
 	// The price-list choices are stored with the price the form showed
-	// ($489 + $180 guard, less 12% on the plan) and the job length (150 min
-	// for a double storey, plus 30 for the guard).
-	if b.ServiceSlug != "bushfire-preparation" || b.PropertyType != "double" || !b.HasGuard || !b.OnPlan ||
-		b.QuoteCents != 58900 || b.DurationMin != 180 || b.Status != db.BookingNew {
+	// ($489, less 12% on the plan) and the job length (150 min for a double
+	// storey).
+	if b.ServiceSlug != "bushfire-preparation" || b.PropertyType != "double" || !b.OnPlan ||
+		b.QuoteCents != 43000 || b.DurationMin != 150 || b.Status != db.BookingNew {
 		t.Fatalf("enquiry price-list fields: %+v", b)
 	}
 	// The new customer's blank address is filled from the enquiry.
@@ -252,8 +252,8 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	invPath := strings.SplitN(loc, "?", 2)[0]
 	invID := lastSeg(invPath)
 	page := get(invPath)
-	for _, want := range []string{"INV-1000", "Gutter clean — Double-storey house", "Gutter guard lifted, cleaned under and refitted",
-		"Fire-ready plan — 12% off", "$589.00", "+ Downpipe jetted ($90 each)", "+ Neighbour deal (&minus;$30)", "+ Seniors discount (&minus;10%)"} {
+	for _, want := range []string{"INV-1000", "Gutter clean — Double-storey house",
+		"Fire-ready plan — 12% off", "$430.00", "+ Downpipe jetted ($90 each)", "+ Neighbour deal (&minus;$30)", "+ Seniors discount (&minus;10%)"} {
 		if !strings.Contains(page, want) {
 			t.Fatalf("draft page missing %q:\n%s", want, page)
 		}
@@ -267,11 +267,11 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	}
 	// Edit: two downpipes jetted on the day and the neighbour deal (negative
 	// unit), paste link.
-	const editedTotal = 48900 + 18000 - 8000 + 2*9000 - 3000
+	const editedTotal = 48900 - 5900 + 2*9000 - 3000
 	post(invPath+"/items", url.Values{
-		"desc": {"Gutter clean — Double-storey house", "Gutter guard lifted, cleaned under and refitted", "Fire-ready plan — 12% off", "Downpipe jetted", "Neighbour deal", ""},
-		"qty":  {"1", "1", "1", "2", "1", "1"},
-		"unit": {"489", "180", "-80.00", "90", "-30.00", ""},
+		"desc": {"Gutter clean — Double-storey house", "Fire-ready plan — 12% off", "Downpipe jetted", "Neighbour deal", ""},
+		"qty":  {"1", "1", "2", "1", "1"},
+		"unit": {"489", "-59.00", "90", "-30.00", ""},
 		"due":  {"2026-09-01"}, "notes": {"Thanks!"}, "payment_link": {"https://pay.example/zeller/abc"},
 	})
 	inv, _ := db.GetInvoice(invID)
@@ -284,9 +284,9 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		t.Fatalf("discount line not rendered:\n%s", pg)
 	}
 	post(invPath+"/items", url.Values{
-		"desc": {"Gutter clean — Double-storey house", "Gutter guard lifted, cleaned under and refitted", "Fire-ready plan — 12% off", "Downpipe jetted", "Neighbour deal", ""},
-		"qty":  {"1", "1", "1", "2", "1", "1"},
-		"unit": {"489", "180", "-$80.00", "90", "-$30.00", ""},
+		"desc": {"Gutter clean — Double-storey house", "Fire-ready plan — 12% off", "Downpipe jetted", "Neighbour deal", ""},
+		"qty":  {"1", "1", "2", "1", "1"},
+		"unit": {"489", "-$59.00", "90", "-$30.00", ""},
 		"due":  {"2026-09-01"}, "notes": {"Thanks!"}, "payment_link": {"https://pay.example/zeller/abc"},
 	})
 	if inv, _ = db.GetInvoice(invID); inv.TotalCents != editedTotal {
@@ -308,7 +308,7 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		t.Fatal("sent invoice should not be editable")
 	}
 	pub := do("GET", "/invoice/"+inv.ViewToken, nil, false)
-	if pub.Code != 200 || !strings.Contains(pub.Body.String(), "INV-1000") || !strings.Contains(pub.Body.String(), "https://pay.example/zeller/abc") || !strings.Contains(pub.Body.String(), "$739.00") || !strings.Contains(pub.Body.String(), "-$30.00") {
+	if pub.Code != 200 || !strings.Contains(pub.Body.String(), "INV-1000") || !strings.Contains(pub.Body.String(), "https://pay.example/zeller/abc") || !strings.Contains(pub.Body.String(), "$580.00") || !strings.Contains(pub.Body.String(), "-$30.00") {
 		t.Fatalf("public invoice: %d\n%s", pub.Code, pub.Body.String())
 	}
 	if do("GET", "/invoice/"+strings.Repeat("b", 64), nil, false).Code != 404 || do("GET", "/invoice/short", nil, false).Code != 404 {
@@ -369,12 +369,12 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	fid := lastSeg(strings.SplitN(loc, "?", 2)[0])
 	fb, _ := db.GetBooking(fid)
 	if fb.CustomerID != b.CustomerID || fb.ParentBookingID != bid || fb.Status != db.BookingNew || !fb.StartAt.IsZero() ||
-		fb.PropertyType != "double" || !fb.HasGuard || !fb.OnPlan || fb.QuoteCents != 58900 || fb.Issue != "Autumn plan clean" {
+		fb.PropertyType != "double" || !fb.OnPlan || fb.QuoteCents != 43000 || fb.Issue != "Autumn plan clean" {
 		t.Fatalf("followup: %+v", fb)
 	}
 	loc = post("/admin/invoices/new", url.Values{"booking": {itoa(fid)}})
 	inv2, _ := db.GetInvoice(lastSeg(strings.SplitN(loc, "?", 2)[0]))
-	if inv2.Number != 1001 || inv2.TotalCents != 58900 {
+	if inv2.Number != 1001 || inv2.TotalCents != 43000 {
 		t.Fatalf("second invoice: number %d, total %d", inv2.Number, inv2.TotalCents)
 	}
 	post("/admin/invoices/"+itoa(inv2.ID)+"/void", nil)
@@ -423,21 +423,21 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	}
 	// A brand-new caller with a picked address creates a new customer with the
 	// address filled in; the booking carries the address, its suburb, and the
-	// price-list choices made on the call ($389 large + $180 guard, 150 min).
+	// price-list choices made on the call ($389 large, 120 min).
 	loc = post("/admin/bookings/new", url.Values{
 		"name": {"Rex Kramer"}, "phone": {"0400 000 099"},
 		"address": {"9 Sample St, Warranwood VIC 3134"}, "addr_street": {"9 Sample St"},
 		"addr_suburb": {"Warranwood"}, "addr_state": {"VIC"}, "addr_postcode": {"3134"},
-		"service": {"gutter-guard-homes"}, "property": {"large"}, "guard": {"1"},
+		"service": {"gutter-cleaning"}, "property": {"large"},
 		"issue": {"Gutters overflowing at the back"},
 		"notes": {"Dog in the yard; use the side gate."},
 	})
 	pid := lastSeg(strings.SplitN(loc, "?", 2)[0])
 	pb, _ := db.GetBooking(pid)
 	if pb == nil || pb.CustomerID == 0 || pb.CustomerID == b.CustomerID || pb.Status != db.BookingNew ||
-		pb.ServiceSlug != "gutter-guard-homes" || pb.Suburb != "Warranwood" ||
+		pb.ServiceSlug != "gutter-cleaning" || pb.Suburb != "Warranwood" ||
 		pb.Address != "9 Sample St, Warranwood VIC 3134" || !pb.StartAt.IsZero() ||
-		pb.PropertyType != "large" || !pb.HasGuard || pb.OnPlan || pb.QuoteCents != 56900 || pb.DurationMin != 150 ||
+		pb.PropertyType != "large" || pb.OnPlan || pb.QuoteCents != 38900 || pb.DurationMin != 120 ||
 		pb.Source != db.SourcePhone || pb.AdminNotes != "Dog in the yard; use the side gate." {
 		t.Fatalf("phone booking: %+v", pb)
 	}
@@ -446,12 +446,12 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	if rr := do("POST", ppath+"/issue", url.Values{"issue": {"  "}}, true); !strings.Contains(rr.Header().Get("Location"), "err=") {
 		t.Fatalf("empty issue should be rejected: %d %s", rr.Code, rr.Header().Get("Location"))
 	}
-	post(ppath+"/issue", url.Values{"issue": {"Guard is the old plastic type — brittle, refit with care"}})
+	post(ppath+"/issue", url.Values{"issue": {"Back gutter is over the pool — bag everything, nothing dropped"}})
 	pb, _ = db.GetBooking(pid)
-	if pb.Issue != "Guard is the old plastic type — brittle, refit with care" {
+	if pb.Issue != "Back gutter is over the pool — bag everything, nothing dropped" {
 		t.Fatalf("issue not updated: %+v", pb)
 	}
-	if page := get(ppath); !strings.Contains(page, "Guard is the old plastic type") {
+	if page := get(ppath); !strings.Contains(page, "Back gutter is over the pool") {
 		t.Fatal("booking page does not show the edited notes")
 	}
 	if pc, _ := db.GetCustomer(pb.CustomerID); pc.Address != "9 Sample St, Warranwood VIC 3134" || pc.Suburb != "Warranwood" {
@@ -462,10 +462,10 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	// property is dropped (no price, the default length), and the saved
 	// customer address is not overwritten.
 	loc = post("/admin/bookings/new", url.Values{"name": {"Zoë O'Brien"}, "phone": {"0400 000 001"}, "suburb": {"Donvale"},
-		"property": {"mansion"}, "guard": {"1"}})
+		"property": {"mansion"}, "plan": {"1"}})
 	pb, _ = db.GetBooking(lastSeg(strings.SplitN(loc, "?", 2)[0]))
 	if pb == nil || pb.CustomerID != b.CustomerID || pb.Issue != "Phone enquiry" || pb.Address != "" ||
-		pb.PropertyType != "" || pb.HasGuard || pb.QuoteCents != 0 || pb.DurationMin != 90 {
+		pb.PropertyType != "" || pb.OnPlan || pb.QuoteCents != 0 || pb.DurationMin != 90 {
 		t.Fatalf("repeat caller not linked: %+v", pb)
 	}
 	if pc, _ := db.GetCustomer(b.CustomerID); pc.Address != "1 Test St" {

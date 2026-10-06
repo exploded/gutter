@@ -104,15 +104,15 @@ func TestEventForBooking(t *testing.T) {
 	b := &db.Booking{
 		ID: 7, Name: "Ann", Phone: "0400 111 222", Email: "ann@example.test",
 		Suburb: "Donvale", Address: "12 Smith St, Donvale VIC 3111", ServiceSlug: "bushfire-preparation",
-		PropertyType: "double", HasGuard: true, OnPlan: true, QuoteCents: 58900,
+		PropertyType: "double", OnPlan: true, QuoteCents: 43000,
 		Issue: "Side gate code 1234", AdminNotes: "Bring the roof anchor",
 		Status: db.BookingBooked, DurationMin: 90,
 		StartAt: time.Date(2026, 8, 26, 10, 0, 0, 0, db.Melbourne),
 	}
 	ev := eventForBooking(b)
 
-	if ev.Summary != "Gutters: Ann — Double-storey house + guard" {
-		t.Errorf("summary = %q, want \"Gutters: Ann — Double-storey house + guard\"", ev.Summary)
+	if ev.Summary != "Gutters: Ann — Double-storey house" {
+		t.Errorf("summary = %q, want \"Gutters: Ann — Double-storey house\"", ev.Summary)
 	}
 	if ev.Source == nil || ev.Source.Title != businessName || ev.Source.URL != "https://example.test/admin/bookings/7" {
 		t.Errorf("source = %+v, want the business name and the booking link", ev.Source)
@@ -134,7 +134,7 @@ func TestEventForBooking(t *testing.T) {
 		t.Errorf("booking id property = %q, want 7", got)
 	}
 	for _, want := range []string{"0400 111 222", "ann@example.test", "Service: Fire-season gutter clean",
-		"Price: $589.00 (Fire-ready plan)", "Side gate code 1234", "Notes: Bring the roof anchor",
+		"Price: $430.00 (Fire-ready plan)", "Side gate code 1234", "Notes: Bring the roof anchor",
 		"https://example.test/admin/bookings/7"} {
 		if !strings.Contains(ev.Description, want) {
 			t.Errorf("description missing %q:\n%s", want, ev.Description)
@@ -143,7 +143,7 @@ func TestEventForBooking(t *testing.T) {
 
 	// A phone booking with no property picked yet, no price and no street
 	// address: a bare title, no price line, and the suburb as the location.
-	b.PropertyType, b.HasGuard, b.OnPlan, b.QuoteCents, b.Address = "", false, false, 0, ""
+	b.PropertyType, b.OnPlan, b.QuoteCents, b.Address = "", false, 0, ""
 	ev = eventForBooking(b)
 	if ev.Summary != "Gutters: Ann" || ev.Location != "Donvale" {
 		t.Errorf("bare booking: summary = %q, location = %q", ev.Summary, ev.Location)

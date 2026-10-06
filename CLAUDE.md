@@ -38,7 +38,7 @@ Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-h
 - `cmd/server/pricing.go` — **the price list**. Every price on the site, the
   booking form's live total, invoice prefill, llms.txt and `/api/pricing` read
   from here. Change prices here only.
-- `cmd/server/services.go` — the six services (copy + meta).
+- `cmd/server/services.go` — the five services (copy + meta).
 - `cmd/server/suburbs.go` — the service area (15 suburbs, unique blurbs; `TestSuburbs` rejects thin copy).
 - `cmd/server/guides.go` — `/guides` articles.
 - `cmd/server/pages.go` — public handlers incl. `/book`; `admin_*.go` — admin.
@@ -46,7 +46,9 @@ Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-h
 
 ## Business rules the code encodes (don't drift)
 - **No repairs.** Fixing or replacing gutters/downpipes is licensed plumbing work
-  in Victoria. Copy must never offer repairs or gutter guard installation.
+  in Victoria. Copy must never offer repairs.
+- **No gutter guard work.** Vin doesn't install it or clean around it, so the
+  site doesn't mention it at all: no service, add-on, guide or booking option.
 - **Make no claims we can't back up**: no "fully insured", years of experience,
   ratings or review counts until they're true.
 - No GST is charged (sole trader, under the threshold). Invoices must not say

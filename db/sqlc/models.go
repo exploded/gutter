@@ -41,7 +41,6 @@ type Booking struct {
 	GcalEventID      string `json:"gcal_event_id"`
 	GcalSyncedAt     string `json:"gcal_synced_at"`
 	Source           string `json:"source"`
-	HasGuard         int64  `json:"has_guard"`
 	OnPlan           int64  `json:"on_plan"`
 	QuoteCents       int64  `json:"quote_cents"`
 }

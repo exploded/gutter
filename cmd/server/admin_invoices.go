@@ -162,31 +162,27 @@ func handleAdminInvoiceNew(w http.ResponseWriter, r *http.Request) {
 
 // seedInvoiceItems prefills a new draft from the price list. kind comes from
 // the customer page's New invoice button (a property-type slug, or "blank")
-// and wins when set; otherwise it follows the booking — its property type,
-// gutter guard and plan discount. A draft with nothing to go on starts empty;
+// and wins when set; otherwise it follows the booking — its property type
+// and plan discount. A draft with nothing to go on starts empty;
 // handleAdminInvoice always offers blank rows to type into.
 func seedInvoiceItems(b *db.Booking, kind string) []db.InvoiceItem {
 	slug := kind
-	guard, plan := false, false
+	plan := false
 	if kind == "" && b != nil {
-		slug, guard, plan = b.PropertyType, b.HasGuard, b.OnPlan
+		slug, plan = b.PropertyType, b.OnPlan
 	}
 	p, ok := findPropertyType(slug)
 	if !ok {
 		return nil
 	}
-	return priceLines(p, guard, plan)
+	return priceLines(p, plan)
 }
 
 // priceLines itemises one clean exactly as quoteDollars prices it, so the
 // invoice total matches the price the customer saw when they booked.
-func priceLines(p *PropertyType, guard, plan bool) []db.InvoiceItem {
+func priceLines(p *PropertyType, plan bool) []db.InvoiceItem {
 	items := []db.InvoiceItem{{Description: "Gutter clean — " + p.Name, Qty: 1, UnitCents: int64(p.Price) * 100}}
 	full := p.Price
-	if guard {
-		items = append(items, db.InvoiceItem{Description: "Gutter guard lifted, cleaned under and refitted", Qty: 1, UnitCents: guardPrice * 100})
-		full += guardPrice
-	}
 	if plan {
 		items = append(items, db.InvoiceItem{
 			Description: fmt.Sprintf("Fire-ready plan — %d%% off", planPct),

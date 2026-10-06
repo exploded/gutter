@@ -45,7 +45,7 @@ func TestPriceList(t *testing.T) {
 		t.Errorf("priceRange() = %q", got)
 	}
 	pi := pricing()
-	if pi.Guard != 180 || pi.Downpipe != 90 || pi.PlanPct != 12 || pi.Neighbour != 30 || pi.Referral != 20 ||
+	if pi.Downpipe != 90 || pi.PlanPct != 12 || pi.Neighbour != 30 || pi.Referral != 20 ||
 		pi.Range != "$219–$489" || len(pi.Types) != len(propertyTypes) {
 		t.Errorf("pricing() = %+v", pi)
 	}
@@ -54,33 +54,17 @@ func TestPriceList(t *testing.T) {
 func TestQuoteDollars(t *testing.T) {
 	unit, single, double := propertyTypesBySlug["unit"], propertyTypesBySlug["single"], propertyTypesBySlug["double"]
 	for _, c := range []struct {
-		p           *PropertyType
-		guard, plan bool
-		want        int
+		p    *PropertyType
+		plan bool
+		want int
 	}{
-		{single, false, false, 289},
-		{single, true, false, 469}, // + $180 guard
-		{single, false, true, 254}, // 289 × 0.88 = 254.32
-		{single, true, true, 413},  // 469 × 0.88 = 412.72, rounded
-		{double, true, true, 589},  // 669 × 0.88 = 588.72, rounded
-		{double, false, true, 430}, // 489 × 0.88 = 430.32
-		{unit, false, true, 193},   // 219 × 0.88 = 192.72, rounded
+		{single, false, 289},
+		{single, true, 254}, // 289 × 0.88 = 254.32
+		{double, true, 430}, // 489 × 0.88 = 430.32
+		{unit, true, 193},   // 219 × 0.88 = 192.72, rounded
 	} {
-		if got := quoteDollars(c.p, c.guard, c.plan); got != c.want {
-			t.Errorf("quoteDollars(%s, guard=%v, plan=%v) = %d, want %d", c.p.Slug, c.guard, c.plan, got, c.want)
-		}
-	}
-}
-
-// TestJobMinutes: the booked length is the property's typical time, plus half
-// an hour when gutter guard has to come off and go back on.
-func TestJobMinutes(t *testing.T) {
-	for _, p := range propertyTypes {
-		if got := jobMinutes(&p, false); got != p.Minutes {
-			t.Errorf("%s: %d min, want %d", p.Slug, got, p.Minutes)
-		}
-		if got := jobMinutes(&p, true); got != p.Minutes+30 {
-			t.Errorf("%s with guard: %d min, want %d", p.Slug, got, p.Minutes+30)
+		if got := quoteDollars(c.p, c.plan); got != c.want {
+			t.Errorf("quoteDollars(%s, plan=%v) = %d, want %d", c.p.Slug, c.plan, got, c.want)
 		}
 	}
 }
@@ -89,35 +73,30 @@ func TestJobMinutes(t *testing.T) {
 // price the customer was shown, for every combination on the list.
 func TestSeedInvoiceItems(t *testing.T) {
 	for _, p := range propertyTypes {
-		for _, guard := range []bool{false, true} {
-			for _, plan := range []bool{false, true} {
-				b := &db.Booking{PropertyType: p.Slug, HasGuard: guard, OnPlan: plan}
-				items := seedInvoiceItems(b, "")
-				var total int64
-				for _, it := range items {
-					total += db.LineCents(it.Qty, it.UnitCents)
-				}
-				if want := int64(quoteDollars(&p, guard, plan)) * 100; total != want {
-					t.Errorf("%s guard=%v plan=%v: lines total %d, want %d: %+v", p.Slug, guard, plan, total, want, items)
-				}
-				wantLines := 1
-				if guard {
-					wantLines++
-				}
-				if plan {
-					wantLines++
-				}
-				if len(items) != wantLines || items[0].Description != "Gutter clean — "+p.Name {
-					t.Errorf("%s guard=%v plan=%v: lines %+v", p.Slug, guard, plan, items)
-				}
-				if plan && (items[len(items)-1].Description != "Fire-ready plan — 12% off" || items[len(items)-1].UnitCents >= 0) {
-					t.Errorf("%s guard=%v: plan line %+v, want a negative 12%% off line", p.Slug, guard, items[len(items)-1])
-				}
+		for _, plan := range []bool{false, true} {
+			b := &db.Booking{PropertyType: p.Slug, OnPlan: plan}
+			items := seedInvoiceItems(b, "")
+			var total int64
+			for _, it := range items {
+				total += db.LineCents(it.Qty, it.UnitCents)
+			}
+			if want := int64(quoteDollars(&p, plan)) * 100; total != want {
+				t.Errorf("%s plan=%v: lines total %d, want %d: %+v", p.Slug, plan, total, want, items)
+			}
+			wantLines := 1
+			if plan {
+				wantLines++
+			}
+			if len(items) != wantLines || items[0].Description != "Gutter clean — "+p.Name {
+				t.Errorf("%s plan=%v: lines %+v", p.Slug, plan, items)
+			}
+			if plan && (items[len(items)-1].Description != "Fire-ready plan — 12% off" || items[len(items)-1].UnitCents >= 0) {
+				t.Errorf("%s: plan line %+v, want a negative 12%% off line", p.Slug, items[len(items)-1])
 			}
 		}
 	}
 
-	booked := &db.Booking{PropertyType: "double", HasGuard: true, OnPlan: true}
+	booked := &db.Booking{PropertyType: "double", OnPlan: true}
 	// The customer page's kind wins over the booking, with no extras.
 	if items := seedInvoiceItems(booked, "unit"); len(items) != 1 || items[0].UnitCents != 21900 {
 		t.Errorf("kind=unit: %+v", items)
@@ -134,7 +113,7 @@ func TestSeedInvoiceItems(t *testing.T) {
 		{"blank kind", booked, "blank"},
 		{"unknown kind", nil, "software"},
 		{"no booking, no kind", nil, ""},
-		{"booking without a property", &db.Booking{HasGuard: true}, ""},
+		{"booking without a property", &db.Booking{OnPlan: true}, ""},
 		{"booking with a stale property", &db.Booking{PropertyType: "mansion"}, ""},
 	} {
 		if items := seedInvoiceItems(c.b, c.kind); items != nil {
@@ -146,8 +125,8 @@ func TestSeedInvoiceItems(t *testing.T) {
 // TestBookFormPrice: the booking page shows the price for the form's current
 // choices before any script runs, and nothing for an unknown property.
 func TestBookFormPrice(t *testing.T) {
-	if got := (bookForm{PropertyType: "large", Guard: true}).Price(); got != 569 {
-		t.Errorf("large + guard = %d, want 569", got)
+	if got := (bookForm{PropertyType: "large", Plan: true}).Price(); got != 342 {
+		t.Errorf("large on the plan = %d, want 342", got)
 	}
 	if got := (bookForm{PropertyType: "nope", Plan: true}).Price(); got != 0 {
 		t.Errorf("unknown property = %d, want 0", got)

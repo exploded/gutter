@@ -25,9 +25,9 @@ func TestLlmsTxt(t *testing.T) {
 	// Pricing facts, service area and agent guidance must all be present.
 	for _, want := range []string{
 		"by Vin", "$219", "$289", "$389", "$489",
-		"add $180", "$90 each", "12% off each", "$30 off each house", "Seniors Card holders: 20% off",
+		"$90 each", "12% off each", "$30 off each house", "Seniors Card holders: 20% off",
 		"Donvale", "Warrandyte", "me@example.test",
-		"no booking API", "service, property, guard (1), plan (1), issue, name, phone, email, preferred_time",
+		"no booking API", "service, property, plan (1), issue, name, phone, email, preferred_time",
 		"Property values: unit, single, large, double",
 		"Do NOT include an address",
 		"https://example.test/book?service=",
@@ -101,7 +101,7 @@ func TestAPIPricing(t *testing.T) {
 		t.Error("api/pricing missing CORS header")
 	}
 	// The field names are a public contract that agents quote from.
-	for _, key := range []string{`"currency"`, `"gst_included"`, `"property_types"`, `"plan_price"`, `"gutter_guard_add_on"`,
+	for _, key := range []string{`"currency"`, `"gst_included"`, `"property_types"`, `"plan_price"`,
 		`"downpipe_jetting_each"`, `"fire_ready_plan_discount_pct"`, `"neighbour_deal_off_each"`, `"seniors_discount_pct"`,
 		`"every_clean_includes"`, `"services"`, `"service_area_suburbs"`, `"book_url"`, `"book_prefill_params"`} {
 		if !strings.Contains(rr.Body.String(), key) {
@@ -115,7 +115,7 @@ func TestAPIPricing(t *testing.T) {
 	if p.Currency != "AUD" || p.GSTIncluded {
 		t.Errorf("currency/gst wrong: %+v", p)
 	}
-	if p.GuardAddOn != 180 || p.DownpipeEach != 90 || p.PlanPct != 12 || p.NeighbourOff != 30 || p.SeniorsPct != 20 {
+	if p.DownpipeEach != 90 || p.PlanPct != 12 || p.NeighbourOff != 30 || p.SeniorsPct != 20 {
 		t.Errorf("pricing numbers wrong: %+v", p)
 	}
 	if len(p.PropertyTypes) != len(propertyTypes) {
@@ -142,7 +142,7 @@ func TestAPIPricing(t *testing.T) {
 	if p.BookURL != "https://example.test/book" {
 		t.Errorf("book_url = %q", p.BookURL)
 	}
-	if strings.Join(p.BookParams, ",") != "service,property,guard,plan,issue,name,phone,email,preferred_time" {
+	if strings.Join(p.BookParams, ",") != "service,property,plan,issue,name,phone,email,preferred_time" {
 		t.Errorf("book_prefill_params = %v", p.BookParams)
 	}
 	for _, s := range p.Services {
@@ -156,15 +156,15 @@ func TestBookPrefill(t *testing.T) {
 	mux := seoTestSetup(t)
 
 	// Valid params are echoed into the form, and the price shown matches them:
-	// $489 double storey + $180 guard, less 12% on the plan = $589.
-	body := get(mux, "/book?service=bushfire-preparation&property=double&guard=1&plan=1&name=Jane&phone=0400000000"+
+	// $489 double storey, less 12% on the plan = $430.
+	body := get(mux, "/book?service=bushfire-preparation&property=double&plan=1&name=Jane&phone=0400000000"+
 		"&email=jane%40example.com&issue=Side+gate+code+1234&preferred_time=Tue+am").Body.String()
 	for _, want := range []string{
 		`value="Jane"`, `value="0400000000"`, `value="jane@example.com"`, `value="Tue am"`,
 		`value="bushfire-preparation" selected`,
 		`value="double" data-price="489" checked`,
-		`name="guard" value="1" checked`, `name="plan" value="1" checked`,
-		`id="price-total">$589<`,
+		`name="plan" value="1" checked`,
+		`id="price-total">$430<`,
 		`>Side gate code 1234</textarea>`,
 	} {
 		if !strings.Contains(body, want) {
@@ -180,16 +180,12 @@ func TestBookPrefill(t *testing.T) {
 		}
 	}
 	if strings.Contains(body, `value="1" checked`) {
-		t.Error("default form ticks guard or plan")
+		t.Error("default form ticks the plan")
 	}
 
-	// Two service links imply an extra: the plan page ticks the plan, the
-	// gutter guard page ticks the guard.
+	// The plan's service link ticks the plan.
 	if body = get(mux, "/book?service=fire-ready-plan").Body.String(); !strings.Contains(body, `name="plan" value="1" checked`) {
 		t.Error("service=fire-ready-plan should tick the plan")
-	}
-	if body = get(mux, "/book?service=gutter-guard-homes").Body.String(); !strings.Contains(body, `name="guard" value="1" checked`) {
-		t.Error("service=gutter-guard-homes should tick gutter guard")
 	}
 
 	// Unknown service slug is blanked — only the placeholder option is selected.

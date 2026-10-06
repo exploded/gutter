@@ -46,8 +46,11 @@ func Open(path string) error {
 	// statements (constant defaults only — SQLite ALTER can't use
 	// datetime('now')), and into schema.sql for fresh databases. They run before
 	// the schema so a CREATE INDEX on a new column succeeds; "duplicate column"
-	// errors on an up-to-date database are expected and ignored.
-	for _, stmt := range []string{} {
+	// (or "no such column" for a drop) errors on an up-to-date database are
+	// expected and ignored.
+	for _, stmt := range []string{
+		"ALTER TABLE bookings DROP COLUMN has_guard", // gutter guard is no longer offered
+	} {
 		conn.Exec(stmt)
 	}
 

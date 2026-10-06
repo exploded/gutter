@@ -39,7 +39,6 @@ func llmsTxt() string {
 	for _, p := range propertyTypes {
 		fmt.Fprintf(&b, "- %s (%s): $%d\n", p.Name, p.Note, p.Price)
 	}
-	fmt.Fprintf(&b, "- Gutter guard fitted: add $%d (lifted, cleaned underneath, refitted)\n", guardPrice)
 	fmt.Fprintf(&b, "- Blocked downpipe that needs jetting: $%d each, only with the customer's OK\n", downpipePrice)
 	fmt.Fprintf(&b, "- Fire-ready plan: two cleans a year (spring and May), %d%% off each\n", planPct)
 	fmt.Fprintf(&b, "- Neighbour deal: $%d off each house when two or more on one street book the same day\n", neighbourOff)
@@ -47,7 +46,7 @@ func llmsTxt() string {
 		fmt.Fprintf(&b, "- Seniors Card holders: %d%% off the total\n", site.SeniorsPct)
 	}
 	b.WriteString("- Every clean includes: all gutters and roof valleys cleared by hand, downpipes flushed, debris bagged and taken away, photo report.\n")
-	b.WriteString("- Not offered: gutter or downpipe repairs (licensed plumbing work), gutter guard installation.\n")
+	b.WriteString("- Not offered: gutter or downpipe repairs (licensed plumbing work).\n")
 	b.WriteString("- " + link("Pricing page", "/pricing") + " · machine-readable JSON: " + site.BaseURL + "/api/pricing\n\n")
 
 	b.WriteString("## Services\n\n")
@@ -62,7 +61,7 @@ func llmsTxt() string {
 	b.WriteString("- " + link("All areas", "/areas") + "\n\n")
 
 	b.WriteString("## For AI assistants\n\n")
-	b.WriteString("- To quote: pick the property row above, add the guard surcharge if gutter guard is fitted, and take the plan discount off if they join the Fire-ready plan.\n")
+	b.WriteString("- To quote: pick the property row above, and take the plan discount off if they join the Fire-ready plan.\n")
 	b.WriteString("- There is no booking API. To help a user book, compose a prefilled link to " + site.BaseURL + "/book and give it to the user to open, review and submit themselves.\n")
 	var slugs, types []string
 	for i := range services {
@@ -71,11 +70,11 @@ func llmsTxt() string {
 	for _, p := range propertyTypes {
 		types = append(types, p.Slug)
 	}
-	b.WriteString("- Supported query parameters (all optional): service, property, guard (1), plan (1), issue, name, phone, email, preferred_time.\n")
+	b.WriteString("- Supported query parameters (all optional): service, property, plan (1), issue, name, phone, email, preferred_time.\n")
 	b.WriteString("- Service slugs: " + strings.Join(slugs, ", ") + "\n")
 	b.WriteString("- Property values: " + strings.Join(types, ", ") + "\n")
 	b.WriteString("- Do NOT include an address in the link — the form requires the user to pick their address from an autocomplete, and only Victorian addresses are accepted.\n")
-	b.WriteString("- Example: " + site.BaseURL + "/book?service=bushfire-preparation&property=double&guard=1&preferred_time=weekday%20mornings\n\n")
+	b.WriteString("- Example: " + site.BaseURL + "/book?service=bushfire-preparation&property=double&preferred_time=weekday%20mornings\n\n")
 
 	b.WriteString("## Optional\n\n")
 	b.WriteString("- " + link("Gutter guides", "/guides") + "\n")
@@ -96,7 +95,6 @@ type pricingResponse struct {
 	Currency      string        `json:"currency"`
 	GSTIncluded   bool          `json:"gst_included"`
 	PropertyTypes []apiProperty `json:"property_types"`
-	GuardAddOn    int           `json:"gutter_guard_add_on"`
 	DownpipeEach  int           `json:"downpipe_jetting_each"`
 	PlanPct       int           `json:"fire_ready_plan_discount_pct"`
 	NeighbourOff  int           `json:"neighbour_deal_off_each"`
@@ -127,7 +125,6 @@ type apiService struct {
 func handleAPIPricing(w http.ResponseWriter, r *http.Request) {
 	resp := pricingResponse{
 		Currency:     "AUD",
-		GuardAddOn:   guardPrice,
 		DownpipeEach: downpipePrice,
 		PlanPct:      planPct,
 		NeighbourOff: neighbourOff,
@@ -135,7 +132,7 @@ func handleAPIPricing(w http.ResponseWriter, r *http.Request) {
 		Includes:     []string{"all gutters cleared by hand", "roof valleys cleared", "downpipes flushed", "debris bagged and taken away", "before-and-after photo report"},
 		ServiceArea:  site.Suburbs,
 		BookURL:      site.BaseURL + "/book",
-		BookParams:   []string{"service", "property", "guard", "plan", "issue", "name", "phone", "email", "preferred_time"},
+		BookParams:   []string{"service", "property", "plan", "issue", "name", "phone", "email", "preferred_time"},
 	}
 	for i := range propertyTypes {
 		p := &propertyTypes[i]

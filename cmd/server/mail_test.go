@@ -11,12 +11,12 @@ func TestMailTemplatesRender(t *testing.T) {
 	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
 	b := &db.Booking{Name: "Ann <b>Bold</b>", Phone: "0400 111 222", Email: "ann@example.test",
 		Suburb: "Donvale", Address: "12 Smith St, Donvale VIC 3111", ServiceSlug: "bushfire-preparation",
-		PropertyType: "double", HasGuard: true, OnPlan: true,
-		QuoteCents: int64(quoteDollars(propertyTypesBySlug["double"], true, true)) * 100,
+		PropertyType: "double", OnPlan: true,
+		QuoteCents: int64(quoteDollars(propertyTypesBySlug["double"], true)) * 100,
 		Issue:      "Side gate code 1234\nFriendly dog", PreferredTime: "Tomorrow arvo", IP: "1.2.3.4"}
-	// $489 + $180 guard, less 12% for the plan, rounded to whole dollars.
+	// $489 less 12% for the plan, rounded to whole dollars.
 	property, price := bookingSummary(b)
-	if property != "Double-storey house, gutter guard fitted, Fire-ready plan" || price != "$589.00" {
+	if property != "Double-storey house, Fire-ready plan" || price != "$430.00" {
 		t.Errorf("bookingSummary = %q, %q", property, price)
 	}
 	for _, name := range []string{"booking-admin", "booking-customer"} {
@@ -28,7 +28,7 @@ func TestMailTemplatesRender(t *testing.T) {
 		if strings.Contains(out, "<b>Bold</b>") {
 			t.Errorf("%s: user input not escaped", name)
 		}
-		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$589.00",
+		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$430.00",
 			"Fire-season gutter clean", "Up The Spout — Vin"} {
 			if !strings.Contains(out, want) {
 				t.Errorf("%s: missing %q:\n%s", name, want, out)

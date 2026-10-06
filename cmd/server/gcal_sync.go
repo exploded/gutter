@@ -46,9 +46,6 @@ func eventForBooking(b *db.Booking) *gcalEvent {
 	if p, ok := findPropertyType(b.PropertyType); ok {
 		title += " — " + p.Name
 	}
-	if b.HasGuard {
-		title += " + guard"
-	}
 
 	loc := strings.TrimSpace(b.Address)
 	if loc == "" {

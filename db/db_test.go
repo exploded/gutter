@@ -60,19 +60,19 @@ func TestCustomerLinkingAndBackfill(t *testing.T) {
 	// Insert + follow-up. The price-list choices round-trip, and a booking
 	// with no duration gets the schema default.
 	bid, err := InsertBooking(&Booking{Name: "New Person", Email: "new@example.com", CustomerID: id2,
-		PropertyType: "single", HasGuard: true, OnPlan: true, QuoteCents: 41300})
+		PropertyType: "single", OnPlan: true, QuoteCents: 25400})
 	if err != nil {
 		t.Fatal(err)
 	}
 	b, _ := GetBooking(bid)
-	if b.PropertyType != "single" || !b.HasGuard || !b.OnPlan || b.QuoteCents != 41300 || b.DurationMin != 90 {
+	if b.PropertyType != "single" || !b.OnPlan || b.QuoteCents != 25400 || b.DurationMin != 90 {
 		t.Fatalf("price-list fields not stored: %+v", b)
 	}
 	other, err := InsertBooking(&Booking{Name: "New Person", CustomerID: id2, PropertyType: "double", DurationMin: 150})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ob, _ := GetBooking(other); ob.DurationMin != 150 || ob.HasGuard || ob.OnPlan || ob.QuoteCents != 0 {
+	if ob, _ := GetBooking(other); ob.DurationMin != 150 || ob.OnPlan || ob.QuoteCents != 0 {
 		t.Fatalf("explicit duration / unset extras: %+v", ob)
 	}
 	start := time.Date(2026, 8, 20, 9, 30, 0, 0, Melbourne)
@@ -96,7 +96,7 @@ func TestCustomerLinkingAndBackfill(t *testing.T) {
 		t.Fatalf("followup: %+v", kids)
 	}
 	// The next plan clean carries the same property, extras, price and length.
-	if k := kids[0]; k.PropertyType != "single" || !k.HasGuard || !k.OnPlan || k.QuoteCents != 41300 ||
+	if k := kids[0]; k.PropertyType != "single" || !k.OnPlan || k.QuoteCents != 25400 ||
 		k.DurationMin != 45 || !k.StartAt.IsZero() || k.Issue != "Autumn plan clean" {
 		t.Fatalf("followup did not inherit the booking: %+v", k)
 	}

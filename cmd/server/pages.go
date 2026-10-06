@@ -184,7 +184,6 @@ type bookForm struct {
 	AddrPostcode  string
 	Service       string
 	PropertyType  string // price-list row slug
-	Guard         bool   // gutter guard fitted
 	Plan          bool   // join the Fire-ready plan
 	Issue         string // optional notes: access, dogs, solar panels
 	PreferredTime string
@@ -197,7 +196,7 @@ func (f bookForm) Price() int {
 	if !ok {
 		return 0
 	}
-	return quoteDollars(p, f.Guard, f.Plan)
+	return quoteDollars(p, f.Plan)
 }
 
 type bookPageData struct {
@@ -232,7 +231,6 @@ func handleBookForm(w http.ResponseWriter, r *http.Request) {
 		Email:         pre("email", 120),
 		Service:       q.Get("service"),
 		PropertyType:  q.Get("property"),
-		Guard:         q.Get("guard") == "1",
 		Plan:          q.Get("plan") == "1" || q.Get("service") == "fire-ready-plan",
 		Issue:         pre("issue", 2000),
 		PreferredTime: pre("preferred_time", 200),
@@ -242,9 +240,6 @@ func handleBookForm(w http.ResponseWriter, r *http.Request) {
 	}
 	if _, ok := findPropertyType(f.PropertyType); !ok {
 		f.PropertyType = defaultPropertyType
-	}
-	if q.Get("service") == "gutter-guard-homes" {
-		f.Guard = true
 	}
 	render(w, r, "book", newBookPage(f, map[string]string{}))
 }
@@ -312,7 +307,6 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		AddrPostcode:  trim("addr_postcode"),
 		Service:       trim("service"),
 		PropertyType:  trim("property"),
-		Guard:         r.FormValue("guard") == "1",
 		Plan:          r.FormValue("plan") == "1",
 		Issue:         trim("issue"),
 		PreferredTime: trim("preferred_time"),
@@ -401,10 +395,9 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		Address:       fullAddress,
 		ServiceSlug:   f.Service,
 		PropertyType:  pt.Slug,
-		HasGuard:      f.Guard,
 		OnPlan:        f.Plan,
-		QuoteCents:    int64(quoteDollars(pt, f.Guard, f.Plan)) * 100,
-		DurationMin:   jobMinutes(pt, f.Guard),
+		QuoteCents:    int64(quoteDollars(pt, f.Plan)) * 100,
+		DurationMin:   pt.Minutes,
 		Issue:         f.Issue,
 		PreferredTime: f.PreferredTime,
 		IP:            ip,
@@ -422,17 +415,8 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 			log.Printf("booking: mark suspicious #%d: %v", id, err)
 		}
 	}
-	log.Printf("booking #%d from %s (%s / %s) service=%s property=%s guard=%v plan=%v suspicious=%v",
-		id, f.Name, f.Phone, f.Email, f.Service, pt.Slug, f.Guard, f.Plan, suspicious)
+	log.Printf("booking #%d from %s (%s / %s) service=%s property=%s plan=%v suspicious=%v",
+		id, f.Name, f.Phone, f.Email, f.Service, pt.Slug, f.Plan, suspicious)
 	notifyBooking(id, b, suspicious)
 	http.Redirect(w, r, "/book/thanks", http.StatusSeeOther)
-}
-
-// jobMinutes is the default booking length: the property's typical time on
-// site, plus half an hour when gutter guard has to come off and go back on.
-func jobMinutes(p *PropertyType, guard bool) int {
-	if guard {
-		return p.Minutes + 30
-	}
-	return p.Minutes
 }

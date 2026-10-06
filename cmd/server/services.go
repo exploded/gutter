@@ -21,7 +21,7 @@ type Service struct {
 // URL returns the canonical path for the service page.
 func (s *Service) URL() string { return "/services/" + s.Slug }
 
-// Number returns the zero-padded position of the service in the catalogue ("01".."06").
+// Number returns the zero-padded position of the service in the catalogue ("01".."05").
 func (s *Service) Number() string {
 	for i := range services {
 		if services[i].Slug == s.Slug {
@@ -110,7 +110,7 @@ var services = []Service{
 			"You want a dated record of the work for your insurer",
 		},
 		PriceNote: "Same fixed prices as a standard clean. Book early: October to December is the busiest time of the year.",
-		Related:   []string{"fire-ready-plan", "gutter-cleaning", "gutter-guard-homes"},
+		Related:   []string{"fire-ready-plan", "gutter-cleaning", "downpipe-unblocking"},
 		MetaTitle: "Bushfire Season Gutter Cleaning — Melbourne's North-East | Up The Spout",
 		MetaDesc:  "Get your gutters fire-ready before the Fire Danger Period. Dated photo report for council notices and insurers. Fixed prices, book online.",
 	},
@@ -150,29 +150,9 @@ var services = []Service{
 			"A gurgling downpipe, or water pooling at its base",
 		},
 		PriceNote: fmt.Sprintf("Flushing is included in every clean. A downpipe that needs jetting is $%d, and only with your OK.", downpipePrice),
-		Related:   []string{"gutter-cleaning", "gutter-guard-homes"},
+		Related:   []string{"gutter-cleaning", "bushfire-preparation"},
 		MetaTitle: "Blocked Downpipe Clearing — Melbourne's North-East | Up The Spout",
 		MetaDesc:  "Downpipes flushed on every gutter clean; blocked ones jetted with your OK. Fixed prices across Melbourne's north-east.",
-	},
-	{
-		Slug:   "gutter-guard-homes",
-		Title:  "Gutters with gutter guard",
-		Kicker: "Gutter guard",
-		Short:  "Guard keeps the big leaves out, not the fine stuff. I lift it, clean underneath, check the mesh, and refit it.",
-		Intro:  "Gutter guard helps, but it isn't set-and-forget. Seeds, fine leaf litter and grit wash through the mesh and settle underneath, and leaves mat on top where embers can catch.",
-		Body: []string{
-			"I lift the guard section by section, clean the gutter underneath, brush the mesh off and refit it the way it came off. If any of it is damaged or loose, I'll photograph it for you.",
-			"I don't install gutter guard at the moment. If you're choosing some for a bushfire area, the CFA and your local council have guidance on non-combustible, ember-resistant mesh.",
-		},
-		Problems: []string{
-			"Leaves are matted on top of the mesh",
-			"Gutters overflow even though the guard is on",
-			"It's been more than a year since anyone looked underneath",
-		},
-		PriceNote: fmt.Sprintf("Add $%d to the clean when gutter guard is fitted.", guardPrice),
-		Related:   []string{"gutter-cleaning", "bushfire-preparation"},
-		MetaTitle: "Gutter Guard Cleaning — Melbourne's North-East | Up The Spout",
-		MetaDesc:  "Gutter guard lifted, gutters cleaned underneath, mesh checked and refitted. Fixed price add-on. Across Melbourne's north-east.",
 	},
 	{
 		Slug:   "pre-sale-and-rentals",

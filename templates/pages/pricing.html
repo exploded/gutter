@@ -23,8 +23,7 @@
           "areaServed": [{{range $i, $n := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$n}}"}{{end}}],
           "offers": [
             {{range $i, $t := .Site.Prices.Types}}{{if $i}},
-            {{end}}{"@type": "Offer", "priceCurrency": "AUD", "price": "{{$t.Price}}", "name": "{{$t.Name}}", "description": "{{$t.Note}}. Full clean, everything included."}{{end}},
-            {"@type": "Offer", "priceCurrency": "AUD", "price": "{{.Site.Prices.Guard}}", "name": "Gutter guard add-on", "description": "Gutter guard lifted, gutters cleaned underneath, guard refitted."}
+            {{end}}{"@type": "Offer", "priceCurrency": "AUD", "price": "{{$t.Price}}", "name": "{{$t.Name}}", "description": "{{$t.Note}}. Full clean, everything included."}{{end}}
           ]
         },
         {
@@ -73,7 +72,7 @@
         <div class="container">
             <div class="section-label">Pricing</div>
             <h1 class="section-title">What it costs.</h1>
-            <p class="page-header-intro">Most gutter cleaners won't give you a price until they've seen the house. Mine are fixed and published here: pick your type of house, add guard if you have it, and that's the price.</p>
+            <p class="page-header-intro">Most gutter cleaners won't give you a price until they've seen the house. Mine are fixed and published here: pick your type of house, and that's the price.</p>
         </div>
     </div>
 
@@ -125,7 +124,7 @@
             <div class="faq-list reveal">
                 <details class="faq-item"><summary>Is there a call-out fee?</summary><p>No. The price for your type of house is the whole price, anywhere in the service area.</p></details>
                 <details class="faq-item"><summary>What if a downpipe is blocked?</summary><p>Most clear when they're flushed, which is included. If one is packed solid and needs a jetter, it's ${{$p.Downpipe}} — and only after you say yes.</p></details>
-                <details class="faq-item"><summary>What isn't included?</summary><p>Repairs. Fixing or replacing gutters and downpipes is licensed plumbing work in Victoria, so if I find a problem I'll photograph it and tell you. I also don't install gutter guard at the moment.</p></details>
+                <details class="faq-item"><summary>What isn't included?</summary><p>Repairs. Fixing or replacing gutters and downpipes is licensed plumbing work in Victoria, so if I find a problem I'll photograph it and tell you.</p></details>
                 <details class="faq-item"><summary>Do you charge GST?</summary><p>No GST is charged — I'm not registered for GST. The price shown is the total.</p></details>
                 <details class="faq-item"><summary>Do I need to be home?</summary><p>No, as long as I can get to the side of the house. Tell me about locked gates, dogs or solar panels when you book.</p></details>
                 <details class="faq-item"><summary>What about bad weather or fire danger days?</summary><p>I don't work on roofs in rain, high wind, or on Extreme and Catastrophic fire danger days. If the weather turns, I'll move you to the next good day.</p></details>

@@ -51,7 +51,6 @@ type Booking struct {
 	GCalEventID     string    // Google Calendar event id; empty until pushed
 	GCalSyncedAt    time.Time // UTC; zero until the first successful push
 	Source          string    // where it came from: google-ads, phone, referral…
-	HasGuard        bool      // gutter guard fitted, so the guard surcharge applies
 	OnPlan          bool      // joined the Fire-ready plan (two cleans a year at the plan price)
 	QuoteCents      int64     // price shown when they booked; 0 = no price given (admin-created)
 }
@@ -73,7 +72,7 @@ func sqlcBooking(r sqlc.Booking) Booking {
 		CreatedAt: parseUTC(r.CreatedAt), UpdatedAt: parseUTC(r.UpdatedAt),
 		ReminderSentAt: parseUTC(r.ReminderSentAt), AdminAlertAt: parseUTC(r.AdminAlertSentAt),
 		GCalEventID: r.GcalEventID, GCalSyncedAt: parseUTC(r.GcalSyncedAt), Source: r.Source,
-		HasGuard: r.HasGuard != 0, OnPlan: r.OnPlan != 0, QuoteCents: r.QuoteCents,
+		OnPlan: r.OnPlan != 0, QuoteCents: r.QuoteCents,
 	}
 }
 
@@ -95,7 +94,7 @@ func InsertBooking(b *Booking) (int64, error) {
 		Name: b.Name, Phone: b.Phone, Email: b.Email, Suburb: b.Suburb, Address: b.Address,
 		ServiceSlug: b.ServiceSlug, PropertyType: b.PropertyType, Issue: b.Issue, PreferredTime: b.PreferredTime,
 		Ip: b.IP, CustomerID: b.CustomerID, Source: b.Source, AdminNotes: b.AdminNotes,
-		HasGuard: boolInt(b.HasGuard), OnPlan: boolInt(b.OnPlan), QuoteCents: b.QuoteCents,
+		OnPlan: boolInt(b.OnPlan), QuoteCents: b.QuoteCents,
 		DurationMin: int64(durationOr(b.DurationMin)),
 	})
 }
@@ -109,7 +108,7 @@ func CreateFollowup(parent *Booking, issue string) (int64, error) {
 		Name: parent.Name, Phone: parent.Phone, Email: parent.Email, Suburb: parent.Suburb,
 		Address: parent.Address, ServiceSlug: parent.ServiceSlug, PropertyType: parent.PropertyType, Issue: issue,
 		CustomerID: parent.CustomerID, ParentBookingID: parent.ID, Source: parent.Source,
-		HasGuard: boolInt(parent.HasGuard), OnPlan: boolInt(parent.OnPlan), QuoteCents: parent.QuoteCents,
+		OnPlan: boolInt(parent.OnPlan), QuoteCents: parent.QuoteCents,
 		DurationMin: int64(durationOr(parent.DurationMin)),
 	})
 }
