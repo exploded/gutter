@@ -1,11 +1,11 @@
-// Command bizcard renders the Warrandyte Gutters business card as a
+// Command bizcard renders the Up The Spout business card as a
 // print-ready PDF for Officeworks, and exports the logo lockups.
 //
 // The card follows the Officeworks spec: 90 × 55 mm trim with 5 mm bleed on
 // every side (so each PDF page is 100 × 65 mm), text and logos at least 5 mm
 // inside the trim, no crop marks. Page 1 is the front, page 2 the back.
 //
-//	go run ./tools/bizcard -name "Vin …" -phone "04xx xxx xxx" [-title Owner] [-email …] [-web warrandytegutters.com.au] [-abn "…"] [-out tools/brand/out]
+//	go run ./tools/bizcard -name "Vin …" -phone "04xx xxx xxx" [-title Owner] [-email …] [-web upthespout.com.au] [-abn "…"] [-out tools/brand/out]
 //	go run ./tools/bizcard -proof    # design review: placeholders allowed, every side stamped PROOF
 //	go run ./tools/bizcard -logos    # logo-lockup.png, logo-lockup-dark.png, logo-mark-1024.png, logo-lockup.pdf
 //
@@ -44,9 +44,9 @@ const (
 // Fixed card copy. Keep it to what the business can back up: no "fully
 // insured", no "since 20xx", no ratings.
 const (
-	tagline  = "Gutter cleaning · Warrandyte & surrounds"
+	tagline  = "I go up the ladder, so you don't have to"
 	services = "Gutters · Downpipes · Valleys · Photo report"
-	area     = "Warrandyte · Park Orchards · Wonga Park · Donvale · Eltham"
+	area     = "Melbourne's north-east · Fixed prices · Book online"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 	flag.StringVar(&c.Phone, "phone", "", "phone number, as it should be printed (required unless -proof)")
 	flag.StringVar(&c.Title, "title", "Owner", "role under the name; empty to omit")
 	flag.StringVar(&c.Email, "email", "", "email address (optional)")
-	flag.StringVar(&c.Web, "web", "warrandytegutters.com.au", "website domain; the QR code points at https://<web>/book")
+	flag.StringVar(&c.Web, "web", "upthespout.com.au", "website domain; the QR code points at https://<web>/book")
 	flag.StringVar(&c.ABN, "abn", "", "ABN, printed small on the back (optional)")
 	out := flag.String("out", "tools/brand/out", "output directory")
 	proof := flag.Bool("proof", false, "design-review copy: allow empty fields and stamp PROOF across both sides")
@@ -106,7 +106,7 @@ type assets struct {
 }
 
 type fontURLs struct {
-	Fraunces, Sans400, Sans500, Sans700 template.URL
+	Display, Sans400, Sans500, Sans800 template.URL
 }
 
 func loadAssets() (assets, error) {
@@ -123,16 +123,16 @@ func loadAssets() (assets, error) {
 	}
 	var a assets
 	var err error
-	if a.Fonts.Fraunces, err = font("Fraunces-SemiBold.ttf"); err != nil {
+	if a.Fonts.Display, err = font("LilitaOne-Regular.ttf"); err != nil {
 		return a, err
 	}
-	if a.Fonts.Sans400, err = font("DMSans-Regular.ttf"); err != nil {
+	if a.Fonts.Sans400, err = font("Figtree-Regular.ttf"); err != nil {
 		return a, err
 	}
-	if a.Fonts.Sans500, err = font("DMSans-Medium.ttf"); err != nil {
+	if a.Fonts.Sans500, err = font("Figtree-Medium.ttf"); err != nil {
 		return a, err
 	}
-	if a.Fonts.Sans700, err = font("DMSans-Bold.ttf"); err != nil {
+	if a.Fonts.Sans800, err = font("Figtree-ExtraBold.ttf"); err != nil {
 		return a, err
 	}
 	svg, err := os.ReadFile(markPath)

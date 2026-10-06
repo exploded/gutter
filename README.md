@@ -1,7 +1,7 @@
-# Warrandyte Gutters
+# Up The Spout
 
-Website and booking system for **Warrandyte Gutters**: residential gutter
-cleaning around Warrandyte VIC 3113, run by Vin. Customers see fixed prices, book
+Website and booking system for **Up The Spout**: residential gutter
+cleaning across Melbourne's north-east, run by Vin from Warrandyte VIC 3113. Customers see fixed prices, book
 online, and get a photo report with every clean. Vin runs bookings, his Google
 Calendar, invoices, receipts and review requests from `/admin`.
 
@@ -11,7 +11,7 @@ the shared mechanics in more depth.
 
 - Repo: `exploded/gutter`, Go module `gutter`
 - Staging: https://gutter.mchugh.au (port 8997, systemd unit `gutter`)
-- Production domain (once registered): https://warrandytegutters.com.au
+- Production domain (once registered): https://upthespout.com.au
 
 ## Structure
 
@@ -91,12 +91,12 @@ The scheduler (on when `PROD` is set) sends the day-before reminder, the
 
 ## Domain cutover (to do)
 
-When `warrandytegutters.com.au` is registered and on Cloudflare:
+When `upthespout.com.au` is registered and on Cloudflare:
 
 1. DNS: `A`/`AAAA` for `@` and `www` → the Linode box, DNS-only.
-2. Caddy: a `warrandytegutters.com.au` block proxying to port 8997, with
+2. Caddy: a `upthespout.com.au` block proxying to port 8997, with
    `www.` and `gutter.mchugh.au` redirecting to it.
-3. `.env`: `BASE_URL=https://warrandytegutters.com.au`; restart.
+3. `.env`: `BASE_URL=https://upthespout.com.au`; restart.
 4. Google Cloud: add the new redirect URIs.
 5. Search Console: add the property and submit `/sitemap.xml`.
 

@@ -39,7 +39,7 @@ func sampleInvoiceView(status string) *invoiceView {
 
 func TestBillingMailTemplates(t *testing.T) {
 	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
-		ABN: "12 345 678 901", BankName: "Warrandyte Gutters", BankBSB: "000-000", BankAcct: "12345678"}
+		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678"}
 	b := &db.Booking{ID: 3, Name: "Ann <b>Bold</b>", Email: "ann@example.test", Suburb: "Donvale", ServiceSlug: "fire-ready-plan",
 		PropertyType: "single", OnPlan: true, Issue: "Spring plan clean", StartAt: time.Date(2026, 8, 20, 9, 30, 0, 0, db.Melbourne),
 		DurationMin: 45, ParentBookingID: 1}
@@ -103,12 +103,12 @@ func TestBillingMailTemplates(t *testing.T) {
 	// ICS is well-formed and UTC, and carries the business's own name and domain.
 	ics := bookingICS(b, "Fire-ready plan")
 	for _, want := range []string{"BEGIN:VEVENT", "DTSTART:20260819T233000Z", "DTEND:20260820T001500Z",
-		"UID:booking-3@warrandytegutters.com.au", "SUMMARY:Warrandyte Gutters — Fire-ready plan"} {
+		"UID:booking-3@upthespout.com.au", "SUMMARY:Up The Spout — Fire-ready plan"} {
 		if !strings.Contains(ics, want) {
 			t.Errorf("ics missing %q:\n%s", want, ics)
 		}
 	}
-	if ics := bookingICS(b, ""); !strings.Contains(ics, "SUMMARY:Warrandyte Gutters — gutter clean") {
+	if ics := bookingICS(b, ""); !strings.Contains(ics, "SUMMARY:Up The Spout — gutter clean") {
 		t.Errorf("ics without a service:\n%s", ics)
 	}
 	// nil mailer: sends are no-ops that succeed.
@@ -130,7 +130,7 @@ func TestBillingMailTemplates(t *testing.T) {
 
 func TestInvoicePDF(t *testing.T) {
 	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
-		ABN: "12 345 678 901", BankName: "Warrandyte Gutters", BankBSB: "000-000", BankAcct: "12345678"}
+		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678"}
 	for _, status := range []string{db.InvoiceSent, db.InvoicePaid, db.InvoiceVoid} {
 		out, err := invoicePDF(sampleInvoiceView(status))
 		if err != nil {

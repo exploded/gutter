@@ -46,7 +46,7 @@ func invoicePDF(v *invoiceView) ([]byte, error) {
 	pdf.CellFormat(100, 7, strings.ToUpper(site.Name), "", 1, "L", false, 0, "")
 	pdf.SetFont("Helvetica", "", 9)
 	pdf.SetTextColor(90, 90, 90)
-	pdf.CellFormat(100, 4.5, site.Owner+" - gutter cleaning, Warrandyte VIC", "", 1, "L", false, 0, "")
+	pdf.CellFormat(100, 4.5, site.Owner+" - gutter cleaning, Melbourne's north-east", "", 1, "L", false, 0, "")
 	if site.ABN != "" {
 		pdf.CellFormat(100, 4.5, "ABN "+site.ABN, "", 1, "L", false, 0, "")
 	}

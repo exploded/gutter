@@ -4,7 +4,9 @@ In priority order. `[ ]` to do · ✅ done.
 
 ## Before launch (week of 12 October 2026)
 
-- [ ] Vin confirms the name; register the business name, then `warrandytegutters.com.au` and `.au`
+- [ ] ABN for Up The Spout (approved; number due by 8 October 2026) → `ABN` in `.env`
+- [ ] Check IP Australia trade marks (class 37) for "Up The Spout"
+- [ ] Register "Up The Spout" as a business name with ASIC (an ABN doesn't register the name), then `upthespout.com.au` and `.au`
 - [ ] Domain cutover (README → Domain cutover), SES setup, `CONTACT_EMAIL`
 - [ ] Fill `.env`: `PHONE`, `ABN`, `ADMIN_EMAIL` (Vin's Gmail first), `MAPPIFY_API_KEY`, Google OAuth
 - [ ] Confirm trading hours with Vin (`openHours` in main.go) — must match the Business Profile

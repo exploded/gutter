@@ -1,17 +1,18 @@
 Fonts in this folder
 ====================
 
-Both families come from Google Fonts (fonts.google.com) and are licensed under
-the SIL Open Font License, Version 1.1, reproduced in full below.
+Both families are licensed under the SIL Open Font License, Version 1.1,
+reproduced in full below.
 
-Fraunces-SemiBold.ttf (the static "Fraunces 72pt SemiBold" instance)
-  Copyright 2020 The Fraunces Project Authors (github.com/undercasetype/Fraunces)
+LilitaOne-Regular.ttf (from Google Fonts, github.com/google/fonts)
+  Copyright 2011 Juan Montoreano (juan@remolacha.biz), with Reserved Font Name "Lilita"
 
-DMSans-Regular.ttf, DMSans-Medium.ttf, DMSans-Bold.ttf
-  Copyright 2014 The DM Sans Project Authors (https://github.com/googlefonts/dm-fonts)
+Figtree-Regular.ttf, Figtree-Medium.ttf, Figtree-ExtraBold.ttf
+  Copyright 2022 The Figtree Project Authors (https://github.com/erikdkennedy/figtree)
 
-The variable web fonts in static/fonts (fraunces.woff2, dm-sans.woff2) are the
-same families under the same licence.
+The web fonts in static/fonts (lilita-one.woff2, figtree.woff2,
+figtree-italic.woff2) are the same families under the same licence, latin
+subset from Google Fonts.
 
 -----------------------------------------------------------
 SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007

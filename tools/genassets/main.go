@@ -11,8 +11,8 @@
 // It's pure Go: the mark is parsed from the SVG and rasterised with
 // golang.org/x/image/vector, so the icons can't drift from the SVG, and text
 // is set with golang.org/x/image/font/opentype plus the fonts' GPOS pair
-// kerning (neither font has an old-style kern table, and Fraunces kerns "Wa"
-// by -0.054 em, which shows at display sizes).
+// kerning (neither font has an old-style kern table, and display sizes show
+// the difference).
 package main
 
 import (
@@ -42,23 +42,25 @@ import (
 	"golang.org/x/image/vector"
 )
 
-// Palette — the brand spec.
+// Palette — the brand spec, matching the :root tokens in static/css/styles.css.
 var (
-	gumGreen  = rgb(0x2F5D4E) // primary
-	gumDark   = rgb(0x1F3F35)
-	ochre     = rgb(0xE0A13B) // fills, and text on dark
-	ochreText = rgb(0x9A5F12) // ochre text on light
-	ink       = rgb(0x1D2622)
-	paper     = rgb(0xF8F6F0)
-	sage      = rgb(0xE4ECE4)
-	white     = rgb(0xFFFFFF)
+	ink        = rgb(0x12284A) // navy: text, the badge, dark fields
+	inkDark    = rgb(0x0B1A33)
+	tangerine  = rgb(0xFF7A21) // the spout; fills only on light
+	tangerineT = rgb(0xB34700) // tangerine text on light
+	sky        = rgb(0x4DB0FF) // water
+	sun        = rgb(0xFFD449) // highlights, and text on dark
+	cream      = rgb(0xFFF7EA)
 )
 
 const (
-	markSVG = "static/img/logo-mark.svg"
-	fontDir = "tools/brand/fonts"
-	domain  = "warrandytegutters.com.au"
-	pitch   = "Gutter cleaning for Warrandyte & the green wedge"
+	markSVG  = "static/img/logo-mark.svg"
+	fontDir  = "tools/brand/fonts"
+	domain   = "upthespout.com.au"
+	wordmark = "Up The Spout"
+	subline  = "GUTTER CLEANING"
+	pitch    = "Gutters cleared & downpipes flowing"
+	areaLine = "Melbourne's north-east  ·  Fixed prices  ·  Book online"
 )
 
 var services = []string{"Gutters", "Downpipes", "Valleys", "Photo report"}
@@ -160,7 +162,7 @@ func writeICO(path string, imgs ...image.Image) error {
 
 var (
 	mark                              *svgMark
-	fraunces, sansReg, sansMed, sansB *typeface
+	lilita, sansReg, sansMed, sansB *typeface
 )
 
 func loadBrand() {
@@ -175,10 +177,10 @@ func loadBrand() {
 		}
 		return tf
 	}
-	fraunces = load("Fraunces-SemiBold.ttf")
-	sansReg = load("DMSans-Regular.ttf")
-	sansMed = load("DMSans-Medium.ttf")
-	sansB = load("DMSans-Bold.ttf")
+	lilita = load("LilitaOne-Regular.ttf")
+	sansReg = load("Figtree-Regular.ttf")
+	sansMed = load("Figtree-Medium.ttf")
+	sansB = load("Figtree-ExtraBold.ttf")
 }
 
 // ── the mark: a small SVG reader and rasteriser ──
@@ -591,12 +593,12 @@ type markStyle struct {
 
 var (
 	standardMark = markStyle{}
-	// onGreenMark is the treatment for gum-green surfaces (the card front, the
-	// cover): the badge would vanish into the field, so it goes gum dark with a
-	// hairline sage edge, and the leaf vein follows the badge colour.
-	onGreenMark = markStyle{
-		recolor: map[string]color.Color{"#2F5D4E": gumDark},
-		edge:    color.NRGBA{0xE4, 0xEC, 0xE4, 0x8C},
+	// onInkMark is the treatment for navy surfaces (the card front, the
+	// cover): the badge would vanish into the field, so it goes a shade darker
+	// with a hairline cream edge, and the leaf vein follows the badge colour.
+	onInkMark = markStyle{
+		recolor: map[string]color.Color{"#12284A": inkDark},
+		edge:    color.NRGBA{0xFF, 0xF7, 0xEA, 0x8C},
 	}
 )
 
@@ -1000,11 +1002,12 @@ func mustFit(w, safe float64, what string) {
 
 // ── the lockup ──
 //
-// Mark on the left; "Warrandyte" in Fraunces SemiBold (tracking -0.01 em)
-// over "GUTTERS" in DM Sans Bold at 38% of its size (tracking 0.34 em). em is
-// the Warrandyte size in px. The geometry matches tools/bizcard/brand.tmpl:
-// mark 1.5 em square, 0.34 em gap, and the GUTTERS cap top 0.25 em below the
-// Warrandyte baseline, the word block centred on the mark.
+// Mark on the left; "Up The Spout" in Lilita One (tracking 0.01 em) over
+// "GUTTER CLEANING" in Figtree ExtraBold at 30% of its size (tracking 0.24
+// em). em is the wordmark size in px. The geometry matches
+// tools/bizcard/brand.tmpl: mark 1.5 em square, 0.34 em gap, and the subline
+// cap top 0.25 em below the wordmark baseline, the word block centred on the
+// mark.
 
 type lockup struct {
 	em         float64
@@ -1015,14 +1018,14 @@ type lockup struct {
 
 func newLockup(em float64, word, sub color.Color, ms markStyle) lockup {
 	return lockup{em: em, word: word, sub: sub, markStyle: ms,
-		words: style{fraunces, em, -0.01},
-		gut:   style{sansB, em * 0.38, 0.34}}
+		words: style{lilita, em, 0.01},
+		gut:   style{sansB, em * 0.30, 0.24}}
 }
 
 func (l lockup) markSize() float64 { return 1.5 * l.em }
 func (l lockup) height() float64   { return l.markSize() }
 func (l lockup) width() float64 {
-	return l.markSize() + 0.34*l.em + math.Max(l.words.width("Warrandyte"), l.gut.width("GUTTERS"))
+	return l.markSize() + 0.34*l.em + math.Max(l.words.width(wordmark), l.gut.width(subline))
 }
 
 // draw places the lockup's top-left corner at (x, y).
@@ -1033,8 +1036,8 @@ func (l lockup) draw(dst *image.RGBA, x, y float64) {
 	gap := 0.25 * l.em
 	top := y + (m-(capW+gap+capG))/2
 	tx := x + m + 0.34*l.em
-	l.words.draw(dst, "Warrandyte", tx, top+capW, l.word)
-	l.gut.draw(dst, "GUTTERS", tx, top+capW+gap+capG, l.sub)
+	l.words.draw(dst, wordmark, tx, top+capW, l.word)
+	l.gut.draw(dst, subline, tx, top+capW+gap+capG, l.sub)
 }
 
 // ── the images ──
@@ -1049,103 +1052,59 @@ func icon(size int) *image.RGBA {
 }
 
 // appleTouchIcon has no transparency: iOS fills transparent pixels with black
-// and applies its own rounded mask, so the badge green runs into the corners.
+// and applies its own rounded mask, so the badge navy runs into the corners.
 func appleTouchIcon(size int) *image.RGBA {
 	img := image.NewRGBA(image.Rect(0, 0, size, size))
-	fill(img, img.Bounds(), gumGreen)
+	fill(img, img.Bounds(), ink)
 	drawMark(img, 0, 0, float64(size), standardMark)
 	return img
 }
 
-// ogImage is the link-preview card (1200×630), shown whole: paper field, the
-// lockup and pitch on the left, an oversized faint roofline on the right, and
-// a gum-green footer band carrying the domain and service area.
+// ogImage is the link-preview card (1200×630), shown whole: cream field, a
+// big sun coming up off the top-right corner, the lockup and pitch on the
+// left, and a navy footer band carrying the domain and the area.
 func ogImage() *image.RGBA {
 	const W, H = 1200, 630
 	const margin = 84
 	img := image.NewRGBA(image.Rect(0, 0, W, H))
-	fill(img, img.Bounds(), paper)
+	fill(img, img.Bounds(), cream)
 
-	l := newLockup(86, gumDark, ochreText, standardMark)
+	l := newLockup(86, ink, tangerineT, standardMark)
 	mustFit(l.width(), W-2*margin, "og lockup")
-	p := style{sansMed, 32, 0}
-	mustFit(p.width(pitch), W-2*margin, "og pitch")
+	p := style{sansMed, 34, 0}
+	mustFit(p.width(pitch), 760, "og pitch (it must clear the sun)")
 
-	// Roof and gutter strokes from the mark, ~9× size, in sage: a quiet echo
-	// of the badge, running off the top and right edges. It moves right to
-	// stay 40px clear of the pitch, and a pitch too long to leave room for it
-	// fails the build.
-	const echoSize = 600
-	echoX := math.Max(800, margin+p.width(pitch)+40-markStrokeMinX()*echoSize/mark.size)
-	mustFit(echoX, 860, "og roofline offset (shorten the pitch)")
+	// The sun: an ink-ringed disc, mostly off the canvas, behind everything.
+	fillPolys(img, [][]pt{disc(pt{1090, 70}, 236)}, ink)
+	fillPolys(img, [][]pt{disc(pt{1090, 70}, 230)}, sun)
 
 	// The text block (lockup top to services baseline) is centred in the
-	// paper above the band; the echo keeps its place relative to it.
+	// cream above the band.
 	band := 128
-	const pitchOff, svcOff = 76, 126 // baselines below the lockup
+	const pitchOff, svcOff = 78, 130 // baselines below the lockup
 	blockH := l.height() + svcOff
 	top := math.Round((float64(H-band) - blockH) / 2)
-	drawMarkStrokes(img, echoX, top-114, echoSize, sage)
 
-	fill(img, image.Rect(0, H-band, W, H), gumGreen)
-	fill(img, image.Rect(0, H-band, W, H-band+6), ochre)
+	fill(img, image.Rect(0, H-band, W, H), ink)
+	fill(img, image.Rect(0, H-band, W, H-band+8), tangerine)
 
 	l.draw(img, margin, top)
 	p.draw(img, pitch, margin, top+l.height()+pitchOff, ink)
 	svc := style{sansB, 24, 0.01}
 	line := strings.Join(services, "  ·  ")
 	mustFit(svc.width(line), W-2*margin, "og services")
-	svc.draw(img, line, margin, top+l.height()+svcOff, gumGreen)
+	svc.draw(img, line, margin, top+l.height()+svcOff, tangerineT)
 
-	d := style{sansB, 28, 0.01}
-	d.draw(img, domain, margin, float64(H-band/2)+11, paper)
-	area := style{sansMed, 19, 0.01}
-	areaLine := "Warrandyte · Park Orchards · Wonga Park · Donvale · Eltham"
+	d := style{sansB, 30, 0.01}
+	d.draw(img, domain, margin, float64(H-band/2)+14, cream)
+	area := style{sansMed, 20, 0.01}
 	mustFit(d.width(domain)+48+area.width(areaLine), W-2*margin, "og footer")
-	area.draw(img, areaLine, W-margin-area.width(areaLine), float64(H-band/2)+8, sage)
+	area.draw(img, areaLine, W-margin-area.width(areaLine), float64(H-band/2)+11, sun)
 	return img
 }
 
-// markStrokeMinX is the left edge of the mark's white strokes, in viewBox units.
-func markStrokeMinX() float64 {
-	minX := mark.size
-	for _, sh := range mark.shapes {
-		if !strings.EqualFold(sh.stroke, "#FFFFFF") {
-			continue
-		}
-		for _, sp := range sh.subpaths {
-			for _, v := range sp {
-				minX = math.Min(minX, v.x-sh.strokeWidth/2)
-			}
-		}
-	}
-	return minX
-}
-
-// drawMarkStrokes draws only the mark's white strokes (roof, gutter, downpipe)
-// in col — the decorative echo on the og image.
-func drawMarkStrokes(dst *image.RGBA, x, y, size float64, col color.Color) {
-	s := size / mark.size
-	for _, sh := range mark.shapes {
-		if !strings.EqualFold(sh.stroke, "#FFFFFF") {
-			continue
-		}
-		var polys [][]pt
-		for i, sp := range sh.subpaths {
-			for _, p := range strokePolyline(sp, sh.strokeWidth, sh.roundCap, sh.closed[i]) {
-				q := make([]pt, len(p))
-				for j, v := range p {
-					q[j] = pt{x + v.x*s, y + v.y*s}
-				}
-				polys = append(polys, q)
-			}
-		}
-		fillPolys(dst, polys, col)
-	}
-}
-
-// brandPlate draws the centred brand stack — lockup, ochre rule, pitch,
-// service chips and domain — full-bleed on a gum-green field, in the same
+// brandPlate draws the centred brand stack — lockup, tangerine rule, pitch,
+// service chips and domain — full-bleed on a navy field, in the same
 // treatment as the business card front. Cover and square differ only in
 // canvas shape and scale, so they share it.
 //
@@ -1158,9 +1117,9 @@ func brandPlate(img *image.RGBA, scale float64, safeW, safeH float64) {
 	cx := W / 2
 	s := func(v float64) float64 { return v * scale }
 
-	gradient(img, gumGreen, color.RGBA{0x25, 0x4C, 0x40, 0xff})
-	softGlow(img, W*0.88, H*0.08, W*0.5, sage, 0.10)
-	softGlow(img, W*0.08, H*0.98, W*0.42, ochre, 0.07)
+	gradient(img, ink, inkDark)
+	softGlow(img, W*0.88, H*0.08, W*0.5, sky, 0.14)
+	softGlow(img, W*0.08, H*0.98, W*0.42, sky, 0.12)
 
 	// Offsets down from the top of the stack, at scale 1. The block is
 	// measured and centred as a whole, so it sits right on any canvas shape.
@@ -1178,19 +1137,19 @@ func brandPlate(img *image.RGBA, scale float64, safeW, safeH float64) {
 	top := (H - s(stackH)) / 2
 	at := func(off float64) float64 { return top + s(off) }
 
-	l := newLockup(s(lockEm), paper, ochre, onGreenMark)
+	l := newLockup(s(lockEm), cream, sun, onInkMark)
 	mustFit(l.width(), safeW, "lockup")
 	l.draw(img, cx-l.width()/2, top)
 
-	roundRect(img, cx-s(26), at(ruleY), cx+s(26), at(ruleY)+s(5), s(2.5), ochre)
+	roundRect(img, cx-s(26), at(ruleY), cx+s(26), at(ruleY)+s(6), s(3), tangerine)
 
 	// The pitch, in two lines: one line is wider than a square crop allows.
 	p := style{sansMed, s(30), 0}
 	line1, line2, _ := strings.Cut(pitch, " & ")
 	line2 = "& " + line2
 	mustFit(math.Max(p.width(line1), p.width(line2)), safeW, "pitch")
-	p.drawC(img, line1, cx, at(pitchY), sage)
-	p.drawC(img, line2, cx, at(pitch2Y), sage)
+	p.drawC(img, line1, cx, at(pitchY), cream)
+	p.drawC(img, line2, cx, at(pitch2Y), cream)
 
 	// Service chips, centred as a row: outlined rather than filled, so they
 	// read as trim on the field instead of competing with the wordmark.
@@ -1204,14 +1163,14 @@ func brandPlate(img *image.RGBA, scale float64, safeW, safeH float64) {
 	x := cx - total/2
 	for _, c := range services {
 		bw := chip.width(c) + padX*2
-		outlineRect(img, x, at(chipY), x+bw, at(chipY)+s(chipH), s(chipH)/2, s(1.6), color.NRGBA{0xE4, 0xEC, 0xE4, 0x80})
-		chip.draw(img, c, x+padX, at(chipY)+s(chipH)/2+chip.capHeight()/2, paper)
+		outlineRect(img, x, at(chipY), x+bw, at(chipY)+s(chipH), s(chipH)/2, s(1.8), color.NRGBA{0xFF, 0xF7, 0xEA, 0x80})
+		chip.draw(img, c, x+padX, at(chipY)+s(chipH)/2+chip.capHeight()/2, cream)
 		x += bw + gap
 	}
 
 	d := style{sansB, s(24), 0.02}
 	mustFit(d.width(domain), safeW, "domain")
-	d.drawC(img, domain, cx, at(domainY), ochre)
+	d.drawC(img, domain, cx, at(domainY), sun)
 }
 
 // coverImage is the 16:9 cover, sized for Google Business Profile. Unlike

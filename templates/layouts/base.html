@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {{template "google-tag" .}}
     {{block "meta" .}}
-    <title>Warrandyte Gutters — Gutter Cleaning in Warrandyte &amp; Surrounds</title>
-    <meta name="description" content="Gutter cleaning around Warrandyte, Park Orchards, Wonga Park, Donvale and Eltham. Fixed prices, book online, photo report with every clean.">
+    <title>Up The Spout — Gutter Cleaning in Melbourne's North-East</title>
+    <meta name="description" content="Gutter and downpipe cleaning across Melbourne's north-east: Eltham, Templestowe, Donvale, Ringwood North, Warrandyte and nearby. Fixed prices, book online, photo report with every clean.">
     {{end}}
     <link rel="canonical" href="{{.Site.BaseURL}}{{.Path}}">
     <meta property="og:site_name" content="{{.Site.Name}}">
@@ -18,18 +18,18 @@
     <meta property="og:image" content="{{.Site.BaseURL}}/static/img/og.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Warrandyte Gutters — gutter cleaning for Warrandyte and surrounds">
+    <meta property="og:image:alt" content="Up The Spout — gutter and downpipe cleaning in Melbourne's north-east">
     {{end}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="geo.region" content="AU-VIC">
     <meta name="geo.placename" content="Warrandyte">
-    <meta name="theme-color" content="#2f5d4e">
+    <meta name="theme-color" content="#12284a">
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png">
     <link rel="manifest" href="/static/site.webmanifest">
-    <link rel="preload" href="/static/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/static/fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/figtree.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/static/fonts/lilita-one.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{asset "css/styles.css"}}">
     {{/* htmx is admin-only: the public pages are static server-rendered content
          and must not pay for it. */}}
@@ -40,14 +40,11 @@
      inside, and every admin POST is rejected by requireCSRF. */}}
 <body{{if .IsAdmin}} hx-headers:inherited='{"X-CSRF-Token": "{{.CSRF}}"}'{{end}}>
 
-<div class="glow-orb glow-orb--amber"></div>
-<div class="glow-orb glow-orb--blue"></div>
-
 <div class="page-wrapper">
 
     <!-- Navigation -->
     <nav>
-        <a href="/" class="nav-brand"><img src="/static/img/logo-mark.svg" alt="" width="30" height="30" class="nav-brand-icon">{{.Site.Name}}</a>
+        <a href="/" class="nav-brand"><img src="/static/img/logo-mark.svg" alt="" width="36" height="36" class="nav-brand-icon">{{.Site.Name}}</a>
         <div class="nav-links">
             <a href="/services"{{if hasPrefix .Path "/services"}} class="active"{{end}}>Services</a>
             <a href="/pricing"{{if hasPrefix .Path "/pricing"}} class="active"{{end}}>Pricing</a>
@@ -75,7 +72,7 @@
     <!-- Footer -->
     <footer>
         <div class="footer-inner">
-            <div class="footer-copy"><img src="/static/img/logo-mark.svg" alt="" width="20" height="20" class="footer-icon">&copy; 2026 {{.Site.Name}} &middot; {{.Site.Owner}}, Warrandyte VIC{{if .Site.ABN}} &middot; ABN {{.Site.ABN}}{{end}}</div>
+            <div class="footer-copy"><img src="/static/img/logo-mark.svg" alt="" width="34" height="34" class="footer-icon"><strong>{{.Site.Name}}</strong>&copy; 2026 {{.Site.Owner}} &middot; Melbourne's north-east{{if .Site.ABN}} &middot; ABN {{.Site.ABN}}{{end}}</div>
             <div class="footer-links">
                 <a href="/services">Services</a>
                 <a href="/pricing">Pricing</a>

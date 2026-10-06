@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS google_calendar (
     id             INTEGER PRIMARY KEY CHECK (id = 1),
     account_email  TEXT NOT NULL DEFAULT '',   -- must match ADMIN_EMAIL
     refresh_token  TEXT NOT NULL DEFAULT '',
-    calendar_id    TEXT NOT NULL DEFAULT '',   -- the "Warrandyte Gutters" secondary calendar
+    calendar_id    TEXT NOT NULL DEFAULT '',   -- the "Up The Spout" secondary calendar
     calendar_name  TEXT NOT NULL DEFAULT '',
     skip_calendars TEXT NOT NULL DEFAULT '',   -- newline-separated calendar ids excluded from busy times
     connected_at   TEXT NOT NULL DEFAULT '',   -- UTC

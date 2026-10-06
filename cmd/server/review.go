@@ -37,7 +37,7 @@ func reviewQRDataURI(size int) (template.URL, error) {
 	return template.URL("data:image/png;base64," + base64.StdEncoding.EncodeToString(png)), nil
 }
 
-// stripScheme trims https:// for display — "warrandytegutters.com.au/review" is what
+// stripScheme trims https:// for display — "upthespout.com.au/review" is what
 // you read out to a customer, not the scheme.
 func stripScheme(u string) string {
 	return strings.TrimPrefix(strings.TrimPrefix(u, "https://"), "http://")

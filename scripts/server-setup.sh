@@ -1,10 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-# One-time server setup for the Warrandyte Gutters Go web app (repo exploded/gutter).
+# One-time server setup for the Up The Spout Go web app (repo exploded/gutter).
 # Usage: curl -fsSL https://raw.githubusercontent.com/exploded/gutter/main/scripts/server-setup.sh | sudo bash
 #
-# Staged at gutter.mchugh.au until warrandytegutters.com.au is registered; the
+# Staged at gutter.mchugh.au until upthespout.com.au is registered; the
 # README's "Domain cutover" section covers the move.
 
 APP_DIR="/var/www/gutter"
@@ -20,17 +20,17 @@ mkdir -p "$APP_DIR"
 # .env template (only if absent — never overwrite real secrets)
 if [ ! -f "$APP_DIR/.env" ]; then
 cat > "$APP_DIR/.env" <<EOF
-# ── Warrandyte Gutters ──
+# ── Up The Spout ──
 PORT=$PORT
 PROD=true
 APP_DIR=$APP_DIR
-# Staging origin; change to https://warrandytegutters.com.au at the domain cutover.
+# Staging origin; change to https://upthespout.com.au at the domain cutover.
 BASE_URL=https://gutter.mchugh.au
 
 # Contact details shown on the site (PHONE empty = phone UI hidden).
 # CONTACT_EMAIL is also the SES sender + notification address.
 PHONE=
-CONTACT_EMAIL=vin@warrandytegutters.com.au
+CONTACT_EMAIL=vin@upthespout.com.au
 OWNER_NAME=Vin
 
 # Invoices: ABN and bank transfer details (both empty = hidden). Prices live in cmd/server/pricing.go.
@@ -85,7 +85,7 @@ chmod +x /usr/local/bin/deploy-gutter 2>/dev/null || true
 # Create systemd service
 cat > /etc/systemd/system/${SERVICE}.service <<EOF
 [Unit]
-Description=Warrandyte Gutters web app
+Description=Up The Spout web app
 After=network.target
 
 [Service]

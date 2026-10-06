@@ -1,7 +1,8 @@
-# gutter — Warrandyte Gutters
+# gutter — Up The Spout
 
-Website and booking system for **Warrandyte Gutters**, Vin's residential gutter
-cleaning business around Warrandyte VIC 3113 (Manningham, Nillumbik, Maroondah).
+Website and booking system for **Up The Spout**, Vin's residential gutter
+cleaning business across Melbourne's north-east (Manningham, Nillumbik,
+Maroondah), based in Warrandyte VIC 3113.
 A fork of `C:\Projects\go\localithelp` (Local IT Help), so most mechanics —
 bookings, calendar sync, invoices, receipts, Zeller links, Ads attribution,
 review card, scheduler, backups — match that project. Check there first when
@@ -16,11 +17,22 @@ It is deliberately not in this repo: the repo is public.
 - Invoke `sqlc-sqlite` before touching `db/queries.sql`; run `sqlc generate` after.
 - Write prose (copy, docs, commits) with the `google-style` skill: Australian spelling.
 
+## Brand
+Easy-going, sunny, tradie signwriting. Navy ink `#12284A`, tangerine `#FF7A21`
+(the spout, primary buttons), sky `#4DB0FF` (water), sun `#FFD449` (labels,
+highlights), cream `#FFF7EA` ground. Tangerine, sky and sun are fills only; use
+`--accent` / `--sky-text` for coloured text. Cards and buttons are "stickers":
+2px ink outline plus a hard offset shadow (`--pop`). Speak as Vin, first person.
+Describe the area as "Melbourne's north-east"; Warrandyte is only the base.
+The mark is `static/img/logo-mark.svg` (gutter, tangerine downpipe, drop, leaf);
+`go run ./tools/genassets` and `go run ./tools/bizcard -logos` re-render
+everything from it.
+
 ## Stack
 Go 1.25, `net/http` ServeMux, `html/template` (read from `templates/` on disk at
 startup, not embedded), modernc/sqlite + sqlc, htmx 4 on `/admin` only (public
 pages are script-light: `book.js`, `address.js`, `areamap.js`, `reveal.js`).
-Module `gutter`. Fonts: Fraunces (headings) + DM Sans (body), self-hosted.
+Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-hosted.
 
 ## Where things live
 - `cmd/server/pricing.go` — **the price list**. Every price on the site, the
@@ -52,4 +64,4 @@ Booking needs `MAPPIFY_API_KEY` for the address autocomplete.
 ## Deploy
 Push to `main` → GitHub Actions (vet + test, build, scp, `deploy-gutter`).
 Server: `/var/www/gutter`, systemd unit `gutter`, port **8997**, staged at
-`https://gutter.mchugh.au` until `warrandytegutters.com.au` is registered.
+`https://gutter.mchugh.au` until `upthespout.com.au` is registered.

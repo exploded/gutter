@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# One-time Amazon SES setup for warrandytegutters.com.au (run from your machine, not
+# One-time Amazon SES setup for upthespout.com.au (run from your machine, not
 # the server). Run it after the domain is registered and on Cloudflare.
 #
 # What it does (idempotent — safe to re-run):
 #   1. Creates IAM user `gutter-mailer` with a send-only policy limited to
-#      the warrandytegutters.com.au SES identities (plus any
+#      the upthespout.com.au SES identities (plus any
 #      configuration set, since a default set attached to an identity is also
 #      authorised on send), and an access key for it.
-#   2. Ensures the SES domain identity `warrandytegutters.com.au` exists (Easy DKIM).
+#   2. Ensures the SES domain identity `upthespout.com.au` exists (Easy DKIM).
 #   3. If CF_TOKEN is set (Cloudflare API token with Zone:DNS:Edit on
-#      warrandytegutters.com.au), adds the 3 DKIM CNAME records; otherwise prints them.
+#      upthespout.com.au), adds the 3 DKIM CNAME records; otherwise prints them.
 #   4. Prints the lines to append to /var/www/gutter/.env on the server.
 #
 # Requirements: aws CLI v2 with an admin profile, curl, jq.
@@ -18,10 +18,10 @@
 set -euo pipefail
 
 REGION=${AWS_REGION:-ap-southeast-2}
-DOMAIN=warrandytegutters.com.au
-FROM_ADDR=vin@warrandytegutters.com.au
+DOMAIN=upthespout.com.au
+FROM_ADDR=vin@upthespout.com.au
 USER_NAME=gutter-mailer
-POLICY_NAME=ses-send-warrandytegutters-com-au
+POLICY_NAME=ses-send-upthespout-com-au
 CF_ZONE_NAME=$DOMAIN
 
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)

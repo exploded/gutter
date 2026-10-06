@@ -36,11 +36,11 @@
 
         const area = L.circle(CENTRE, {
             radius: RADIUS_M,
-            color: '#2f5d4e',
+            color: '#ff7a21',
             weight: 2,
             opacity: 0.7,
-            fillColor: '#2f5d4e',
-            fillOpacity: 0.12,
+            fillColor: '#ffd449',
+            fillOpacity: 0.2,
             interactive: false,
         }).addTo(map);
 

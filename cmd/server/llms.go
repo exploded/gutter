@@ -23,7 +23,7 @@ func llmsTxt() string {
 	}
 
 	b.WriteString("# " + site.Name + "\n\n")
-	b.WriteString("> Residential gutter cleaning around Warrandyte VIC 3113 (Melbourne's outer north-east), by " + site.Owner + ".\n")
+	b.WriteString("> Residential gutter and downpipe cleaning across Melbourne's north-east (based in Warrandyte VIC 3113), by " + site.Owner + ".\n")
 	b.WriteString("> Fixed prices, online booking, and a dated before-and-after photo report with every clean.")
 	if site.ABN != "" {
 		b.WriteString(" ABN " + site.ABN + ".")

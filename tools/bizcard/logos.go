@@ -34,8 +34,8 @@ const (
 )
 
 // exportLogos writes logo-lockup.png (for light backgrounds),
-// logo-lockup-dark.png (for dark backgrounds) and logo-lockup-on-green.png
-// (for the brand green itself, where the standard badge would vanish — the
+// logo-lockup-dark.png (for dark backgrounds) and logo-lockup-on-navy.png
+// (for the brand navy itself, where the standard badge would vanish — the
 // same treatment as the card front), all transparent and cropped to the same
 // box; logo-mark-1024.png; and logo-lockup.pdf, a vector copy of the light
 // lockup for sign writers.
@@ -52,7 +52,7 @@ func exportLogos(chrome string, a assets, outDir string) error {
 	for _, v := range []struct{ variant, class, file string }{
 		{"light", "", "logo-lockup.png"},
 		{"dark", "", "logo-lockup-dark.png"},
-		{"dark", "on-green", "logo-lockup-on-green.png"},
+		{"dark", "on-ink", "logo-lockup-on-navy.png"},
 	} {
 		page, err := renderTo(work, v.file+".html", "logo.tmpl",
 			logoPage{assets: a, Variant: v.variant, LockupClass: v.class, Size: logoEm, X: logoStageX, Y: logoStageY})

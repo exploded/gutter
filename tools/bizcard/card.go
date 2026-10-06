@@ -28,7 +28,7 @@ func (c *card) prepare() error {
 	}
 	c.Web = strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(strings.ToLower(c.Web), "https://"), "http://"), "/")
 	if c.Web == "" || strings.ContainsAny(c.Web, "/ ") {
-		return fmt.Errorf("-web should be a bare domain like warrandytegutters.com.au, not %q", c.Web)
+		return fmt.Errorf("-web should be a bare domain like upthespout.com.au, not %q", c.Web)
 	}
 	if c.Email != "" && !strings.Contains(c.Email, "@") {
 		return fmt.Errorf("-email %q doesn't look like an email address", c.Email)
@@ -106,7 +106,7 @@ func makeCard(chrome string, a assets, c card, outDir string) error {
 	mm := func(v float64) string { return strconv.FormatFloat(v, 'f', 3, 64) }
 
 	p := cardPage{
-		assets: a, Proof: c.Proof, Guides: c.Guides, LockupClass: "on-green",
+		assets: a, Proof: c.Proof, Guides: c.Guides, LockupClass: "on-ink",
 		Name: c.Name, Title: c.Title, Phone: c.Phone, Email: c.Email, Web: c.Web, ABN: c.ABN,
 		Tagline: tagline, Services: services, Area: area, QR: qr,
 		QRSymbolMM: mm(qrSymbolMM),
@@ -202,7 +202,7 @@ func qrSVG(target string) (template.HTML, int, error) {
 			fmt.Fprintf(&d, "M%d %dh%dv1h-%dz", x0+qrQuietModules, y+qrQuietModules, x-x0, x-x0)
 		}
 	}
-	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" shape-rendering="crispEdges" role="img" aria-label="QR code: %s"><path fill="#1D2622" d="%s"/></svg>`,
+	svg := fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" shape-rendering="crispEdges" role="img" aria-label="QR code: %s"><path fill="#12284A" d="%s"/></svg>`,
 		size, size, html.EscapeString(target), d.String())
 	return template.HTML(svg), n, nil
 }

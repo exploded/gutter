@@ -14,7 +14,7 @@ if [ -f "$BUNDLE_SCRIPT" ] && ! diff -q /usr/local/bin/deploy-gutter "$BUNDLE_SC
     exec /usr/local/bin/deploy-gutter "$@"
 fi
 
-echo "[deploy] Deploying gutter (Warrandyte Gutters)..."
+echo "[deploy] Deploying gutter (Up The Spout)..."
 
 # Stop service
 systemctl stop "$SERVICE" 2>/dev/null || true

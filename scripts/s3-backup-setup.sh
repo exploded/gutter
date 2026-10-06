@@ -21,7 +21,7 @@ BUCKET=${BACKUP_BUCKET:-warrandyte-gutters-backups}
 RETENTION_DAYS=${RETENTION_DAYS:-90}
 USER_NAME=gutter-backup
 POLICY_NAME=s3-backup-gutter
-APP_TAG=warrandytegutters.com.au
+APP_TAG=upthespout.com.au
 
 ACCOUNT=$(aws sts get-caller-identity --query Account --output text)
 echo "AWS account $ACCOUNT, region $REGION"

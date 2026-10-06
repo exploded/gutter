@@ -758,7 +758,7 @@ func sourceRows() ([]sourceRow, int64) {
 type siteConfig struct {
 	Name        string       // business name as registered and on the Google Business Profile
 	Owner       string       // the person who turns up, for "I'm Vin" copy
-	BaseURL     string       // canonical origin, no trailing slash, e.g. https://warrandytegutters.com.au
+	BaseURL     string       // canonical origin, no trailing slash, e.g. https://upthespout.com.au
 	Phone       string       // display phone, empty hides all phone UI
 	PhoneHref   template.URL // tel: link (+61 form); template.URL so html/template keeps the tel: scheme
 	Email       string       // contact email
@@ -791,20 +791,20 @@ var site siteConfig
 // businessName is the trading name. It must match the ASIC registration, the
 // Google Business Profile and the vehicle signs exactly: Google treats a
 // mismatch as a reason to doubt the profile.
-const businessName = "Warrandyte Gutters"
+const businessName = "Up The Spout"
 
 func initSiteConfig(port string) {
 	base := strings.TrimRight(os.Getenv("BASE_URL"), "/")
 	if base == "" {
 		if os.Getenv("PROD") != "" {
-			base = "https://warrandytegutters.com.au"
+			base = "https://upthespout.com.au"
 		} else {
 			base = "http://localhost:" + port
 		}
 	}
 	email := os.Getenv("CONTACT_EMAIL")
 	if email == "" {
-		email = "vin@warrandytegutters.com.au"
+		email = "vin@upthespout.com.au"
 	}
 	site = siteConfig{
 		Name:        businessName,

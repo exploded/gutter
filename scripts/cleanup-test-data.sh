@@ -145,5 +145,5 @@ q "SELECT (SELECT COUNT(*) FROM bookings)  AS bookings,
 
 echo
 echo -n "Health check: "
-curl -sS -o /dev/null -w "%{http_code}\n" https://warrandytegutters.com.au/health
+curl -sS -o /dev/null -w "%{http_code}\n" https://upthespout.com.au/health
 echo "Backup kept at $BACKUP"

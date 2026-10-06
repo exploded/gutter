@@ -1,9 +1,9 @@
 {{template "base" .}}
 
 {{define "meta"}}
-    <title>Gutter Cleaning Warrandyte, Park Orchards &amp; Eltham — Fixed Prices | Warrandyte Gutters</title>
-    <meta name="description" content="Local gutter cleaning around Warrandyte, Park Orchards, Wonga Park, Donvale and Eltham. Fixed prices from ${{(index .Site.Prices.Types 0).Price}}, book online, before-and-after photos with every clean.">
-    <meta property="og:title" content="Gutter cleaning for Warrandyte &amp; surrounds — fixed prices, book online">
+    <title>Gutter Cleaning in Melbourne's North-East — Fixed Prices | Up The Spout</title>
+    <meta name="description" content="Gutter and downpipe cleaning across Melbourne's north-east: Eltham, Templestowe, Donvale, Ringwood North, Warrandyte and nearby. Fixed prices from ${{(index .Site.Prices.Types 0).Price}}, book online, before-and-after photos with every clean.">
+    <meta property="og:title" content="Up The Spout — gutter cleaning with fixed prices, book online">
     <meta property="og:description" content="Every gutter cleared by hand, valleys done, downpipes flushed, mess taken away, and a photo report. Get fire-ready before summer.">
 {{end}}
 
@@ -57,31 +57,30 @@
     <!-- Hero -->
     <section class="hero">
         <div class="container">
-            <div class="hero-content">
-                <p class="hero-overline">Gutter cleaning &middot; Warrandyte &amp; surrounds</p>
-                <h1>Clear gutters,<br>before the gums fill them again.</h1>
-                <p class="hero-desc">
-                    I'm {{.Site.Owner}}, and I clean gutters around Warrandyte, Park Orchards, Wonga Park,
-                    Donvale and Eltham. Every gutter cleared by hand, valleys done, downpipes flushed,
-                    the mess taken away — and photos to prove it.
-                </p>
-                <div class="hero-actions">
-                    <a href="/book" class="btn btn--primary">See your price &amp; book</a>
-                    {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <p class="hero-overline">Gutter &amp; downpipe cleaning &middot; Melbourne's north-east</p>
+                    <h1>I go up the ladder, so <span class="hl">you don't have to.</span></h1>
+                    <p class="hero-desc">
+                        G'day, I'm {{.Site.Owner}}. I clear gutters, roof valleys and downpipes for homes
+                        across Melbourne's north-east. Fixed prices, the mess taken away, and
+                        before-and-after photos so you can see the job from the ground.
+                    </p>
+                    <div class="hero-actions">
+                        <a href="/book" class="btn btn--primary">See your price &amp; book &#8594;</a>
+                        {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost">Call {{.Site.Phone}}</a>{{end}}
+                    </div>
+                    <ul class="hero-points">
+                        <li>No call-out fee</li>
+                        <li>Photo report with every clean</li>
+                        <li>Book online in two minutes</li>
+                    </ul>
                 </div>
-                <ul class="hero-points">
-                    <li>Fixed prices from ${{(index .Site.Prices.Types 0).Price}} — no call-out fee</li>
-                    <li>Before-and-after photo report with every clean</li>
-                    <li>Book online in two minutes</li>
-                </ul>
+                <div class="hero-art">
+                    {{template "hero-art"}}
+                    <a href="/pricing" class="hero-sticker"><small>Fixed price<br>from</small><strong>${{(index .Site.Prices.Types 0).Price}}</strong></a>
+                </div>
             </div>
-        </div>
-        <div class="hero-decoration" aria-hidden="true">
-            <div class="line"></div>
-            <div class="dot"></div>
-            <div class="line"></div>
-            <div class="dot"></div>
-            <div class="line"></div>
         </div>
     </section>
 
@@ -90,7 +89,7 @@
         <div class="container">
             <div class="portfolio-cta reveal">
                 <div class="portfolio-cta-text">
-                    <div class="section-label">Bushfire season</div>
+                    <div class="section-label">Fire season</div>
                     <h2 class="section-title">Get your gutters fire-ready before summer.</h2>
                     <p class="portfolio-cta-desc">The CFA tells people in bushfire areas to clear their gutters in early spring, before the Fire Danger Period is declared. Dry leaves in a gutter are where embers land. Book now and you'll get a dated photo report you can show the council or your insurer.</p>
                 </div>
@@ -106,8 +105,8 @@
     <section class="services-section" id="services">
         <div class="container">
             <div class="section-label reveal">What I do</div>
-            <h2 class="section-title reveal">Gutters, downpipes and valleys —<br>done properly, from one local person.</h2>
-            <p class="section-intro reveal">I don't do repairs or plumbing; if I spot a problem I'll photograph it and tell you who to call.</p>
+            <h2 class="section-title reveal">Gutters, downpipes and valleys. <span class="hl">Sorted.</span></h2>
+            <p class="section-intro reveal">One local bloke, done properly. I don't do repairs or plumbing; if I spot a problem I'll photograph it and tell you who to call.</p>
             <div class="services-grid">
                 {{range .PageData.Services}}{{template "service-card" .}}{{end}}
             </div>
@@ -118,7 +117,7 @@
     <section class="how-section">
         <div class="container">
             <div class="section-label reveal">How it works</div>
-            <h2 class="section-title reveal">Three steps, no runaround.</h2>
+            <h2 class="section-title reveal">Three steps. No runaround.</h2>
             <div class="steps reveal">
                 <div class="step">
                     <div class="step-num">01</div>
@@ -143,7 +142,7 @@
     <section class="pricing-section" id="pricing">
         <div class="container">
             <div class="section-label reveal">Pricing</div>
-            <h2 class="section-title reveal">Fixed prices, published up front.</h2>
+            <h2 class="section-title reveal">Fixed prices, <span class="hl">right up front.</span></h2>
             <p class="section-intro reveal">Most gutter cleaners won't give you a price until they've seen the house. Here's mine.</p>
             <div class="reveal">{{template "pricing" .Site}}</div>
             <div class="reveal">{{template "payment-methods" .}}</div>
@@ -185,7 +184,7 @@
     <section class="areas-section" id="areas">
         <div class="container">
             <div class="section-label reveal">Service area</div>
-            <h2 class="section-title reveal">Based in Warrandyte, covering the green wedge.</h2>
+            <h2 class="section-title reveal">Covering Melbourne's north-east.</h2>
             <div class="reveal">{{template "areas" .Site}}</div>
         </div>
     </section>
@@ -197,7 +196,7 @@
             <div class="contact-inner">
                 <div class="contact-text">
                     <div class="section-label reveal">Contact</div>
-                    <h2 class="section-title reveal">Let's get those gutters done.</h2>
+                    <h2 class="section-title reveal">Gutters full? <span class="hl">Give me a yell.</span></h2>
                     <p class="contact-desc reveal">
                         Book online and you'll see the price before you send anything. Questions first? Email or call.
                     </p>
@@ -219,8 +218,8 @@
                     </div>
                     {{end}}
                     <div class="contact-detail-item">
-                        <div class="contact-detail-label">Based in</div>
-                        <div class="contact-detail-value">Warrandyte VIC 3113 — servicing Manningham, Nillumbik and nearby</div>
+                        <div class="contact-detail-label">Service area</div>
+                        <div class="contact-detail-value">Manningham, Nillumbik and Maroondah: about 15 minutes' drive from base</div>
                     </div>
                     <div class="contact-detail-item">
                         <div class="contact-detail-label">Hours</div>

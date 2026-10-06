@@ -76,7 +76,7 @@ var services = []Service{
 		Short:  "Every gutter cleared by hand, roof valleys done, downpipes flushed, and the mess bagged and taken away — with a dated photo report.",
 		Intro:  "A proper clean, not a quick blow-out from the lawn. I clear every metre of gutter by hand, clean out the roof valleys where leaves pile up, flush each downpipe to check it runs, and take everything away with me.",
 		Body: []string{
-			"Around Warrandyte the gums drop leaves, bark and gumnuts all year, so gutters fill faster than most people expect. Once they're full, water spills over the front, soaks the fascia and eaves, and finds its way into walls and foundations.",
+			"Across Melbourne's leafy north-east, gum trees drop leaves, bark and gumnuts all year, so gutters fill faster than most people expect. Once they're full, water spills over the front, soaks the fascia and eaves, and finds its way into walls and foundations.",
 			"You get before-and-after photos of every run of gutter with your receipt, so you can see the work without climbing a ladder. Nothing is burnt and nothing is left in your garden beds.",
 			"If I spot something that needs a plumber — a sagging section, a rusted-through joint, a broken downpipe — I'll photograph it and tell you. Repairs are licensed plumbing work in Victoria, so I don't do them myself.",
 		},
@@ -89,8 +89,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("Fixed prices from $%d for a unit to $%d for a double storey. Flushing downpipes and clearing valleys are included.", propertyTypes[0].Price, propertyTypes[len(propertyTypes)-1].Price),
 		Related:   []string{"bushfire-preparation", "fire-ready-plan", "downpipe-unblocking"},
-		MetaTitle: "Gutter Cleaning Warrandyte — Fixed Prices, Book Online | Warrandyte Gutters",
-		MetaDesc:  "Gutter cleaning in Warrandyte and nearby: every gutter cleared by hand, valleys done, downpipes flushed, photo report. Fixed prices, book online.",
+		MetaTitle: "Gutter Cleaning in Melbourne's North-East — Fixed Prices, Book Online | Up The Spout",
+		MetaDesc:  "Gutter cleaning in Melbourne's north-east: every gutter cleared by hand, valleys done, downpipes flushed, photo report. Fixed prices, book online.",
 	},
 	{
 		Slug:   "bushfire-preparation",
@@ -111,7 +111,7 @@ var services = []Service{
 		},
 		PriceNote: "Same fixed prices as a standard clean. Book early: October to December is the busiest time of the year.",
 		Related:   []string{"fire-ready-plan", "gutter-cleaning", "gutter-guard-homes"},
-		MetaTitle: "Bushfire Season Gutter Cleaning — Warrandyte & Surrounds | Warrandyte Gutters",
+		MetaTitle: "Bushfire Season Gutter Cleaning — Melbourne's North-East | Up The Spout",
 		MetaDesc:  "Get your gutters fire-ready before the Fire Danger Period. Dated photo report for council notices and insurers. Fixed prices, book online.",
 	},
 	{
@@ -131,8 +131,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("%d%% off every plan clean. Tick \"Fire-ready plan\" when you book.", planPct),
 		Related:   []string{"bushfire-preparation", "gutter-cleaning"},
-		MetaTitle: "Fire-Ready Gutter Plan — Two Cleans a Year | Warrandyte Gutters",
-		MetaDesc:  fmt.Sprintf("Spring and autumn gutter cleans at %d%% off each, with reminders. No contract, pay after each clean. Warrandyte, Park Orchards, Eltham and nearby.", planPct),
+		MetaTitle: "Fire-Ready Gutter Plan — Two Cleans a Year | Up The Spout",
+		MetaDesc:  fmt.Sprintf("Spring and autumn gutter cleans at %d%% off each, with reminders. No contract, pay after each clean. Across Melbourne's north-east.", planPct),
 	},
 	{
 		Slug:   "downpipe-unblocking",
@@ -151,8 +151,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("Flushing is included in every clean. A downpipe that needs jetting is $%d, and only with your OK.", downpipePrice),
 		Related:   []string{"gutter-cleaning", "gutter-guard-homes"},
-		MetaTitle: "Blocked Downpipe Clearing — Warrandyte & Surrounds | Warrandyte Gutters",
-		MetaDesc:  "Downpipes flushed on every gutter clean; blocked ones jetted with your OK. Fixed prices across Warrandyte, Park Orchards, Donvale and Eltham.",
+		MetaTitle: "Blocked Downpipe Clearing — Melbourne's North-East | Up The Spout",
+		MetaDesc:  "Downpipes flushed on every gutter clean; blocked ones jetted with your OK. Fixed prices across Melbourne's north-east.",
 	},
 	{
 		Slug:   "gutter-guard-homes",
@@ -171,8 +171,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("Add $%d to the clean when gutter guard is fitted.", guardPrice),
 		Related:   []string{"gutter-cleaning", "bushfire-preparation"},
-		MetaTitle: "Gutter Guard Cleaning — Warrandyte & Surrounds | Warrandyte Gutters",
-		MetaDesc:  "Gutter guard lifted, gutters cleaned underneath, mesh checked and refitted. Fixed price add-on. Warrandyte, Park Orchards, Wonga Park and nearby.",
+		MetaTitle: "Gutter Guard Cleaning — Melbourne's North-East | Up The Spout",
+		MetaDesc:  "Gutter guard lifted, gutters cleaned underneath, mesh checked and refitted. Fixed price add-on. Across Melbourne's north-east.",
 	},
 	{
 		Slug:   "pre-sale-and-rentals",
@@ -190,7 +190,7 @@ var services = []Service{
 		},
 		PriceNote: "Same fixed prices. Invoices can go to the owner or the agency.",
 		Related:   []string{"gutter-cleaning", "downpipe-unblocking"},
-		MetaTitle: "Pre-Sale & Rental Gutter Cleaning — Warrandyte | Warrandyte Gutters",
+		MetaTitle: "Pre-Sale & Rental Gutter Cleaning — Melbourne's North-East | Up The Spout",
 		MetaDesc:  "Gutter cleans before a sale, inspection or new tenancy, with a dated photo report. Invoice the owner or the agency. Fixed prices, book online.",
 	},
 }

@@ -10,6 +10,40 @@
 </a>
 {{end}}
 
+{{/* hero-art: the home page illustration. A house corner with a full gutter,
+     leaves flicking up out of it, and water dripping from the downpipe's
+     spout. Decorative; the animation classes are styled in styles.css. */}}
+{{define "hero-art"}}
+<svg viewBox="0 0 420 520" aria-hidden="true" focusable="false">
+    <g stroke="#12284A" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+        <circle cx="322" cy="92" r="74" fill="#FFD449"/>
+        <path d="M228 170 C210 170 202 148 218 138 C216 114 246 104 260 120 C270 98 308 100 312 128 C332 126 342 150 326 162 C322 168 316 170 308 170 Z" fill="#FFFFFF"/>
+        <rect x="22" y="214" width="262" height="290" fill="#FFFFFF"/>
+        <rect x="64" y="282" width="128" height="112" rx="10" fill="#E6F3FF"/>
+        <path d="M128 282 V394 M64 338 H192" fill="none"/>
+        <rect x="206" y="420" width="52" height="84" rx="6" fill="#FFD449"/>
+        <path d="M-8 222 L148 100 L306 222 Z" fill="#12284A"/>
+        <path d="M66 162 L230 162 M30 192 L268 192" fill="none" stroke="#2A4A7A" stroke-width="3"/>
+        <path d="M104 224 C100 210 106 200 118 196 C122 208 116 218 104 224 Z" fill="#FF7A21" stroke-width="3"/>
+        <path d="M196 222 C196 208 204 200 216 200 C216 212 208 220 196 222 Z" fill="#FFD449" stroke-width="3"/>
+        <path d="M44 220 C42 210 48 202 58 200 C60 210 54 217 44 220 Z" fill="#FFD449" stroke-width="3"/>
+        <rect x="-16" y="216" width="334" height="28" rx="10" fill="#FFFFFF"/>
+        <path d="M300 240 V282 C300 302 332 302 332 322 V432 A30 30 0 0 0 362 462 H384" fill="none" stroke-width="34"/>
+        <path d="M300 240 V282 C300 302 332 302 332 322 V432 A30 30 0 0 0 362 462 H384" fill="none" stroke="#FF7A21" stroke-width="25"/>
+        <rect x="312" y="362" width="40" height="10" rx="3" fill="#12284A" stroke="none"/>
+        <rect x="312" y="410" width="40" height="10" rx="3" fill="#12284A" stroke="none"/>
+        <path d="M-12 504 H432" fill="none"/>
+        <ellipse class="puddle" cx="398" cy="504" rx="30" ry="7" fill="#4DB0FF" stroke-width="3"/>
+        <path class="leaf" d="M70 210 C72 196 84 188 96 190 C94 202 84 210 70 210 Z" fill="#FFD449" stroke-width="3"/>
+        <path class="leaf leaf--2" d="M150 210 C152 196 164 188 176 190 C174 202 164 210 150 210 Z" fill="#FF7A21" stroke-width="3"/>
+        <path class="leaf leaf--3" d="M236 210 C238 196 250 188 262 190 C260 202 250 210 236 210 Z" fill="#FFD449" stroke-width="3"/>
+        <path class="drip" d="M398 466 C398 466 390 476 390 481 A8 8 0 0 0 406 481 C406 476 398 466 398 466 Z" fill="#4DB0FF" stroke-width="3"/>
+        <path class="drip drip--2" d="M398 466 C398 466 390 476 390 481 A8 8 0 0 0 406 481 C406 476 398 466 398 466 Z" fill="#4DB0FF" stroke-width="3"/>
+        <path class="drip drip--3" d="M398 466 C398 466 390 476 390 481 A8 8 0 0 0 406 481 C406 476 398 466 398 466 Z" fill="#4DB0FF" stroke-width="3"/>
+    </g>
+</svg>
+{{end}}
+
 {{/* price-card: the fixed price list. Takes a dict — "Site" (required), plus
      optional "Kicker", "Note", "BookURL" and "BookLabel" (a book button, and a
      call button when a phone is set). */}}
@@ -95,7 +129,7 @@
 <div class="areas-grid">
     <div class="area-map-wrap">
         <div id="area-map" class="area-map" role="img" aria-label="Map of Melbourne's outer north-east with a shaded circle showing the approximate service area around Warrandyte"></div>
-        <p class="area-map-caption">Approximate service area — about 15 minutes' drive from Warrandyte.</p>
+        <p class="area-map-caption">Approximate service area: about 15 minutes' drive from my base in Warrandyte.</p>
     </div>
     <div>
         <div class="area-list">
@@ -111,7 +145,7 @@
 <div class="book-cta reveal">
     <div class="book-cta-text">
         <div class="section-label">Ready when you are</div>
-        <h2 class="section-title">Book a gutter clean.</h2>
+        <h2 class="section-title">Let's get those gutters flowing.</h2>
         <p>Pick your property, see the price, and tell me which days suit. I'll confirm a time within a day.</p>
     </div>
     <div class="book-cta-actions">

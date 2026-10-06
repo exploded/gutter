@@ -161,9 +161,9 @@ func bookingICS(b *db.Booking, serviceTitle string) string {
 	if b.Suburb != "" {
 		loc = "LOCATION:" + icsEscape(b.Suburb) + "\r\n"
 	}
-	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//warrandytegutters.com.au//bookings//EN\r\nMETHOD:PUBLISH\r\n" +
+	return "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//upthespout.com.au//bookings//EN\r\nMETHOD:PUBLISH\r\n" +
 		"BEGIN:VEVENT\r\n" +
-		fmt.Sprintf("UID:booking-%d@warrandytegutters.com.au\r\n", b.ID) +
+		fmt.Sprintf("UID:booking-%d@upthespout.com.au\r\n", b.ID) +
 		"DTSTAMP:" + time.Now().UTC().Format(layout) + "\r\n" +
 		"DTSTART:" + start.Format(layout) + "\r\n" +
 		"DTEND:" + end.Format(layout) + "\r\n" +

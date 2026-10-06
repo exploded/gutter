@@ -1,7 +1,7 @@
 {{template "base" .}}
 
 {{define "meta"}}
-    <title>Gutter Cleaning Prices — Warrandyte, Park Orchards &amp; Eltham | Warrandyte Gutters</title>
+    <title>Gutter Cleaning Prices — Melbourne's North-East | Up The Spout</title>
     <meta name="description" content="Fixed gutter cleaning prices: {{range $i, $t := .Site.Prices.Types}}{{if $i}}, {{end}}{{$t.Name}} ${{$t.Price}}{{end}}. Downpipes, valleys and a photo report included.">
     <meta property="og:title" content="Gutter cleaning prices — published up front">
     <meta property="og:description" content="Fixed prices from {{.Site.Prices.Range}}. Downpipes flushed, valleys cleared, mess taken away, photo report.">
@@ -17,7 +17,7 @@
           "@type": "Service",
           "name": "Gutter cleaning",
           "serviceType": "Gutter cleaning",
-          "description": "Residential gutter cleaning around Warrandyte: every gutter cleared by hand, roof valleys cleared, downpipes flushed, debris taken away, and a before-and-after photo report.",
+          "description": "Residential gutter cleaning in Melbourne's north-east: every gutter cleared by hand, roof valleys cleared, downpipes flushed, debris taken away, and a before-and-after photo report.",
           "url": "{{.Site.BaseURL}}/pricing",
           "provider": {"@id": "{{.Site.BaseURL}}/#business"},
           "areaServed": [{{range $i, $n := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$n}}"}{{end}}],
