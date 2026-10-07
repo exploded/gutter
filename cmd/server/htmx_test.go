@@ -26,7 +26,7 @@ func TestBookingStatusHTMX(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Prices: pricing(), Suburbs: suburbs}
+	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Prices: pricing(), Suburbs: suburbs}
 	mail = nil
 
 	sessTok := "sess-" + generateSessionToken()

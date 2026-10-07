@@ -27,7 +27,7 @@ func seoTestSetup(t *testing.T) *http.ServeMux {
 	if err != nil {
 		t.Fatal(err)
 	}
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test",
+	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test",
 		Prices: pricing(), SeniorsPct: 20, Suburbs: suburbs, Areas: suburbList, Hours: hoursDisplay(), HoursLD: hoursSchema(),
 		IndexNowKey: "testindexnowkey0123456789abcdef0"}
 	return newMux("../..")
@@ -298,7 +298,7 @@ func TestJSONLD(t *testing.T) {
 	// Home page LocalBusiness: concrete priceRange and a booking action.
 	// (Match slash-free fragments — html/template escapes "/" inside <script>.)
 	home := get(mux, "/").Body.String()
-	for _, want := range []string{"ReserveAction", "$219–$489 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout"`, `"name": "Vin"`} {
+	for _, want := range []string{"ReserveAction", "$219–$489 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout Gutter Cleaning"`, `"alternateName": "Up The Spout"`, `"name": "Vin"`} {
 		if !strings.Contains(home, want) {
 			t.Errorf("home JSON-LD missing %s", want)
 		}

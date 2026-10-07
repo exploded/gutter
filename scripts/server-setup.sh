@@ -4,8 +4,8 @@ set -euo pipefail
 # One-time server setup for the Up The Spout Go web app (repo exploded/gutter).
 # Usage: curl -fsSL https://raw.githubusercontent.com/exploded/gutter/main/scripts/server-setup.sh | sudo bash
 #
-# Staged at gutter.mchugh.au until upthespout.com.au is registered; the
-# README's "Domain cutover" section covers the move.
+# Serves https://upthespout.com.au; the README's "Domains" section has the
+# DNS and Caddy setup.
 
 APP_DIR="/var/www/gutter"
 SERVICE="gutter"
@@ -24,8 +24,7 @@ cat > "$APP_DIR/.env" <<EOF
 PORT=$PORT
 PROD=true
 APP_DIR=$APP_DIR
-# Staging origin; change to https://upthespout.com.au at the domain cutover.
-BASE_URL=https://gutter.mchugh.au
+BASE_URL=https://upthespout.com.au
 
 # Contact details shown on the site (PHONE empty = phone UI hidden).
 # CONTACT_EMAIL is also the SES sender + notification address.
@@ -34,7 +33,7 @@ CONTACT_EMAIL=vin@upthespout.com.au
 OWNER_NAME=Vin
 
 # Invoices: ABN and bank transfer details (both empty = hidden). Prices live in cmd/server/pricing.go.
-ABN=
+ABN=70 158 581 130
 BANK_ACCOUNT_NAME=
 BANK_BSB=
 BANK_ACCOUNT_NO=
@@ -68,7 +67,7 @@ AWS_SECRET_ACCESS_KEY=
 SCHEDULER=
 
 # Nightly DB backup to S3 (scripts/s3-backup-setup.sh prints these). Empty = no backups.
-BACKUP_S3_BUCKET=warrandyte-gutters-backups
+BACKUP_S3_BUCKET=upthespout-backups
 BACKUP_AWS_ACCESS_KEY_ID=
 BACKUP_AWS_SECRET_ACCESS_KEY=
 EOF
@@ -122,11 +121,15 @@ Next steps:
   1. Edit $APP_DIR/.env (PHONE, ADMIN_EMAIL, Google OAuth, Mappify, SES).
   2. Add this to /etc/caddy/Caddyfile and run: sudo systemctl reload caddy
 
-     gutter.mchugh.au {
+     upthespout.com.au {
          import access_log
          reverse_proxy 127.0.0.1:$PORT {
              import go_proxy
          }
+     }
+
+     www.upthespout.com.au, upthespout.com, www.upthespout.com {
+         redir https://upthespout.com.au{uri} permanent
      }
 
   3. Deploy from GitHub Actions (or: sudo /usr/local/bin/deploy-gutter), then

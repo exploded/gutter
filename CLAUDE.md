@@ -65,5 +65,5 @@ Booking needs `MAPPIFY_API_KEY` for the address autocomplete.
 
 ## Deploy
 Push to `main` → GitHub Actions (vet + test, build, scp, `deploy-gutter`).
-Server: `/var/www/gutter`, systemd unit `gutter`, port **8997**, staged at
-`https://gutter.mchugh.au` until `upthespout.com.au` is registered.
+Server: `/var/www/gutter`, systemd unit `gutter`, port **8997**, live at
+`https://upthespout.com.au` (`www.` and `upthespout.com` redirect to it in Caddy).

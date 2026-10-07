@@ -757,6 +757,7 @@ func sourceRows() ([]sourceRow, int64) {
 // siteConfig holds global, environment-driven settings exposed to every template as .Site.
 type siteConfig struct {
 	Name        string       // business name as registered and on the Google Business Profile
+	Brand       string       // the short name in the wordmark: nav, footer, page titles
 	Owner       string       // the person who turns up, for "I'm Vin" copy
 	BaseURL     string       // canonical origin, no trailing slash, e.g. https://upthespout.com.au
 	Phone       string       // display phone, empty hides all phone UI
@@ -788,10 +789,15 @@ type siteConfig struct {
 
 var site siteConfig
 
-// businessName is the trading name. It must match the ASIC registration, the
-// Google Business Profile and the vehicle signs exactly: Google treats a
-// mismatch as a reason to doubt the profile.
-const businessName = "Up The Spout"
+// businessName is the registered business name (ASIC, ABN 70 158 581 130).
+// It must match the ASIC registration, the Google Business Profile and the
+// vehicle signs exactly: Google treats a mismatch as a reason to doubt the
+// profile. ASIC stores it in capitals; this is the same name in title case.
+const businessName = "Up The Spout Gutter Cleaning"
+
+// brandName is the short name the wordmark uses, with "Gutter cleaning" set
+// under it as a subline, as on the logo lockup.
+const brandName = "Up The Spout"
 
 func initSiteConfig(port string) {
 	base := strings.TrimRight(os.Getenv("BASE_URL"), "/")
@@ -808,6 +814,7 @@ func initSiteConfig(port string) {
 	}
 	site = siteConfig{
 		Name:        businessName,
+		Brand:       brandName,
 		Owner:       envOr("OWNER_NAME", "Vin"),
 		BaseURL:     base,
 		Phone:       strings.TrimSpace(os.Getenv("PHONE")),

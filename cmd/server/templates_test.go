@@ -18,7 +18,7 @@ func TestTemplatesRender(t *testing.T) {
 		t.Fatalf("load templates: %v", err)
 	}
 	site = siteConfig{
-		Name: businessName, Owner: "Vin",
+		Name: businessName, Brand: brandName, Owner: "Vin",
 		BaseURL: "https://example.test", Phone: "0400 000 000", PhoneHref: "tel:+61400000000",
 		Email: "test@example.test", Prices: pricing(), SeniorsPct: 20, Suburbs: suburbs, Areas: suburbList,
 		Hours: hoursDisplay(), HoursLD: hoursSchema(), ABN: "12 345 678 901",
@@ -185,7 +185,7 @@ func TestServiceCatalogue(t *testing.T) {
 		if s.Title == "" || s.Short == "" || s.Intro == "" || len(s.Problems) == 0 || s.PriceNote == "" || s.MetaTitle == "" || s.MetaDesc == "" {
 			t.Errorf("service %q missing required copy", s.Slug)
 		}
-		if !strings.Contains(s.MetaTitle, businessName) {
+		if !strings.Contains(s.MetaTitle, brandName) {
 			t.Errorf("service %q meta title doesn't name the business: %q", s.Slug, s.MetaTitle)
 		}
 		for _, r := range s.Related {

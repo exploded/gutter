@@ -10,8 +10,7 @@ Go + `html/template` + SQLite (sqlc). Forked from
 the shared mechanics in more depth.
 
 - Repo: `exploded/gutter`, Go module `gutter`
-- Staging: https://gutter.mchugh.au (port 8997, systemd unit `gutter`)
-- Production domain (once registered): https://upthespout.com.au
+- Live: https://upthespout.com.au (port 8997, systemd unit `gutter`)
 
 ## Structure
 
@@ -80,24 +79,45 @@ The scheduler (on when `PROD` is set) sends the day-before reminder, the
    `sudo systemctl reload caddy`, and `sudo systemctl enable --now gutter`.
 2. **Google Cloud**: create a project for this app (separate from the shared
    mchugh.au project, as Local IT Help does), an OAuth client with redirect URIs
-   `https://gutter.mchugh.au/auth/google/callback` and
-   `https://gutter.mchugh.au/auth/google/calendar/callback`, enable the Calendar
+   `https://upthespout.com.au/auth/google/callback` and
+   `https://upthespout.com.au/auth/google/calendar/callback`, enable the Calendar
    API, add the `calendar` scope, and set the consent screen to **In production**.
 3. **Admin accounts**: `ADMIN_EMAIL=<Vin's Gmail>,james67@gmail.com`. Vin connects
    Google Calendar from `/admin/calendar/settings` with his own account.
-4. **Email**: after the domain is registered, `AWS_PROFILE=… CF_TOKEN=… scripts/ses-setup.sh`.
+4. **Email**: `AWS_PROFILE=… CF_TOKEN=… scripts/ses-setup.sh`.
 5. **Backups**: `AWS_PROFILE=… scripts/s3-backup-setup.sh`.
 
-## Domain cutover (to do)
+## Domains
 
-When `upthespout.com.au` is registered and on Cloudflare:
+`upthespout.com.au` (VentraIP, DNS on Cloudflare) is the only site. Both zones
+point `@` and `www` at the Linode box, DNS-only. Caddy serves the site on one
+name and redirects the rest; `canonicalHost` (seo.go) also 301s any host that
+isn't the one in `BASE_URL`.
 
-1. DNS: `A`/`AAAA` for `@` and `www` → the Linode box, DNS-only.
-2. Caddy: a `upthespout.com.au` block proxying to port 8997, with
-   `www.` and `gutter.mchugh.au` redirecting to it.
-3. `.env`: `BASE_URL=https://upthespout.com.au`; restart.
-4. Google Cloud: add the new redirect URIs.
-5. Search Console: add the property and submit `/sitemap.xml`.
+```
+upthespout.com.au {
+    import access_log
+    reverse_proxy 127.0.0.1:8997 {
+        import go_proxy
+    }
+}
+
+www.upthespout.com.au, upthespout.com, www.upthespout.com {
+    redir https://upthespout.com.au{uri} permanent
+}
+```
+
+`upthespout.com` is registered with Cloudflare Registrar and exists only to
+redirect. The old staging name, `gutter.mchugh.au`, was retired on
+7 October 2026.
+
+Still to do for the domain:
+
+1. Email: Cloudflare Email Routing on `upthespout.com.au` forwards
+   `vin@upthespout.com.au` to Vin's Gmail; then run `scripts/ses-setup.sh` so
+   the site can send as that address.
+2. Search Console: add `upthespout.com.au` as a domain property and submit
+   `/sitemap.xml`. Use the new URL on the Google Business Profile and in Ads.
 
 ## Brand assets
 

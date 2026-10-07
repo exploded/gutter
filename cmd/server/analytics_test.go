@@ -8,7 +8,7 @@ import (
 
 func testSite() siteConfig {
 	return siteConfig{
-		Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "test@example.test",
+		Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "test@example.test",
 		Prices: pricing(), Suburbs: suburbs,
 		Analytics: true, TagID: "G-TEST12345", GA4ID: "G-TEST12345",
 		AdsID: "AW-123456789", AdsBookLabel: "bookLabel", AdsCallLabel: "callLabel",

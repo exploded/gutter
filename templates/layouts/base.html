@@ -44,7 +44,7 @@
 
     <!-- Navigation -->
     <nav>
-        <a href="/" class="nav-brand"><img src="/static/img/logo-mark.svg" alt="" width="36" height="36" class="nav-brand-icon">{{.Site.Name}}</a>
+        <a href="/" class="nav-brand" aria-label="{{.Site.Name}}, home"><img src="/static/img/logo-mark.svg" alt="" width="36" height="36" class="nav-brand-icon"><span class="nav-brand-words"><span class="nav-brand-name">{{.Site.Brand}}</span><span class="nav-brand-sub">Gutter cleaning</span></span></a>
         <div class="nav-links">
             <a href="/services"{{if hasPrefix .Path "/services"}} class="active"{{end}}>Services</a>
             <a href="/pricing"{{if hasPrefix .Path "/pricing"}} class="active"{{end}}>Pricing</a>
@@ -72,7 +72,7 @@
     <!-- Footer -->
     <footer>
         <div class="footer-inner">
-            <div class="footer-copy"><img src="/static/img/logo-mark.svg" alt="" width="34" height="34" class="footer-icon"><strong>{{.Site.Name}}</strong>&copy; 2026 {{.Site.Owner}} &middot; Melbourne's north-east{{if .Site.ABN}} &middot; ABN {{.Site.ABN}}{{end}}</div>
+            <div class="footer-copy"><img src="/static/img/logo-mark.svg" alt="" width="34" height="34" class="footer-icon"><strong>{{.Site.Brand}}</strong>&copy; 2026 {{.Site.Name}}{{if .Site.ABN}} &middot; ABN {{.Site.ABN}}{{end}}</div>
             <div class="footer-links">
                 <a href="/services">Services</a>
                 <a href="/pricing">Pricing</a>

@@ -38,7 +38,7 @@ func sampleInvoiceView(status string) *invoiceView {
 }
 
 func TestBillingMailTemplates(t *testing.T) {
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
+	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
 		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678"}
 	b := &db.Booking{ID: 3, Name: "Ann <b>Bold</b>", Email: "ann@example.test", Suburb: "Donvale", ServiceSlug: "fire-ready-plan",
 		PropertyType: "single", OnPlan: true, Issue: "Spring plan clean", StartAt: time.Date(2026, 8, 20, 9, 30, 0, 0, db.Melbourne),
@@ -129,7 +129,7 @@ func TestBillingMailTemplates(t *testing.T) {
 }
 
 func TestInvoicePDF(t *testing.T) {
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
+	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000",
 		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678"}
 	for _, status := range []string{db.InvoiceSent, db.InvoicePaid, db.InvoiceVoid} {
 		out, err := invoicePDF(sampleInvoiceView(status))

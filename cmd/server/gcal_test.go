@@ -505,7 +505,7 @@ func TestLoginScopesUnchanged(t *testing.T) {
 	}
 }
 
-// TestFindOrCreateBookingCalendar reuses an existing "Up The Spout" calendar
+// TestFindOrCreateBookingCalendar reuses an existing "Up The Spout Gutter Cleaning" calendar
 // instead of making a second one on every reconnect.
 func TestFindOrCreateBookingCalendar(t *testing.T) {
 	f := newFakeCalendar()

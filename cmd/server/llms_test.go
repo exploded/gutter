@@ -16,7 +16,7 @@ func TestLlmsTxt(t *testing.T) {
 		t.Fatalf("llms.txt: %d %s", rr.Code, rr.Header().Get("Content-Type"))
 	}
 	body := rr.Body.String()
-	if !strings.HasPrefix(body, "# Up The Spout\n") {
+	if !strings.HasPrefix(body, "# Up The Spout Gutter Cleaning\n") {
 		t.Errorf("llms.txt must start with the H1:\n%.100s", body)
 	}
 	if !strings.Contains(body, "\n> ") && !strings.HasPrefix(body, "> ") {

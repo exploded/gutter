@@ -8,7 +8,7 @@ import (
 )
 
 func TestMailTemplatesRender(t *testing.T) {
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
+	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
 	b := &db.Booking{Name: "Ann <b>Bold</b>", Phone: "0400 111 222", Email: "ann@example.test",
 		Suburb: "Donvale", Address: "12 Smith St, Donvale VIC 3111", ServiceSlug: "bushfire-preparation",
 		PropertyType: "double", OnPlan: true,
@@ -29,7 +29,7 @@ func TestMailTemplatesRender(t *testing.T) {
 			t.Errorf("%s: user input not escaped", name)
 		}
 		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$430.00",
-			"Fire-season gutter clean", "Up The Spout — Vin"} {
+			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Vin"} {
 			if !strings.Contains(out, want) {
 				t.Errorf("%s: missing %q:\n%s", name, want, out)
 			}

@@ -16,6 +16,7 @@
           "@type": "HomeAndConstructionBusiness",
           "@id": "{{.Site.BaseURL}}/#business",
           "name": "{{.Site.Name}}",
+          "alternateName": "{{.Site.Brand}}",
           "url": "{{.Site.BaseURL}}/",
           "image": "{{.Site.BaseURL}}/static/img/og.png",
           "logo": "{{.Site.BaseURL}}/static/img/icon-512.png",{{if .Site.SameAs}}
@@ -45,6 +46,7 @@
           "@id": "{{.Site.BaseURL}}/#website",
           "url": "{{.Site.BaseURL}}/",
           "name": "{{.Site.Name}}",
+          "alternateName": "{{.Site.Brand}}",
           "publisher": {"@id": "{{.Site.BaseURL}}/#business"},
           "inLanguage": "en-AU"
         }

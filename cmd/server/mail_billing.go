@@ -152,9 +152,9 @@ func bookingICS(b *db.Booking, serviceTitle string) string {
 	const layout = "20060102T150405Z"
 	start := b.StartAt.UTC()
 	end := b.EndAt().UTC()
-	summary := site.Name + " — gutter clean"
+	summary := site.Brand + " — gutter clean"
 	if serviceTitle != "" {
-		summary = site.Name + " — " + serviceTitle
+		summary = site.Brand + " — " + serviceTitle
 	}
 	desc := strings.ReplaceAll(strings.ReplaceAll(b.Issue, "\r", ""), "\n", "\\n")
 	loc := ""
