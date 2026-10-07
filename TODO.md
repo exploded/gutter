@@ -2,18 +2,19 @@
 
 In priority order. `[ ]` to do · ✅ done.
 
-## Before launch (week of 12 October 2026)
+## Before launch (bookings open 19 October 2026)
 
-- [ ] ABN for Up The Spout (approved; number due by 8 October 2026) → `ABN` in `.env`
-- [ ] Check IP Australia trade marks (class 37) for "Up The Spout"
-- [ ] Register "Up The Spout" as a business name with ASIC (an ABN doesn't register the name), then `upthespout.com.au` and `.au`
-- [ ] Domain cutover (README → Domain cutover), SES setup, `CONTACT_EMAIL`
-- [ ] Fill `.env`: `PHONE`, `ABN`, `ADMIN_EMAIL` (Vin's Gmail first), `MAPPIFY_API_KEY`, Google OAuth
-- [ ] Confirm trading hours with Vin (`openHours` in main.go) — must match the Business Profile
+The full list for James and Vin is the launch checklist doc (private; not in
+this public repo). The code-side items:
+
+- [ ] Send email from `bookings@upthespout.com.au` (SES) with `Reply-To` the business Gmail, once it exists
+- [ ] Fill `.env`: `PHONE`, `CONTACT_EMAIL`, `ADMIN_EMAIL`, bank details
+- [ ] Business cards (`tools/bizcard`) once the phone number is final
 - [ ] Replace stock suburb photos with Vin's own (`tools/areaphoto`); add a photo of Vin to the home page
-- [ ] Print business cards (`tools/bizcard`) once the phone number is final
-- [ ] `REVIEW_URL` once the Google Business Profile is verified; `SAME_AS` with the profile URL
-- [ ] Google Ads conversion actions → `GOOGLE_ADS_ID`, `GOOGLE_ADS_BOOKING_LABEL`, `GOOGLE_ADS_CALL_LABEL`
+- [ ] `REVIEW_URL` and `SAME_AS` once the Google Business Profile is verified
+- [x] `GA4_ID` (live 7 October 2026)
+- [ ] `GOOGLE_ADS_ID`, `GOOGLE_ADS_BOOKING_LABEL`, `GOOGLE_ADS_CALL_LABEL`
+- [ ] Delete the `warrandyte-gutters-backups` bucket once backups land in `upthespout-backups`
 
 ## Features
 

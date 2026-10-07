@@ -6,16 +6,19 @@ import (
 	"html/template"
 	"log"
 	"os"
+	"strings"
 
 	"gutter/db"
 	"gutter/mailer"
 )
 
-// ── Email notifications (Amazon SES) ──
+// ── Email notifications (Amazon SES, or Gmail once connected) ──
 //
-// Configured by AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION; the
-// sender and notification address are CONTACT_EMAIL. When the keys are absent the mailer is nil and every notify*
-// call is a silent no-op, so local dev works without any AWS setup.
+// SES is configured by AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION;
+// the sender and notification address are CONTACT_EMAIL. When the admin
+// connects Gmail (gmail.go), customer mail goes from that account instead.
+// With neither configured every notify* call is a silent no-op, so local dev
+// works without any AWS or Google setup.
 
 var (
 	mail        *mailer.Mailer
@@ -39,14 +42,19 @@ func initMail() {
 	}
 }
 
+// mailEnabled reports whether any route can send.
+func mailEnabled() bool {
+	return mail.Enabled() || gmail.Load() != nil
+}
+
 // send delivers an email in the background and logs failures. Callers must
 // not depend on delivery; the request has already been persisted.
 func send(to, subject, html, text, replyTo string) {
-	if !mail.Enabled() || to == "" {
+	if !mailEnabled() || to == "" {
 		return
 	}
 	go func() {
-		if err := mail.Send(to, subject, html, text, replyTo); err != nil {
+		if err := deliver(to, subject, html, text, replyTo); err != nil {
 			log.Printf("email: %v", err)
 		}
 	}()
@@ -54,15 +62,37 @@ func send(to, subject, html, text, replyTo string) {
 
 // sendNow delivers synchronously (with optional attachments) and returns the
 // error, for admin actions where the outcome must be shown and a state change
-// should only happen on success. When SES is not configured it logs and
+// should only happen on success. When email is not configured it logs and
 // returns nil so local flows still complete.
 func sendNow(to, subject, html, text, replyTo string, atts ...mailer.Attachment) error {
 	if to == "" {
 		return fmt.Errorf("no recipient address")
 	}
-	if !mail.Enabled() {
+	if !mailEnabled() {
 		log.Printf("email: (disabled) would send %q to %s with %d attachment(s)", subject, to, len(atts))
 		return nil
+	}
+	return deliver(to, subject, html, text, replyTo, atts...)
+}
+
+// deliver picks the route for one message. Customer mail goes through Gmail
+// when it's connected, falling back to SES if Gmail fails. Admin notices stay
+// on SES: CONTACT_EMAIL forwards to the same Gmail account, and Gmail drops a
+// forwarded copy of a message it has already filed in Sent, so a booking alert
+// sent from that account would never reach the inbox.
+func deliver(to, subject, html, text, replyTo string, atts ...mailer.Attachment) error {
+	g := gmail.Load()
+	if g != nil && (!mail.Enabled() || !strings.EqualFold(to, notifyEmail)) {
+		// Replies should land straight in the Gmail thread, not take the long
+		// way round through the CONTACT_EMAIL forward.
+		if strings.EqualFold(replyTo, site.Email) {
+			replyTo = ""
+		}
+		err := g.send(to, subject, html, text, replyTo, atts...)
+		if err == nil || !mail.Enabled() {
+			return err
+		}
+		log.Printf("email: Gmail failed, sending %q to %s through SES instead", subject, to)
 	}
 	return mail.SendWithAttachments(to, subject, html, text, replyTo, atts...)
 }
@@ -111,6 +141,11 @@ const mailTmplSrc = `
 <p style="color:#666">You don't need to be home on the day, as long as I can get to the side of the house. Please let me know about locked gates, dogs, or solar panels on the roof.</p>
 <p>— {{site.Owner}}</p>
 {{end}}
+
+{{define "gmail-test"}}
+<h2 style="margin:0 0 12px">Gmail is connected</h2>
+<p>This test came from the {{site.Name}} admin. Confirmations, reminders, invoices and receipts now go to customers from <strong>{{.From}}</strong>, and they'll sit in that account's Sent mail.</p>
+{{end}}
 `
 
 var mailTmpl = template.Must(template.Must(template.New("mail").Funcs(template.FuncMap{
@@ -137,7 +172,7 @@ func renderMail(name string, data any) (string, error) {
 // notifyBooking emails the admin (always) and the customer (when they gave an
 // address and the submission wasn't flagged) after a booking is stored.
 func notifyBooking(id int64, b *db.Booking, suspicious bool) {
-	if !mail.Enabled() {
+	if !mailEnabled() {
 		return
 	}
 	svcTitle := ""

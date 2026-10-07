@@ -81,6 +81,8 @@ func main() {
 		}
 		log.Println("Google OAuth2 configured")
 		initGCalOAuth()
+		initGmailOAuth()
+		loadGmail()
 	} else {
 		log.Println("GOOGLE_CLIENT_ID not set — Google login disabled")
 	}
@@ -162,6 +164,11 @@ func newMux(dir string) *http.ServeMux {
 	mux.HandleFunc("POST /admin/calendar/busy", requireAdmin(handleAdminCalendarBusy))
 	mux.HandleFunc("POST /admin/calendar/resync", requireAdmin(handleAdminCalendarResync))
 	mux.HandleFunc("GET /auth/google/calendar/callback", requireAdmin(handleGCalCallback))
+	mux.HandleFunc("GET /admin/email", requireAdmin(handleAdminEmailSettings))
+	mux.HandleFunc("POST /admin/email/connect", requireAdmin(handleGmailConnect))
+	mux.HandleFunc("POST /admin/email/disconnect", requireAdmin(handleGmailDisconnect))
+	mux.HandleFunc("POST /admin/email/test", requireAdmin(handleAdminEmailTest))
+	mux.HandleFunc("GET /auth/google/mail/callback", requireAdmin(handleGmailCallback))
 	mux.HandleFunc("GET /admin/invoices", requireAdmin(handleAdminInvoices))
 	mux.HandleFunc("POST /admin/invoices/new", requireAdmin(handleAdminInvoiceNew))
 	mux.HandleFunc("GET /admin/invoices/{id}", requireAdmin(handleAdminInvoice))
@@ -648,6 +655,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		Outstanding:  outstanding,
 		Week:         bookingRows(week),
 		CalendarOn:   calendarSyncConnected(),
+		GmailFrom:    gmailFrom(),
 		Sources:      sources,
 		Unattributed: unattributed,
 		AdDays:       adWindowDays,
@@ -664,7 +672,8 @@ type adminDashData struct {
 	SentCount    int
 	Outstanding  int64 // cents, invoices sent but unpaid
 	Week         []bookingRow
-	CalendarOn   bool // Google Calendar sync is connected
+	CalendarOn   bool   // Google Calendar sync is connected
+	GmailFrom    string // Gmail account customer mail goes from; "" = SES
 	Sources      []sourceRow
 	Unattributed int64 // cents paid on invoices with no booking behind them
 	AdDays       int   // window the two ad numbers below cover

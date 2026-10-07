@@ -129,3 +129,14 @@ CREATE TABLE IF NOT EXISTS google_calendar (
     last_sync_at   TEXT NOT NULL DEFAULT '',   -- UTC; last successful push or busy query
     last_error     TEXT NOT NULL DEFAULT ''
 );
+
+-- Gmail sending: a single row (id = 1) holding the refresh token for the account
+-- customer emails are sent from. Deleting the row puts sending back on SES.
+CREATE TABLE IF NOT EXISTS google_mail (
+    id             INTEGER PRIMARY KEY CHECK (id = 1),
+    account_email  TEXT NOT NULL DEFAULT '',   -- must match the primary ADMIN_EMAIL
+    refresh_token  TEXT NOT NULL DEFAULT '',
+    connected_at   TEXT NOT NULL DEFAULT '',   -- UTC
+    last_sent_at   TEXT NOT NULL DEFAULT '',   -- UTC; last message Gmail accepted
+    last_error     TEXT NOT NULL DEFAULT ''
+);

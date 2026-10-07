@@ -91,7 +91,11 @@ func TestTemplatesRender(t *testing.T) {
 				ConnectedAt: time.Now(), LastSyncAt: time.Now(), LastError: "boom"},
 			Calendars: []calSettingsCal{{ID: "cal1", Name: calendarName, IsApp: true}, {ID: "p", Name: "Personal", Primary: true}, {ID: "s", Name: "Sport", Skipped: true}}},
 		"admin-calendar-settings-off": calSettingsData{Configured: true, AdminEmail: "me@example.test"},
-		"admin-invoices":              adminInvoicesData{Status: "sent", Statuses: []string{"draft", "sent"}, Rows: []invoiceRow{{Invoice: *inv, Ref: "INV-1001", CustName: "Ann", Issued: "20 Aug 2026"}}, TotalOut: 500},
+		"admin-email": emailSettingsData{Flash: flash{OK: "x"}, Configured: true, SESOn: true, AdminEmail: "me@example.test",
+			NotifyEmail: "me@example.test", SiteEmail: "vin@example.test",
+			Conn: &db.GoogleMail{AccountEmail: "me@example.test", RefreshToken: "r", ConnectedAt: time.Now(), LastSentAt: time.Now(), LastError: "boom"}},
+		"admin-email-off": emailSettingsData{Configured: true, AdminEmail: "me@example.test", SiteEmail: "vin@example.test"},
+		"admin-invoices":  adminInvoicesData{Status: "sent", Statuses: []string{"draft", "sent"}, Rows: []invoiceRow{{Invoice: *inv, Ref: "INV-1001", CustName: "Ann", Issued: "20 Aug 2026"}}, TotalOut: 500},
 		"admin-invoice": func() adminInvoiceData {
 			v := sampleInvoiceView(db.InvoiceDraft)
 			return adminInvoiceData{V: v, Ref: "INV-1001", Total: "$279.00", TotalDollars: "279.00", Editable: true, CanSend: true, CanPay: true, CanVoid: true,
@@ -130,7 +134,7 @@ func TestTemplatesRender(t *testing.T) {
 	}
 	// Variants (name suffix after the page) reuse the same template with different data.
 	pageOf := func(name string) string {
-		for _, p := range []string{"admin-booking-nocust", "admin-invoice-sent", "invoice-public-paid", "admin-review-card-empty", "admin-calendar-settings-off", "book-plain"} {
+		for _, p := range []string{"admin-booking-nocust", "admin-invoice-sent", "invoice-public-paid", "admin-review-card-empty", "admin-calendar-settings-off", "admin-email-off", "book-plain"} {
 			if name == p {
 				return name[:strings.LastIndex(name, "-")]
 			}

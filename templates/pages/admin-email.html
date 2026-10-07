@@ -1,0 +1,98 @@
+{{template "base" .}}
+
+{{define "meta"}}
+    <title>Admin — Email</title>
+    <meta name="robots" content="noindex">
+{{end}}
+
+{{define "content"}}
+    {{$d := .PageData}}
+    <div class="page-header">
+        <div class="container">
+            <div class="section-label">Administration</div>
+            <h1 class="section-title">Email</h1>
+            {{template "admin-nav" .Path}}
+        </div>
+    </div>
+
+    <section class="admin-section">
+        <div class="container">
+            <div id="admin-flash">
+            {{if $d.Flash.OK}}<div class="admin-status admin-status--success admin-flash">{{$d.Flash.OK}}</div>{{end}}
+            {{if $d.Flash.Err}}<div class="admin-status admin-status--error admin-flash">{{$d.Flash.Err}}</div>{{end}}
+            </div>
+
+            {{if not $d.Configured}}
+            <div class="admin-status admin-status--error">
+                Google OAuth isn't configured on this server. Set <code>GOOGLE_CLIENT_ID</code> and
+                <code>GOOGLE_CLIENT_SECRET</code> in the server <code>.env</code>, then restart.
+            </div>
+            {{else if $d.Conn.Connected}}
+
+            <div class="admin-card">
+                <h2 class="admin-card-title">Sending from Gmail</h2>
+                <dl class="admin-dl">
+                    <dt>Gmail account</dt><dd>{{$d.Conn.AccountEmail}}</dd>
+                    <dt>Connected</dt><dd>{{$d.Conn.ConnectedAt.Format "2 Jan 2006, 3:04 pm"}} UTC</dd>
+                    <dt>Last email sent</dt>
+                    <dd>{{if $d.Conn.LastSentAt.IsZero}}none yet{{else}}{{$d.Conn.LastSentAt.Format "2 Jan 2006, 3:04 pm"}} UTC{{end}}</dd>
+                    {{if $d.Conn.LastError}}<dt>Last error</dt><dd class="admin-error-text">{{$d.Conn.LastError}}</dd>{{end}}
+                </dl>
+                <p class="admin-note">
+                    Booking confirmations, reminders, invoices and receipts go to customers from
+                    <strong>{{$d.Conn.AccountEmail}}</strong>. They show up in its Sent mail, and replies come
+                    straight back to it.
+                    {{if $d.SESOn}}If Gmail ever refuses a message, it goes through Amazon SES from
+                    {{$d.SiteEmail}} instead, and the error shows here.{{else}}<strong>Amazon SES isn't set up</strong>,
+                    so if Gmail refuses a message, it isn't sent.{{end}}
+                </p>
+                {{if $d.SESOn}}
+                <p class="admin-note admin-note--small">
+                    New-booking alerts and the morning digest to {{$d.NotifyEmail}} still come through Amazon SES.
+                    Gmail hides a forwarded copy of mail it has already sent, so they'd never reach your inbox.
+                </p>
+                {{end}}
+                <div class="admin-actions">
+                    {{/* Only the message changes, so the main swap is none. */}}
+                    <form method="post" action="/admin/email/test"
+                          hx-post="/admin/email/test" hx-swap="none" hx-disable="find button">
+                        <input type="hidden" name="csrf" value="{{.CSRF}}">
+                        <button class="btn btn--ghost btn--sm" type="submit">Send me a test email</button>
+                    </form>
+                    <form method="post" action="/admin/email/disconnect"
+                          onsubmit="return confirm('Disconnect Gmail? Customer emails will go through Amazon SES again.')">
+                        <input type="hidden" name="csrf" value="{{.CSRF}}">
+                        <button class="btn btn--ghost btn--sm" type="submit">Disconnect</button>
+                    </form>
+                </div>
+            </div>
+
+            {{else}}
+
+            <div class="admin-card">
+                <h2 class="admin-card-title">Not connected</h2>
+                <p class="admin-note">
+                    {{if $d.SESOn}}Customer emails go out through Amazon SES from {{$d.SiteEmail}}.{{else}}No email is
+                    being sent: neither Gmail nor Amazon SES is set up.{{end}}
+                    Connect <strong>{{$d.AdminEmail}}</strong> to send booking confirmations, reminders, invoices and
+                    receipts from your own Gmail instead. They'll sit in your Sent mail, and customer replies
+                    thread with them.
+                </p>
+                <p class="admin-note">
+                    The app can only <em>send</em> as you. It can't read, search or delete anything in your mailbox.
+                </p>
+                <form method="post" action="/admin/email/connect">
+                    <input type="hidden" name="csrf" value="{{.CSRF}}">
+                    <button class="btn btn--primary" type="submit">Connect Gmail</button>
+                </form>
+                <p class="admin-note admin-note--small">
+                    Google will show an "unverified app" warning — that's expected for a private app.
+                    Choose <em>Advanced → Go to upthespout.com.au</em> to continue, and leave
+                    "Send email on your behalf" ticked.
+                </p>
+            </div>
+
+            {{end}}
+        </div>
+    </section>
+{{end}}

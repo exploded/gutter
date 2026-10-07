@@ -70,6 +70,15 @@ type GoogleCalendar struct {
 	LastError     string `json:"last_error"`
 }
 
+type GoogleMail struct {
+	ID           int64  `json:"id"`
+	AccountEmail string `json:"account_email"`
+	RefreshToken string `json:"refresh_token"`
+	ConnectedAt  string `json:"connected_at"`
+	LastSentAt   string `json:"last_sent_at"`
+	LastError    string `json:"last_error"`
+}
+
 type Invoice struct {
 	ID            int64  `json:"id"`
 	Number        int64  `json:"number"`

@@ -185,6 +185,30 @@ UPDATE google_calendar SET last_error = ? WHERE id = 1;
 -- name: DeleteGoogleCalendar :exec
 DELETE FROM google_calendar WHERE id = 1;
 
+-- Gmail sending
+
+-- name: GetGoogleMail :one
+SELECT account_email, refresh_token, connected_at, last_sent_at, last_error
+FROM google_mail WHERE id = 1;
+
+-- name: SaveGoogleMail :exec
+INSERT INTO google_mail (id, account_email, refresh_token, connected_at, last_sent_at, last_error)
+VALUES (1, ?, ?, datetime('now'), '', '')
+ON CONFLICT(id) DO UPDATE SET
+    account_email = excluded.account_email,
+    refresh_token = excluded.refresh_token,
+    connected_at  = datetime('now'),
+    last_error    = '';
+
+-- name: MarkGoogleMailSent :exec
+UPDATE google_mail SET last_sent_at = datetime('now'), last_error = '' WHERE id = 1;
+
+-- name: SetGoogleMailError :exec
+UPDATE google_mail SET last_error = ? WHERE id = 1;
+
+-- name: DeleteGoogleMail :exec
+DELETE FROM google_mail WHERE id = 1;
+
 -- Scheduler
 
 -- name: InsertSchedulerRun :execrows

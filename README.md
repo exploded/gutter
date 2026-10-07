@@ -80,10 +80,15 @@ The scheduler (on when `PROD` is set) sends the day-before reminder, the
 2. **Google Cloud**: create a project for this app (separate from the shared
    mchugh.au project, as Local IT Help does), an OAuth client with redirect URIs
    `https://upthespout.com.au/auth/google/callback` and
-   `https://upthespout.com.au/auth/google/calendar/callback`, enable the Calendar
-   API, add the `calendar` scope, and set the consent screen to **In production**.
+   `https://upthespout.com.au/auth/google/calendar/callback` and
+   `https://upthespout.com.au/auth/google/mail/callback`, enable the Calendar
+   and Gmail APIs, add the `calendar` and `gmail.send` scopes, and set the
+   consent screen to **In production**.
 3. **Admin accounts**: `ADMIN_EMAIL=<Vin's Gmail>,james67@gmail.com`. Vin connects
-   Google Calendar from `/admin/calendar/settings` with his own account.
+   Google Calendar from `/admin/calendar/settings` and Gmail from `/admin/email`,
+   both with his own account. Once Gmail is connected, customer emails go from
+   it; admin notices stay on SES (Gmail hides forwarded copies of its own sent
+   mail), and SES is the fallback if Gmail refuses a message.
 4. **Email**: `AWS_PROFILE=… CF_TOKEN=… scripts/ses-setup.sh`.
 5. **Backups**: `AWS_PROFILE=… scripts/s3-backup-setup.sh`.
 

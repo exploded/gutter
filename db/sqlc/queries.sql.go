@@ -132,6 +132,15 @@ func (q *Queries) DeleteGoogleCalendar(ctx context.Context) error {
 	return err
 }
 
+const deleteGoogleMail = `-- name: DeleteGoogleMail :exec
+DELETE FROM google_mail WHERE id = 1
+`
+
+func (q *Queries) DeleteGoogleMail(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteGoogleMail)
+	return err
+}
+
 const deleteInvoiceItems = `-- name: DeleteInvoiceItems :exec
 DELETE FROM invoice_items WHERE invoice_id = ?
 `
@@ -335,6 +344,34 @@ func (q *Queries) GetGoogleCalendar(ctx context.Context) (GetGoogleCalendarRow, 
 		&i.SkipCalendars,
 		&i.ConnectedAt,
 		&i.LastSyncAt,
+		&i.LastError,
+	)
+	return i, err
+}
+
+const getGoogleMail = `-- name: GetGoogleMail :one
+
+SELECT account_email, refresh_token, connected_at, last_sent_at, last_error
+FROM google_mail WHERE id = 1
+`
+
+type GetGoogleMailRow struct {
+	AccountEmail string `json:"account_email"`
+	RefreshToken string `json:"refresh_token"`
+	ConnectedAt  string `json:"connected_at"`
+	LastSentAt   string `json:"last_sent_at"`
+	LastError    string `json:"last_error"`
+}
+
+// Gmail sending
+func (q *Queries) GetGoogleMail(ctx context.Context) (GetGoogleMailRow, error) {
+	row := q.db.QueryRowContext(ctx, getGoogleMail)
+	var i GetGoogleMailRow
+	err := row.Scan(
+		&i.AccountEmail,
+		&i.RefreshToken,
+		&i.ConnectedAt,
+		&i.LastSentAt,
 		&i.LastError,
 	)
 	return i, err
@@ -1631,6 +1668,15 @@ func (q *Queries) MarkGoogleCalendarSynced(ctx context.Context) error {
 	return err
 }
 
+const markGoogleMailSent = `-- name: MarkGoogleMailSent :exec
+UPDATE google_mail SET last_sent_at = datetime('now'), last_error = '' WHERE id = 1
+`
+
+func (q *Queries) MarkGoogleMailSent(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, markGoogleMailSent)
+	return err
+}
+
 const markInvoicePaid = `-- name: MarkInvoicePaid :execrows
 UPDATE invoices SET status = 'paid', paid_at = ?, payment_method = ?, payment_ref = ?,
     issued_at = CASE WHEN issued_at = '' THEN ? ELSE issued_at END, updated_at = datetime('now')
@@ -1719,6 +1765,26 @@ func (q *Queries) SaveGoogleCalendar(ctx context.Context, arg SaveGoogleCalendar
 		arg.CalendarID,
 		arg.CalendarName,
 	)
+	return err
+}
+
+const saveGoogleMail = `-- name: SaveGoogleMail :exec
+INSERT INTO google_mail (id, account_email, refresh_token, connected_at, last_sent_at, last_error)
+VALUES (1, ?, ?, datetime('now'), '', '')
+ON CONFLICT(id) DO UPDATE SET
+    account_email = excluded.account_email,
+    refresh_token = excluded.refresh_token,
+    connected_at  = datetime('now'),
+    last_error    = ''
+`
+
+type SaveGoogleMailParams struct {
+	AccountEmail string `json:"account_email"`
+	RefreshToken string `json:"refresh_token"`
+}
+
+func (q *Queries) SaveGoogleMail(ctx context.Context, arg SaveGoogleMailParams) error {
+	_, err := q.db.ExecContext(ctx, saveGoogleMail, arg.AccountEmail, arg.RefreshToken)
 	return err
 }
 
@@ -1820,6 +1886,15 @@ UPDATE google_calendar SET skip_calendars = ? WHERE id = 1
 
 func (q *Queries) SetGoogleCalendarSkips(ctx context.Context, skipCalendars string) error {
 	_, err := q.db.ExecContext(ctx, setGoogleCalendarSkips, skipCalendars)
+	return err
+}
+
+const setGoogleMailError = `-- name: SetGoogleMailError :exec
+UPDATE google_mail SET last_error = ? WHERE id = 1
+`
+
+func (q *Queries) SetGoogleMailError(ctx context.Context, lastError string) error {
+	_, err := q.db.ExecContext(ctx, setGoogleMailError, lastError)
 	return err
 }
 
