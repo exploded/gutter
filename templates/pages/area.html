@@ -75,8 +75,8 @@
                 <div class="service-body">
                     <h2>What's included in {{$a.Name}}</h2>
                     <ul class="checklist">
-                        <li><a href="/services/gutter-cleaning">Every gutter cleared by hand</a>, and the roof valleys too</li>
-                        <li><a href="/services/downpipe-unblocking">Downpipes flushed</a> so you know they run</li>
+                        <li><a href="/services/gutter-cleaning">Every gutter cleared</a>, front and back</li>
+                        <li>Professional equipment, so no one risks a ladder</li>
                         <li>Leaves bagged and taken away — never burnt, never left in the garden</li>
                         <li>Before-and-after photos emailed with your receipt</li>
                     </ul>
@@ -94,7 +94,7 @@
                         <div class="step">
                             <div class="step-num">02</div>
                             <h3>The clean</h3>
-                            <p>On the day we agree. You don't need to be home, as long as I can get to the side of the house.</p>
+                            <p>On the day we agree. You don't need to be home, as long as we can get to the side of the house.</p>
                         </div>
                         <div class="step">
                             <div class="step-num">03</div>
@@ -138,7 +138,7 @@
     <section class="services-section">
         <div class="container">
             <div class="section-label reveal">Services</div>
-            <h2 class="section-title reveal">Everything I do, available in {{$a.Name}}.</h2>
+            <h2 class="section-title reveal">Everything we do, available in {{$a.Name}}.</h2>
             <div class="services-grid">
                 {{range .PageData.Services}}{{template "service-card" .}}{{end}}
             </div>

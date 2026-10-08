@@ -388,6 +388,20 @@ section { padding: 6rem 2rem; position: relative; }
 
 /* ── Services ── */
 .services-section { background: var(--bg-primary); }
+
+/* The cost of leaving gutters full: information cards, not links, so the
+   tangerine bar stays up and there's no hover lift. */
+.cost-section { background: var(--bg-deep); border-top: 2px solid var(--ink); }
+.cost-section .services-grid { margin-top: 2.5rem; }
+.service-card.cost-card::before { transform: scaleX(1); }
+.service-card.cost-card:hover { transform: none; box-shadow: none; }
+.cost-note {
+    margin: 2rem 0 1.5rem;
+    max-width: 720px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.5;
+}
 .services-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

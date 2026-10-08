@@ -18,7 +18,7 @@ func TestTemplatesRender(t *testing.T) {
 		t.Fatalf("load templates: %v", err)
 	}
 	site = siteConfig{
-		Name: businessName, Brand: brandName, Owner: "Vin",
+		Name: businessName, Brand: brandName,
 		BaseURL: "https://example.test", Phone: "0400 000 000", PhoneHref: "tel:+61400000000",
 		Email: "test@example.test", Prices: pricing(), SeniorsPct: 20, Suburbs: suburbs, Areas: suburbList,
 		Hours: hoursDisplay(), HoursLD: hoursSchema(), ABN: "12 345 678 901",

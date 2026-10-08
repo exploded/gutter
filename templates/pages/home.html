@@ -4,7 +4,7 @@
     <title>Gutter Cleaning in Melbourne's North-East — Fixed Prices | Up The Spout</title>
     <meta name="description" content="Gutter and downpipe cleaning across Melbourne's north-east: Eltham, Templestowe, Donvale, Ringwood North, Warrandyte and nearby. Fixed prices from ${{(index .Site.Prices.Types 0).Price}}, book online, before-and-after photos with every clean.">
     <meta property="og:title" content="Up The Spout — gutter cleaning with fixed prices, book online">
-    <meta property="og:description" content="Every gutter cleared by hand, valleys done, downpipes flushed, mess taken away, and a photo report. Get fire-ready before summer.">
+    <meta property="og:description" content="Gutters cleared with professional equipment, mess taken away, and a photo report. Get fire-ready before summer.">
 {{end}}
 
 {{define "head"}}
@@ -27,10 +27,9 @@
           "address": {"@type": "PostalAddress", "addressLocality": "Warrandyte", "addressRegion": "VIC", "postalCode": "3113", "addressCountry": "AU"},
           "geo": {"@type": "GeoCoordinates", "latitude": -37.75, "longitude": 145.22},
           "areaServed": [{{range $i, $s := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$s}}"}{{end}}],
-          "knowsAbout": ["Gutter cleaning", "Downpipe clearing", "Roof valley cleaning", "Bushfire preparation"],
+          "knowsAbout": ["Gutter cleaning", "Downpipe clearing", "Bushfire preparation"],
           "paymentAccepted": "Visa, Mastercard, Amex, eftpos, Apple Pay, Google Pay",
           "openingHours": [{{range $i, $h := .Site.HoursLD}}{{if $i}}, {{end}}"{{$h}}"{{end}}],
-          "founder": {"@type": "Person", "name": "{{.Site.Owner}}"},
           "potentialAction": {
             "@type": "ReserveAction",
             "target": {
@@ -62,11 +61,11 @@
             <div class="hero-grid">
                 <div class="hero-content">
                     <p class="hero-overline">Gutter &amp; downpipe cleaning &middot; Melbourne's north-east</p>
-                    <h1>I go up the ladder, so <span class="hl">you don't have to.</span></h1>
+                    <h1>Clean gutters. <span class="hl">No one on a ladder.</span></h1>
                     <p class="hero-desc">
-                        G'day, I'm {{.Site.Owner}}. I clear gutters, roof valleys and downpipes for homes
-                        across Melbourne's north-east. Fixed prices, the mess taken away, and
-                        before-and-after photos so you can see the job from the ground.
+                        We use professional gutter cleaning equipment, so no one has to risk their life on a
+                        ladder. Gutters cleared for homes across Melbourne's north-east, at
+                        fixed prices, with the mess taken away and before-and-after photos of the job.
                     </p>
                     <div class="hero-actions">
                         <a href="/book" class="btn btn--primary">See your price &amp; book &#8594;</a>
@@ -103,12 +102,43 @@
         </div>
     </section>
 
+    <!-- The cost of leaving it -->
+    <section class="cost-section">
+        <div class="container">
+            <div class="section-label reveal">Why it matters</div>
+            <h2 class="section-title reveal">Blocked gutters get <span class="hl">expensive, fast.</span></h2>
+            <p class="section-intro reveal">A full gutter can't carry water to the downpipe, so rain spills over the back edge and soaks into the house. The damage is slow, out of sight, and costs far more to fix than a clean.</p>
+            <div class="services-grid">
+                <div class="service-card cost-card reveal">
+                    <div class="service-icon">Fascia and eaves</div>
+                    <h3>Rotting timber</h3>
+                    <p>Overflow runs down the fascia board behind the gutter and into the eaves. The timber stays wet, paint peels, and the boards rot until the gutter has nothing solid to hang from.</p>
+                </div>
+                <div class="service-card cost-card reveal">
+                    <div class="service-icon">Gutters</div>
+                    <h3>Rust from the inside</h3>
+                    <p>Wet leaves hold water against the metal long after the rain stops. Steel gutters rust through from the inside out, and once they're rusted through they can't be cleaned, only replaced.</p>
+                </div>
+                <div class="service-card cost-card reveal">
+                    <div class="service-icon">Roof, walls and footings</div>
+                    <h3>Water where it shouldn't be</h3>
+                    <p>Water backs up into the roof space, stains ceilings and runs down inside walls. Overflow at ground level soaks garden beds and the soil along the footings.</p>
+                </div>
+            </div>
+            <p class="cost-note reveal">Replacing fascia and gutters means a carpenter and a licensed plumber, and a bill many times the price of a clean. A clean from ${{(index .Site.Prices.Types 0).Price}} is the cheap part.</p>
+            <div class="hero-actions reveal">
+                <a href="/book" class="btn btn--primary">See your price &amp; book &#8594;</a>
+                <a href="/guides/signs-gutters-are-blocked" class="btn btn--ghost">Check yours from the ground</a>
+            </div>
+        </div>
+    </section>
+
     <!-- Services -->
     <section class="services-section" id="services">
         <div class="container">
-            <div class="section-label reveal">What I do</div>
-            <h2 class="section-title reveal">Gutters, downpipes and valleys. <span class="hl">Sorted.</span></h2>
-            <p class="section-intro reveal">One local bloke, done properly. I don't do repairs or plumbing; if I spot a problem I'll photograph it and tell you who to call.</p>
+            <div class="section-label reveal">What we do</div>
+            <h2 class="section-title reveal">Gutters and downpipes. <span class="hl">Sorted.</span></h2>
+            <p class="section-intro reveal">Local, and done properly. We don't do repairs or plumbing; if we spot a problem, we'll photograph it and tell you who to call.</p>
             <div class="services-grid">
                 {{range .PageData.Services}}{{template "service-card" .}}{{end}}
             </div>
@@ -124,12 +154,12 @@
                 <div class="step">
                     <div class="step-num">01</div>
                     <h3>Book online</h3>
-                    <p>Pick your type of house and see the price straight away. Tell me which days suit{{if .Site.Phone}}, or just call{{end}}.</p>
+                    <p>Pick your type of house and see the price straight away. Tell us which days suit{{if .Site.Phone}}, or just call{{end}}.</p>
                 </div>
                 <div class="step">
                     <div class="step-num">02</div>
-                    <h3>I clean the gutters</h3>
-                    <p>You don't need to be home, as long as I can get to the side of the house. Everything is bagged and taken away.</p>
+                    <h3>We clean the gutters</h3>
+                    <p>You don't need to be home, as long as we can get to the side of the house. Everything is bagged and taken away.</p>
                 </div>
                 <div class="step">
                     <div class="step-num">03</div>
@@ -145,7 +175,7 @@
         <div class="container">
             <div class="section-label reveal">Pricing</div>
             <h2 class="section-title reveal">Fixed prices, <span class="hl">right up front.</span></h2>
-            <p class="section-intro reveal">Most gutter cleaners won't give you a price until they've seen the house. Here's mine.</p>
+            <p class="section-intro reveal">Most gutter cleaners won't give you a price until they've seen the house. Here are ours.</p>
             <div class="reveal">{{template "pricing" .Site}}</div>
             <div class="reveal">{{template "payment-methods" .}}</div>
         </div>
@@ -155,7 +185,7 @@
     <section class="guarantee-section">
         <div class="container">
             <div class="section-label reveal">The promise</div>
-            <h2 class="section-title reveal">Three things you can hold me to.</h2>
+            <h2 class="section-title reveal">Three things you can hold us to.</h2>
             <div class="reveal">{{template "guarantees" .}}</div>
         </div>
     </section>
@@ -166,7 +196,7 @@
         <div class="container">
             <div class="section-label reveal">Guides</div>
             <h2 class="section-title reveal">Know your gutters.</h2>
-            <p class="section-intro reveal">Plain-English answers to the questions I get asked most: how often, what to check from the ground, and how to get ready for fire season.</p>
+            <p class="section-intro reveal">Plain-English answers to the questions we get asked most: how often, what to check from the ground, and how to get ready for fire season.</p>
             <div class="services-grid">
                 {{range $i, $g := .PageData.Guides}}{{if lt $i 3}}
                 <a href="/guides/{{$g.Slug}}" class="service-card reveal">
@@ -198,7 +228,7 @@
             <div class="contact-inner">
                 <div class="contact-text">
                     <div class="section-label reveal">Contact</div>
-                    <h2 class="section-title reveal">Gutters full? <span class="hl">Give me a yell.</span></h2>
+                    <h2 class="section-title reveal">Gutters full? <span class="hl">Give us a yell.</span></h2>
                     <p class="contact-desc reveal">
                         Book online and you'll see the price before you send anything. Questions first? Email or call.
                     </p>
@@ -211,7 +241,7 @@
                 <div class="contact-details reveal">
                     <div class="contact-detail-item">
                         <div class="contact-detail-label">Business</div>
-                        <div class="contact-detail-value">{{.Site.Name}} ({{.Site.Owner}}) — residential gutter cleaning</div>
+                        <div class="contact-detail-value">{{.Site.Name}} — residential gutter cleaning</div>
                     </div>
                     {{if .Site.ABN}}
                     <div class="contact-detail-item">

@@ -766,8 +766,7 @@ func sourceRows() ([]sourceRow, int64) {
 // siteConfig holds global, environment-driven settings exposed to every template as .Site.
 type siteConfig struct {
 	Name        string       // business name as registered and on the Google Business Profile
-	Brand       string       // the short name in the wordmark: nav, footer, page titles
-	Owner       string       // the person who turns up, for "I'm Vin" copy
+	Brand       string       // the short name in the wordmark: nav, footer, page titles, email sign-offs
 	BaseURL     string       // canonical origin, no trailing slash, e.g. https://upthespout.com.au
 	Phone       string       // display phone, empty hides all phone UI
 	PhoneHref   template.URL // tel: link (+61 form); template.URL so html/template keeps the tel: scheme
@@ -819,12 +818,11 @@ func initSiteConfig(port string) {
 	}
 	email := os.Getenv("CONTACT_EMAIL")
 	if email == "" {
-		email = "vin@upthespout.com.au"
+		email = "upthespoutguttercleaning@gmail.com"
 	}
 	site = siteConfig{
 		Name:        businessName,
 		Brand:       brandName,
-		Owner:       envOr("OWNER_NAME", "Vin"),
 		BaseURL:     base,
 		Phone:       strings.TrimSpace(os.Getenv("PHONE")),
 		Email:       email,

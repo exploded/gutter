@@ -60,7 +60,7 @@
         {{end}}
         </tbody>
     </table>
-    <p class="price-card-note">{{or .Note "The price you see is the price you pay. Downpipes flushed, valleys cleared, mess taken away and a photo report — all included."}}</p>
+    <p class="price-card-note">{{or .Note "The price you see is the price you pay. Gutters cleared, mess taken away and a photo report — all included."}}</p>
     {{if .BookURL}}<a href="{{.BookURL}}" class="btn btn--primary aside-btn">{{or .BookLabel "Book a clean"}} &#8594;</a>
     {{if .Site.Phone}}<a href="{{.Site.PhoneHref}}" class="btn btn--ghost aside-btn">Call {{.Site.Phone}}</a>{{end}}{{end}}
 </div>
@@ -69,14 +69,14 @@
 {{/* price-points: takes .Site */}}
 {{define "price-points"}}
 <ul class="price-points">
-    <li>Every gutter cleared by hand, and the roof valleys too</li>
-    <li>Downpipes flushed so you know they run</li>
+    <li>Every gutter cleared, front and back</li>
+    <li>Professional equipment, so no one risks a ladder</li>
     <li>Leaves bagged and taken away — never burnt, never left in the garden</li>
     <li>Before-and-after photos emailed with your receipt</li>
     <li>Fire-ready plan: two cleans a year at {{.Prices.PlanPct}}% off each</li>
     <li>Same street, same day? ${{.Prices.Neighbour}} off each house</li>
     {{if .SeniorsPct}}<li>Seniors Card holders get {{.SeniorsPct}}% off the total</li>{{end}}
-    <li>A downpipe that needs jetting is ${{.Prices.Downpipe}} — and only if you say yes</li>
+    <li>A blocked downpipe that needs jetting is ${{.Prices.Downpipe}} — and only if you say yes</li>
 </ul>
 {{end}}
 
@@ -93,15 +93,15 @@
 <div class="guarantee-grid">
     <div class="guarantee-badge">
         <div class="guarantee-title">The price is the price</div>
-        <p>Fixed prices on the website, not "call for a quote". If anything extra comes up, I'll ask before I do it.</p>
+        <p>Fixed prices on the website, not "call for a quote". If anything extra comes up, we'll ask before we do it.</p>
     </div>
     <div class="guarantee-badge">
         <div class="guarantee-title">Photos, not promises</div>
-        <p>Before-and-after photos of your gutters come with the receipt, so you can see the job without climbing a ladder.</p>
+        <p>Before-and-after photos of your gutters come with the receipt, so you can see the job from the ground.</p>
     </div>
     <div class="guarantee-badge">
         <div class="guarantee-title">Left tidy</div>
-        <p>Everything is bagged and taken away. Paths, decks and garden beds are left the way I found them.</p>
+        <p>Everything is bagged and taken away. Paths, decks and garden beds are left the way we found them.</p>
     </div>
 </div>
 {{end}}
@@ -116,7 +116,7 @@
     <span class="payment-chip">eftpos</span>
     <span class="payment-chip">Apple Pay</span>
     <span class="payment-chip">Google Pay</span>
-    <span class="payment-note">Tap your card on my phone on the day, or pay the emailed invoice online.</span>
+    <span class="payment-note">Tap your card on the day, or pay the emailed invoice online.</span>
 </div>
 {{end}}
 
@@ -125,13 +125,13 @@
 <div class="areas-grid">
     <div class="area-map-wrap">
         <div id="area-map" class="area-map" role="img" aria-label="Map of Melbourne's outer north-east with a shaded circle showing the approximate service area around Warrandyte"></div>
-        <p class="area-map-caption">Approximate service area: about 15 minutes' drive from my base in Warrandyte.</p>
+        <p class="area-map-caption">Approximate service area: about 15 minutes' drive from our base in Warrandyte.</p>
     </div>
     <div>
         <div class="area-list">
             {{range .Areas}}<a href="{{.URL}}" class="area-chip">{{.Name}}</a>{{end}}
         </div>
-        <p class="area-note">A bit further out? Ask — if I'm working nearby I can usually fit you in. <a href="/areas">All service areas &#8594;</a></p>
+        <p class="area-note">A bit further out? Ask — if we're working nearby we can usually fit you in. <a href="/areas">All service areas &#8594;</a></p>
     </div>
 </div>
 {{end}}
@@ -142,7 +142,7 @@
     <div class="book-cta-text">
         <div class="section-label">Ready when you are</div>
         <h2 class="section-title">Let's get those gutters flowing.</h2>
-        <p>Pick your property, see the price, and tell me which days suit. I'll confirm a time within a day.</p>
+        <p>Pick your property, see the price, and tell us which days suit. We'll confirm a time within a day.</p>
     </div>
     <div class="book-cta-actions">
         <a href="/book" class="btn btn--primary">Book now &#8594;</a>
@@ -174,7 +174,7 @@
 {{/* google-tag: takes the whole pageData. Loads gtag.js (Analytics and/or Ads) and
      tracks clicks on phone and email links, which GA4 does not count on its own.
      Renders nothing unless a tag ID is configured, and never for the signed-in
-     admin — my own visits shouldn't show up as traffic or conversions. */}}
+     admin — the owner's own visits shouldn't show up as traffic or conversions. */}}
 {{define "google-tag"}}
 {{if and .Site.Analytics (not .IsAdmin)}}
 <script async src="https://www.googletagmanager.com/gtag/js?id={{.Site.TagID}}"></script>

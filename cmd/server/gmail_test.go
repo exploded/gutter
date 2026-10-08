@@ -58,7 +58,7 @@ func TestGmailDelivery(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	site = siteConfig{Name: businessName, Owner: "Vin", BaseURL: "https://example.test", Email: "vin@example.test"}
+	site = siteConfig{Name: businessName, BaseURL: "https://example.test", Email: "vin@example.test"}
 	mail, notifyEmail = nil, "vin@example.test"
 
 	// Not connected and no SES: sends are logged no-ops.

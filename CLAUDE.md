@@ -22,8 +22,9 @@ Easy-going, sunny, tradie signwriting. Navy ink `#12284A`, tangerine `#FF7A21`
 (the spout, primary buttons), sky `#4DB0FF` (water), sun `#FFD449` (labels,
 highlights), cream `#FFF7EA` ground. Tangerine, sky and sun are fills only; use
 `--accent` / `--sky-text` for coloured text. Cards and buttons are "stickers":
-2px ink outline plus a hard offset shadow (`--pop`). Speak as Vin, first person.
-Describe the area as "Melbourne's north-east"; Warrandyte is only the base.
+2px ink outline plus a hard offset shadow (`--pop`). Speak as the business, "we":
+never name Vin anywhere customers see (site, emails, invoices, cards), and never
+imply a team size. Describe the area as "Melbourne's north-east"; Warrandyte is only the base.
 The mark is `static/img/logo-mark.svg` (gutter, tangerine downpipe, drop, leaf);
 `go run ./tools/genassets` and `go run ./tools/bizcard -logos` re-render
 everything from it.
@@ -49,6 +50,13 @@ Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-h
   in Victoria. Copy must never offer repairs.
 - **No gutter guard work.** Vin doesn't install it or clean around it, so the
   site doesn't mention it at all: no service, add-on, guide or booking option.
+- **No ladders, no downpipe promise.** Cleans use professional equipment so no
+  one goes up a ladder; don't describe cleaning "by hand" or working from a
+  ladder or harness. Downpipe flushing isn't part of a clean (some can't be
+  reached); only the optional jetting add-on, with the customer's OK. Don't
+  claim roof valleys are cleared either (guides may still advise homeowners
+  about them).
+- **No Amazon SES.** All email goes through the connected business Gmail.
 - **Make no claims we can't back up**: no "fully insured", years of experience,
   ratings or review counts until they're true.
 - No GST is charged (sole trader, under the threshold). Invoices must not say

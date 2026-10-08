@@ -26,7 +26,7 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test",
+	site = siteConfig{Name: businessName, Brand: brandName, BaseURL: "https://example.test", Email: "me@example.test",
 		Prices: pricing(), SeniorsPct: 10, Suburbs: suburbs, Areas: suburbList,
 		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678",
 		ReviewURL: "https://g.page/r/TEST/review"}

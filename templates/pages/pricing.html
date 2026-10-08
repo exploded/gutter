@@ -2,9 +2,9 @@
 
 {{define "meta"}}
     <title>Gutter Cleaning Prices — Melbourne's North-East | Up The Spout</title>
-    <meta name="description" content="Fixed gutter cleaning prices: {{range $i, $t := .Site.Prices.Types}}{{if $i}}, {{end}}{{$t.Name}} ${{$t.Price}}{{end}}. Downpipes, valleys and a photo report included.">
+    <meta name="description" content="Fixed gutter cleaning prices: {{range $i, $t := .Site.Prices.Types}}{{if $i}}, {{end}}{{$t.Name}} ${{$t.Price}}{{end}}. Rubbish removal and a photo report included.">
     <meta property="og:title" content="Gutter cleaning prices — published up front">
-    <meta property="og:description" content="Fixed prices from {{.Site.Prices.Range}}. Downpipes flushed, valleys cleared, mess taken away, photo report.">
+    <meta property="og:description" content="Fixed prices from {{.Site.Prices.Range}}. Gutters cleared, mess taken away, photo report.">
 {{end}}
 
 {{define "head"}}
@@ -17,7 +17,7 @@
           "@type": "Service",
           "name": "Gutter cleaning",
           "serviceType": "Gutter cleaning",
-          "description": "Residential gutter cleaning in Melbourne's north-east: every gutter cleared by hand, roof valleys cleared, downpipes flushed, debris taken away, and a before-and-after photo report.",
+          "description": "Residential gutter cleaning in Melbourne's north-east: every gutter cleared with professional equipment, debris taken away, and a before-and-after photo report.",
           "url": "{{.Site.BaseURL}}/pricing",
           "provider": {"@id": "{{.Site.BaseURL}}/#business"},
           "areaServed": [{{range $i, $n := .Site.Suburbs}}{{if $i}}, {{end}}{"@type": "City", "name": "{{$n}}"}{{end}}],
@@ -37,27 +37,27 @@
             {
               "@type": "Question",
               "name": "What's included?",
-              "acceptedAnswer": {"@type": "Answer", "text": "Every gutter cleared by hand, roof valleys cleared, downpipes flushed, all debris bagged and taken away, and before-and-after photos emailed with your receipt."}
+              "acceptedAnswer": {"@type": "Answer", "text": "Every gutter cleared, all debris bagged and taken away, and before-and-after photos emailed with your receipt."}
             },
             {
               "@type": "Question",
               "name": "What if a downpipe is blocked?",
-              "acceptedAnswer": {"@type": "Answer", "text": "Most clear when they're flushed, which is included. If one is packed solid and needs a jetter, it's ${{.Site.Prices.Downpipe}} — and only after you say yes."}
+              "acceptedAnswer": {"@type": "Answer", "text": "If we find a blocked downpipe, we'll tell you. Where it can be reached, we can clear it with a jetter for ${{.Site.Prices.Downpipe}} — and only after you say yes. Some downpipes, especially on taller houses, can't be reached, so flushing isn't part of the standard clean."}
             },
             {
               "@type": "Question",
               "name": "Do you charge GST?",
-              "acceptedAnswer": {"@type": "Answer", "text": "No GST is charged — I'm not registered for GST. The price shown is the total."}
+              "acceptedAnswer": {"@type": "Answer", "text": "No GST is charged — the business isn't registered for GST. The price shown is the total."}
             },
             {
               "@type": "Question",
               "name": "Do I need to be home?",
-              "acceptedAnswer": {"@type": "Answer", "text": "No, as long as I can get to the side of the house. Let me know about locked gates, dogs or solar panels when you book."}
+              "acceptedAnswer": {"@type": "Answer", "text": "No, as long as we can get to the side of the house. Let us know about locked gates, dogs or solar panels when you book."}
             },
             {
               "@type": "Question",
               "name": "How do I pay?",
-              "acceptedAnswer": {"@type": "Answer", "text": "Tap your card on my phone on the day — Visa, Mastercard, Amex, eftpos, Apple Pay or Google Pay — or pay the emailed invoice online."}
+              "acceptedAnswer": {"@type": "Answer", "text": "Tap your card on the day — Visa, Mastercard, Amex, eftpos, Apple Pay or Google Pay — or pay the emailed invoice online."}
             }
           ]
         }
@@ -72,7 +72,7 @@
         <div class="container">
             <div class="section-label">Pricing</div>
             <h1 class="section-title">What it costs.</h1>
-            <p class="page-header-intro">Most gutter cleaners won't give you a price until they've seen the house. Mine are fixed and published here: pick your type of house, and that's the price.</p>
+            <p class="page-header-intro">Most gutter cleaners won't give you a price until they've seen the house. Ours are fixed and published here: pick your type of house, and that's the price.</p>
         </div>
     </div>
 
@@ -87,7 +87,7 @@
         <div class="container">
             <div class="section-label reveal">Save on the next one</div>
             <h2 class="section-title reveal">Fire-ready plan: two cleans a year, {{$p.PlanPct}}% off each.</h2>
-            <p class="section-intro reveal">Gum-tree properties need their gutters done more than once a year. On the plan I book you in each spring before the Fire Danger Period and again in May after the leaves drop. No contract, nothing up front — you pay after each clean.</p>
+            <p class="section-intro reveal">Gum-tree properties need their gutters done more than once a year. On the plan we book you in each spring before the Fire Danger Period and again in May after the leaves drop. No contract, nothing up front — you pay after each clean.</p>
             <div class="admin-quotes-table-wrap reveal">
                 <table class="admin-quotes-table plan-table">
                     <thead><tr><th>Property</th><th class="td-num">One clean</th><th class="td-num">Plan clean</th><th class="td-num">Plan, per year</th><th class="td-num">You save</th></tr></thead>
@@ -111,7 +111,7 @@
             <h2 class="section-title reveal">Neighbours and referrals.</h2>
             <ul class="price-points reveal">
                 <li>Two or more houses on the same street, booked for the same day: ${{$p.Neighbour}} off each house</li>
-                <li>Send a friend my way: ${{$p.Referral}} off your next clean, and ${{$p.Referral}} off their first</li>
+                <li>Send a friend our way: ${{$p.Referral}} off your next clean, and ${{$p.Referral}} off their first</li>
                 {{if .Site.SeniorsPct}}<li>Seniors Card holders: {{.Site.SeniorsPct}}% off the total</li>{{end}}
             </ul>
         </div>
@@ -123,11 +123,11 @@
             <h2 class="section-title reveal">The small print, in plain English.</h2>
             <div class="faq-list reveal">
                 <details class="faq-item"><summary>Is there a call-out fee?</summary><p>No. The price for your type of house is the whole price, anywhere in the service area.</p></details>
-                <details class="faq-item"><summary>What if a downpipe is blocked?</summary><p>Most clear when they're flushed, which is included. If one is packed solid and needs a jetter, it's ${{$p.Downpipe}} — and only after you say yes.</p></details>
-                <details class="faq-item"><summary>What isn't included?</summary><p>Repairs. Fixing or replacing gutters and downpipes is licensed plumbing work in Victoria, so if I find a problem I'll photograph it and tell you.</p></details>
-                <details class="faq-item"><summary>Do you charge GST?</summary><p>No GST is charged — I'm not registered for GST. The price shown is the total.</p></details>
-                <details class="faq-item"><summary>Do I need to be home?</summary><p>No, as long as I can get to the side of the house. Tell me about locked gates, dogs or solar panels when you book.</p></details>
-                <details class="faq-item"><summary>What about bad weather or fire danger days?</summary><p>I don't work on roofs in rain, high wind, or on Extreme and Catastrophic fire danger days. If the weather turns, I'll move you to the next good day.</p></details>
+                <details class="faq-item"><summary>What if a downpipe is blocked?</summary><p>If we find one, we'll tell you. Where it can be reached, we can clear it with a jetter for ${{$p.Downpipe}} — and only after you say yes. Some downpipes, especially on taller houses, can't be reached, so flushing isn't part of the standard clean.</p></details>
+                <details class="faq-item"><summary>What isn't included?</summary><p>Repairs. Fixing or replacing gutters and downpipes is licensed plumbing work in Victoria, so if we find a problem, we'll photograph it and tell you.</p></details>
+                <details class="faq-item"><summary>Do you charge GST?</summary><p>No GST is charged — the business isn't registered for GST. The price shown is the total.</p></details>
+                <details class="faq-item"><summary>Do I need to be home?</summary><p>No, as long as we can get to the side of the house. Tell us about locked gates, dogs or solar panels when you book.</p></details>
+                <details class="faq-item"><summary>What about bad weather or fire danger days?</summary><p>We don't work in rain, high wind, or on Extreme and Catastrophic fire danger days. If the weather turns, we'll move you to the next good day.</p></details>
             </div>
         </div>
     </section>

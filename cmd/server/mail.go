@@ -12,11 +12,11 @@ import (
 	"gutter/mailer"
 )
 
-// ── Email notifications (Amazon SES, or Gmail once connected) ──
+// ── Email notifications (Gmail once connected; SES is an unused fallback) ──
 //
-// SES is configured by AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY / AWS_REGION;
-// the sender and notification address are CONTACT_EMAIL. When the admin
-// connects Gmail (gmail.go), customer mail goes from that account instead.
+// All mail goes out through the business Gmail the admin connects (gmail.go),
+// and notifications go to CONTACT_EMAIL. The business doesn't use Amazon SES:
+// without AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY the SES route stays off.
 // With neither configured every notify* call is a silent no-op, so local dev
 // works without any AWS or Google setup.
 
@@ -30,8 +30,6 @@ func initMail() {
 	if region == "" {
 		region = "ap-southeast-2"
 	}
-	// Sender and notification target both derive from CONTACT_EMAIL; the
-	// address must be a verified SES identity.
 	from := site.Name + " <" + site.Email + ">"
 	notifyEmail = site.Email
 	mail = mailer.New(region, os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), from)
@@ -101,7 +99,7 @@ const mailTmplSrc = `
 {{define "wrap"}}<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1c1c1c;margin:0;padding:24px;background:#f6f5f2">
 <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e6e3dc;border-radius:8px;padding:28px">
 {{.}}
-<p style="margin-top:32px;font-size:12px;color:#777">{{site.Name}} — {{site.Owner}}, Melbourne's north-east · <a href="{{site.BaseURL}}" style="color:#777">{{site.BaseURL}}</a></p>
+<p style="margin-top:32px;font-size:12px;color:#777">{{site.Name}} — Melbourne's north-east · <a href="{{site.BaseURL}}" style="color:#777">{{site.BaseURL}}</a></p>
 </div></body></html>{{end}}
 
 {{define "row"}}<tr><td style="padding:6px 12px 6px 0;color:#666;white-space:nowrap;vertical-align:top">{{.K}}</td><td style="padding:6px 0;vertical-align:top">{{.V}}</td></tr>{{end}}
@@ -127,8 +125,8 @@ const mailTmplSrc = `
 {{end}}
 
 {{define "booking-customer"}}
-<h2 style="margin:0 0 12px">Thanks {{.B.Name}} — I've got your request.</h2>
-<p>I'll be in touch within a day to lock in a time. If it's urgent — say a council Fire Prevention Notice deadline — just reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}}.</p>
+<h2 style="margin:0 0 12px">Thanks {{.B.Name}} — we've got your request.</h2>
+<p>We'll be in touch within a day to lock in a time. If it's urgent — say a council Fire Prevention Notice deadline — just reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}}.</p>
 <p style="margin:20px 0 6px;color:#666">What you booked:</p>
 <table style="border-collapse:collapse;margin:0 0 20px">
 {{if .ServiceTitle}}{{template "row" (kv "Service" .ServiceTitle)}}{{end}}
@@ -138,8 +136,8 @@ const mailTmplSrc = `
 {{if .B.PreferredTime}}{{template "row" (kv "Preferred time" .B.PreferredTime)}}{{end}}
 </table>
 {{if .B.Issue}}<blockquote style="margin:0 0 20px;padding:12px 16px;border-left:3px solid #d9d5cc;background:#faf9f6;white-space:pre-wrap">{{.B.Issue}}</blockquote>{{end}}
-<p style="color:#666">You don't need to be home on the day, as long as I can get to the side of the house. Please let me know about locked gates, dogs, or solar panels on the roof.</p>
-<p>— {{site.Owner}}</p>
+<p style="color:#666">You don't need to be home on the day, as long as we can get to the side of the house. Please let us know about locked gates, dogs, or solar panels on the roof.</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 
 {{define "gmail-test"}}
@@ -208,8 +206,8 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 		log.Printf("email: render booking-customer: %v", err)
 		return
 	}
-	text = fmt.Sprintf("Thanks %s — I've got your request and will be in touch within a day to lock in a time.\n\nProperty: %s\nPrice: %s\nAddress: %s\n\n— %s\n%s\n",
-		b.Name, property, price, b.Address, site.Owner, site.BaseURL)
+	text = fmt.Sprintf("Thanks %s — we've got your request and will be in touch within a day to lock in a time.\n\nProperty: %s\nPrice: %s\nAddress: %s\n\n— %s\n%s\n",
+		b.Name, property, price, b.Address, site.Brand, site.BaseURL)
 	send(b.Email, "Got your booking request — "+site.Name, html, text, site.Email)
 }
 

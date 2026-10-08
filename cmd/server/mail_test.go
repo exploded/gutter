@@ -8,7 +8,7 @@ import (
 )
 
 func TestMailTemplatesRender(t *testing.T) {
-	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
+	site = siteConfig{Name: businessName, Brand: brandName, BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
 	b := &db.Booking{Name: "Ann <b>Bold</b>", Phone: "0400 111 222", Email: "ann@example.test",
 		Suburb: "Donvale", Address: "12 Smith St, Donvale VIC 3111", ServiceSlug: "bushfire-preparation",
 		PropertyType: "double", OnPlan: true,
@@ -29,14 +29,14 @@ func TestMailTemplatesRender(t *testing.T) {
 			t.Errorf("%s: user input not escaped", name)
 		}
 		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$430.00",
-			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Vin"} {
+			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Melbourne's north-east"} {
 			if !strings.Contains(out, want) {
 				t.Errorf("%s: missing %q:\n%s", name, want, out)
 			}
 		}
 	}
-	if out, _ := renderMail("booking-customer", map[string]any{"B": b}); !strings.Contains(out, "<p>— Vin</p>") {
-		t.Errorf("booking-customer: missing the owner's sign-off:\n%s", out)
+	if out, _ := renderMail("booking-customer", map[string]any{"B": b}); !strings.Contains(out, "<p>— Up The Spout</p>") {
+		t.Errorf("booking-customer: missing the business sign-off:\n%s", out)
 	}
 	// An admin-created booking has no price-list row and no price shown.
 	if property, price := bookingSummary(&db.Booking{}); property != "" || price != "" {

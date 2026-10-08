@@ -27,10 +27,9 @@ APP_DIR=$APP_DIR
 BASE_URL=https://upthespout.com.au
 
 # Contact details shown on the site (PHONE empty = phone UI hidden).
-# CONTACT_EMAIL is also the SES sender + notification address.
+# CONTACT_EMAIL is the business Gmail, which also receives notifications.
 PHONE=
-CONTACT_EMAIL=vin@upthespout.com.au
-OWNER_NAME=Vin
+CONTACT_EMAIL=upthespoutguttercleaning@gmail.com
 
 # Invoices: ABN and bank transfer details (both empty = hidden). Prices live in cmd/server/pricing.go.
 ABN=70 158 581 130
@@ -50,18 +49,16 @@ SAME_AS=
 REVIEW_URL=
 
 # Admin: comma-separated Google accounts allowed into /admin. The FIRST one is
-# the account Google Calendar sync connects to (Vin's).
-ADMIN_EMAIL=james67@gmail.com
+# the account Google Calendar sync and Gmail sending connect to (the business Gmail).
+ADMIN_EMAIL=upthespoutguttercleaning@gmail.com,james67@gmail.com
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 
 # Address autocomplete on /book (Mappify). Without it the booking form can't be submitted.
 MAPPIFY_API_KEY=
 
-# Email notifications via Amazon SES (scripts/ses-setup.sh prints these). Empty = disabled.
+# Region for the S3 backups. Email goes through Gmail only, not Amazon SES.
 AWS_REGION=ap-southeast-2
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
 
 # Background scheduler (reminders, digest, nightly backup). Runs when PROD is set; 0 disables.
 SCHEDULER=
@@ -118,7 +115,7 @@ cat <<EOF
 Setup complete.
 
 Next steps:
-  1. Edit $APP_DIR/.env (PHONE, ADMIN_EMAIL, Google OAuth, Mappify, SES).
+  1. Edit $APP_DIR/.env (PHONE, ADMIN_EMAIL, Google OAuth, Mappify).
   2. Add this to /etc/caddy/Caddyfile and run: sudo systemctl reload caddy
 
      upthespout.com.au {

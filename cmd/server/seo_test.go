@@ -27,7 +27,7 @@ func seoTestSetup(t *testing.T) *http.ServeMux {
 	if err != nil {
 		t.Fatal(err)
 	}
-	site = siteConfig{Name: businessName, Brand: brandName, Owner: "Vin", BaseURL: "https://example.test", Email: "me@example.test",
+	site = siteConfig{Name: businessName, Brand: brandName, BaseURL: "https://example.test", Email: "me@example.test",
 		Prices: pricing(), SeniorsPct: 20, Suburbs: suburbs, Areas: suburbList, Hours: hoursDisplay(), HoursLD: hoursSchema(),
 		IndexNowKey: "testindexnowkey0123456789abcdef0"}
 	return newMux("../..")
@@ -298,9 +298,15 @@ func TestJSONLD(t *testing.T) {
 	// Home page LocalBusiness: concrete priceRange and a booking action.
 	// (Match slash-free fragments — html/template escapes "/" inside <script>.)
 	home := get(mux, "/").Body.String()
-	for _, want := range []string{"ReserveAction", "$219–$489 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout Gutter Cleaning"`, `"alternateName": "Up The Spout"`, `"name": "Vin"`} {
+	for _, want := range []string{"ReserveAction", "$219–$489 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout Gutter Cleaning"`, `"alternateName": "Up The Spout"`} {
 		if !strings.Contains(home, want) {
 			t.Errorf("home JSON-LD missing %s", want)
+		}
+	}
+	// The business speaks as itself: no owner's name on customer-facing pages.
+	for _, path := range []string{"/", "/pricing", "/terms", "/privacy", "/services/gutter-cleaning", "/guides/how-often-to-clean-gutters"} {
+		if regexp.MustCompile(`\bVin\b`).MatchString(get(mux, path).Body.String()) {
+			t.Errorf("%s names the owner", path)
 		}
 	}
 	// Suburb photo: page with a file gets the figure + credit + its own og:image; page without falls back.

@@ -23,7 +23,7 @@ func llmsTxt() string {
 	}
 
 	b.WriteString("# " + site.Name + "\n\n")
-	b.WriteString("> Residential gutter and downpipe cleaning across Melbourne's north-east (based in Warrandyte VIC 3113), by " + site.Owner + ".\n")
+	b.WriteString("> Residential gutter and downpipe cleaning across Melbourne's north-east (based in Warrandyte VIC 3113).\n")
 	b.WriteString("> Fixed prices, online booking, and a dated before-and-after photo report with every clean.")
 	if site.ABN != "" {
 		b.WriteString(" ABN " + site.ABN + ".")
@@ -45,7 +45,7 @@ func llmsTxt() string {
 	if site.SeniorsPct > 0 {
 		fmt.Fprintf(&b, "- Seniors Card holders: %d%% off the total\n", site.SeniorsPct)
 	}
-	b.WriteString("- Every clean includes: all gutters and roof valleys cleared by hand, downpipes flushed, debris bagged and taken away, photo report.\n")
+	b.WriteString("- Every clean includes: all gutters cleared, debris bagged and taken away, photo report. Downpipe flushing is not promised: on some properties the downpipes can't be reached.\n")
 	b.WriteString("- Not offered: gutter or downpipe repairs (licensed plumbing work).\n")
 	b.WriteString("- " + link("Pricing page", "/pricing") + " · machine-readable JSON: " + site.BaseURL + "/api/pricing\n\n")
 
@@ -129,7 +129,7 @@ func handleAPIPricing(w http.ResponseWriter, r *http.Request) {
 		PlanPct:      planPct,
 		NeighbourOff: neighbourOff,
 		SeniorsPct:   site.SeniorsPct,
-		Includes:     []string{"all gutters cleared by hand", "roof valleys cleared", "downpipes flushed", "debris bagged and taken away", "before-and-after photo report"},
+		Includes:     []string{"all gutters cleared", "debris bagged and taken away", "before-and-after photo report"},
 		ServiceArea:  site.Suburbs,
 		BookURL:      site.BaseURL + "/book",
 		BookParams:   []string{"service", "property", "plan", "issue", "name", "phone", "email", "preferred_time"},

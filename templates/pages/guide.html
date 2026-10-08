@@ -20,7 +20,7 @@
       "inLanguage": "en-AU",
       "url": "{{.Site.BaseURL}}/guides/{{$g.Slug}}",
       "mainEntityOfPage": "{{.Site.BaseURL}}/guides/{{$g.Slug}}",
-      "author": {"@type": "Person", "name": "{{.Site.Owner}}", "url": "{{.Site.BaseURL}}/"},
+      "author": {"@type": "Organization", "name": "{{.Site.Name}}", "url": "{{.Site.BaseURL}}/"},
       "publisher": {"@id": "{{.Site.BaseURL}}/#business"},
       "image": "{{.Site.BaseURL}}/static/img/og.png",
       "articleBody": {{stripTags $g.Summary}}
@@ -69,7 +69,7 @@
                     {{end}}
 
                     <div class="guide-stop">
-                        <div class="guide-stop-title">When to call me instead</div>
+                        <div class="guide-stop-title">When to call us instead</div>
                         <p>{{$g.StopWhen}}</p>
                         <a href="/book{{with $g.RelatedService}}?service={{.Slug}}{{end}}" class="btn btn--primary">Book a clean &#8594;</a>
                     </div>
@@ -86,7 +86,7 @@
                     {{end}}
                     {{$burl := "/book"}}{{with $g.RelatedService}}{{$burl = printf "/book?service=%s" .Slug}}{{end}}
                     {{template "price-card" (dict "Site" $.Site
-                        "Kicker" "If you'd rather I did it"
+                        "Kicker" "If you'd rather we did it"
                         "BookURL" $burl)}}
                     {{if .PageData.Others}}
                     <div class="aside-links">

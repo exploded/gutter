@@ -334,7 +334,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		errs["name"] = "Please enter your name."
 	}
 	if f.Phone == "" && f.Email == "" {
-		errs["contact"] = "Please give a phone number or an email address so I can get back to you."
+		errs["contact"] = "Please give a phone number or an email address so we can get back to you."
 	}
 	if f.Email != "" && (!strings.Contains(f.Email, "@") || len(f.Email) > 120) {
 		errs["email"] = "That email address doesn't look right."

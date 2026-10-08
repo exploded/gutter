@@ -23,7 +23,7 @@ var propertyTypes = []PropertyType{
 	{Slug: "unit", Name: "Unit or townhouse", Note: "Single level, small roof", Price: 219, Minutes: 60},
 	{Slug: "single", Name: "Single-storey house", Note: "Up to 4 bedrooms", Price: 289, Minutes: 90},
 	{Slug: "large", Name: "Large single storey or split level", Note: "5+ bedrooms, or two roof levels", Price: 389, Minutes: 120},
-	{Slug: "double", Name: "Double-storey house", Note: "Worked from a harness on a roof anchor", Price: 489, Minutes: 150},
+	{Slug: "double", Name: "Double-storey house", Note: "Two full storeys", Price: 489, Minutes: 150},
 }
 
 const (

@@ -225,7 +225,7 @@ func buildDigest(now time.Time) (digestData, error) {
 const mailSchedulerTmplSrc = `
 {{define "booking-reminder"}}
 <h2 style="margin:0 0 12px">See you tomorrow{{if .B.Name}}, {{.B.Name}}{{end}}</h2>
-<p>Just a reminder that I'm booked in to see you tomorrow.</p>
+<p>Just a reminder that we're booked in to see you tomorrow.</p>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "When" .When)}}
 {{template "row" (kv "Duration" .Duration)}}
@@ -233,7 +233,7 @@ const mailSchedulerTmplSrc = `
 {{if .Where}}{{template "row" (kv "Where" .Where)}}{{end}}
 </table>
 <p>If the time no longer suits, reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}} and we'll sort out another one.</p>
-<p>— {{site.Owner}}</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 
 {{define "booking-soon"}}
@@ -288,8 +288,8 @@ func sendBookingReminder(b *db.Booking) error {
 	if err != nil {
 		return fmt.Errorf("render booking-reminder: %w", err)
 	}
-	text := fmt.Sprintf("Hi %s — a reminder that I'm booked in to clean your gutters tomorrow.\n\nWhen: %s\nDuration: %s\n%s\n\nIf the time no longer suits, reply to this email and we'll sort out another one.\n\n— %s\n%s\n",
-		b.Name, d.When, d.Duration, d.Where, site.Owner, site.BaseURL)
+	text := fmt.Sprintf("Hi %s — a reminder that we're booked in to clean your gutters tomorrow.\n\nWhen: %s\nDuration: %s\n%s\n\nIf the time no longer suits, reply to this email and we'll sort out another one.\n\n— %s\n%s\n",
+		b.Name, d.When, d.Duration, d.Where, site.Brand, site.BaseURL)
 	return sendNow(b.Email, "Reminder: gutter clean tomorrow — "+fmtWhen(b.StartAt), html, text, site.Email)
 }
 

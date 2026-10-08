@@ -21,7 +21,7 @@ const mailBillingTmplSrc = `
 
 {{define "booking-confirm"}}
 <h2 style="margin:0 0 12px">{{if .Rescheduled}}Your gutter clean has been moved{{else}}Your gutter clean is booked{{end}}{{if .B.Name}}, {{.B.Name}}{{end}}</h2>
-<p>{{if .Rescheduled}}Here are the new details.{{else}}Thanks — I've booked you in.{{end}} Please reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}} if anything changes.</p>
+<p>{{if .Rescheduled}}Here are the new details.{{else}}Thanks — you're booked in.{{end}} Please reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}} if anything changes.</p>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "When" .When)}}
 {{template "row" (kv "Duration" .Duration)}}
@@ -31,19 +31,19 @@ const mailBillingTmplSrc = `
 {{if .Followup}}<p>This is a follow-up clean{{if .Issue}}: {{.Issue}}{{end}}.</p>{{else if .Issue}}<p style="margin:0 0 6px;color:#666">What you asked about:</p>
 <blockquote style="margin:0 0 20px;padding:12px 16px;border-left:3px solid #d9d5cc;background:#faf9f6;white-space:pre-wrap">{{.Issue}}</blockquote>{{end}}
 <p style="color:#666">A calendar invite is attached.</p>
-<p>— {{site.Owner}}</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 
 {{define "booking-cancel"}}
 <h2 style="margin:0 0 12px">Your gutter clean has been cancelled{{if .B.Name}}, {{.B.Name}}{{end}}</h2>
 <p>The clean{{if .When}} on {{.When}}{{end}} has been cancelled{{if .Reason}}: {{.Reason}}{{end}}.</p>
 <p>If you'd like to rebook, just reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}}, or book online at <a href="{{site.BaseURL}}/book" style="color:#1c1c1c">{{site.BaseURL}}/book</a>.</p>
-<p>— {{site.Owner}}</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 
 {{define "invoice-send"}}
 <h2 style="margin:0 0 12px">Invoice {{.Ref}}{{if .Cust.Name}} for {{.Cust.Name}}{{end}}</h2>
-<p>Thanks for having me{{if .When}} on {{.When}}{{end}}. Here's the invoice — the PDF is attached and you can also view it online.</p>
+<p>Thanks for having us{{if .When}} on {{.When}}{{end}}. Here's the invoice — the PDF is attached and you can also view it online.</p>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "Amount due" (money .Inv.TotalCents))}}
 {{template "row" (kv "Due" .Due)}}
@@ -60,7 +60,7 @@ const mailBillingTmplSrc = `
 </table>{{end}}
 <p style="color:#666;font-size:13px">View or download the invoice any time: <a href="{{.Link}}" style="color:#666;word-break:break-all">{{.Link}}</a></p>
 <p>Questions? Just reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}}. Thanks again.</p>
-<p>— {{site.Owner}}</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 
 {{define "invoice-receipt"}}
@@ -76,9 +76,9 @@ const mailBillingTmplSrc = `
 <p>If you ever need a hand again, book at <a href="{{site.BaseURL}}/book" style="color:#1c1c1c">{{site.BaseURL}}/book</a> or just reply to this email.</p>
 {{if .ReviewURL}}<hr style="border:none;border-top:1px solid #e5e1d8;margin:24px 0">
 <p style="margin:0 0 6px"><strong>One small favour?</strong></p>
-<p style="margin:0 0 16px">Most of my work comes from people finding me on Google. If I got you sorted, a short review helps other locals find me — it takes about 30 seconds.</p>
+<p style="margin:0 0 16px">Most of our work comes from people finding us on Google. If we got you sorted, a short review helps other locals find us — it takes about 30 seconds.</p>
 <p style="margin:0 0 20px">{{template "btn" (btn .ReviewURL "Leave a Google review")}}</p>{{end}}
-<p>— {{site.Owner}}</p>
+<p>— {{site.Brand}}</p>
 {{end}}
 `
 
@@ -126,7 +126,7 @@ func sendBookingConfirmation(b *db.Booking, rescheduled bool) error {
 		subj = "Your gutter clean has been moved — " + fmtWhen(b.StartAt)
 	}
 	text := fmt.Sprintf("Hi %s — %s\n\nWhen: %s\nDuration: %s\n%s\nReply to this email if anything changes.\n\n— %s\n%s\n",
-		b.Name, strings.TrimSuffix(subj, " — "+fmtWhen(b.StartAt)), d.When, d.Duration, d.Where, site.Owner, site.BaseURL)
+		b.Name, strings.TrimSuffix(subj, " — "+fmtWhen(b.StartAt)), d.When, d.Duration, d.Where, site.Brand, site.BaseURL)
 	ics := mailer.Attachment{Filename: "gutter-clean.ics", ContentType: "text/calendar", Data: []byte(bookingICS(b, d.ServiceTitle))}
 	return sendNow(b.Email, subj, html, text, site.Email, ics)
 }
@@ -143,7 +143,7 @@ func sendBookingCancellation(b *db.Booking, reason string) error {
 		return fmt.Errorf("render booking-cancel: %w", err)
 	}
 	text := fmt.Sprintf("Hi %s — your gutter clean%s has been cancelled%s.\n\nTo rebook, reply to this email or visit %s/book.\n\n— %s\n",
-		b.Name, map[bool]string{true: " on " + d.When, false: ""}[d.When != ""], map[bool]string{true: ": " + reason, false: ""}[reason != ""], site.BaseURL, site.Owner)
+		b.Name, map[bool]string{true: " on " + d.When, false: ""}[d.When != ""], map[bool]string{true: ": " + reason, false: ""}[reason != ""], site.BaseURL, site.Brand)
 	return sendNow(b.Email, "Your gutter clean has been cancelled — "+site.Name, html, text, site.Email)
 }
 
@@ -224,7 +224,7 @@ func sendInvoiceEmail(v *invoiceView, pdf []byte) error {
 	if site.BankBSB != "" {
 		text += fmt.Sprintf("\nBank transfer: %s, BSB %s, Account %s, Reference %s\n", site.BankName, site.BankBSB, site.BankAcct, d.Ref)
 	}
-	text += "\nView online: " + d.Link + "\n\n— " + site.Owner + "\n"
+	text += "\nView online: " + d.Link + "\n\n— " + site.Brand + "\n"
 	att := mailer.Attachment{Filename: d.Ref + ".pdf", ContentType: "application/pdf", Data: pdf}
 	return sendNow(v.Cust.Email, fmt.Sprintf("Invoice %s from %s — %s", d.Ref, site.Name, fmtCents(v.Inv.TotalCents)), html, text, site.Email, att)
 }
@@ -247,9 +247,9 @@ func sendReceiptEmail(v *invoiceView, pdf []byte, askReview bool) error {
 	text := fmt.Sprintf("Receipt for %s — thank you.\n\nAmount paid: %s\nPaid on: %s\nMethod: %s\n\nView online: %s\n",
 		d.Ref, fmtCents(v.Inv.TotalCents), d.Paid, d.Method, d.Link)
 	if d.ReviewURL != "" {
-		text += "\nOne small favour? If I got you sorted, a short Google review helps other locals find me:\n" + d.ReviewURL + "\n"
+		text += "\nOne small favour? If we got you sorted, a short Google review helps other locals find us:\n" + d.ReviewURL + "\n"
 	}
-	text += "\n— " + site.Owner + "\n"
+	text += "\n— " + site.Brand + "\n"
 	att := mailer.Attachment{Filename: d.Ref + "-receipt.pdf", ContentType: "application/pdf", Data: pdf}
 	return sendNow(v.Cust.Email, fmt.Sprintf("Receipt for %s — %s", d.Ref, site.Name), html, text, site.Email, att)
 }

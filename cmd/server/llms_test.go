@@ -24,7 +24,7 @@ func TestLlmsTxt(t *testing.T) {
 	}
 	// Pricing facts, service area and agent guidance must all be present.
 	for _, want := range []string{
-		"by Vin", "$219", "$289", "$389", "$489",
+		"Warrandyte VIC 3113).", "$219", "$289", "$389", "$489",
 		"$90 each", "12% off each", "$30 off each house", "Seniors Card holders: 20% off",
 		"Donvale", "Warrandyte", "me@example.test",
 		"no booking API", "service, property, plan (1), issue, name, phone, email, preferred_time",

@@ -7,10 +7,11 @@ In priority order. `[ ]` to do · ✅ done.
 The full list for James and Vin is the launch checklist doc (private; not in
 this public repo). The code-side items:
 
-- [ ] Send email from `bookings@upthespout.com.au` (SES) with `Reply-To` the business Gmail, once it exists
+- [x] Business Gmail `upthespoutguttercleaning@gmail.com` in the server `.env` (no SES: all mail through Gmail)
+- [ ] Connect the business Gmail at `/admin/email` and Google Calendar at `/admin/calendar/settings`
 - [ ] Fill `.env`: `PHONE`, `CONTACT_EMAIL`, `ADMIN_EMAIL`, bank details
 - [ ] Business cards (`tools/bizcard`) once the phone number is final
-- [ ] Replace stock suburb photos with Vin's own (`tools/areaphoto`); add a photo of Vin to the home page
+- [ ] Replace stock suburb photos with Vin's own (`tools/areaphoto`); add a photo of the work to the home page
 - [ ] `REVIEW_URL` and `SAME_AS` once the Google Business Profile is verified
 - [x] `GA4_ID` (live 7 October 2026)
 - [ ] `GOOGLE_ADS_ID`, `GOOGLE_ADS_BOOKING_LABEL`, `GOOGLE_ADS_CALL_LABEL`

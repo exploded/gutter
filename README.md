@@ -84,13 +84,11 @@ The scheduler (on when `PROD` is set) sends the day-before reminder, the
    `https://upthespout.com.au/auth/google/mail/callback`, enable the Calendar
    and Gmail APIs, add the `calendar` and `gmail.send` scopes, and set the
    consent screen to **In production**.
-3. **Admin accounts**: `ADMIN_EMAIL=<Vin's Gmail>,james67@gmail.com`. Vin connects
+3. **Admin accounts**: `ADMIN_EMAIL=upthespoutguttercleaning@gmail.com,james67@gmail.com`. Connect
    Google Calendar from `/admin/calendar/settings` and Gmail from `/admin/email`,
-   both with his own account. Once Gmail is connected, customer emails go from
-   it; admin notices stay on SES (Gmail hides forwarded copies of its own sent
-   mail), and SES is the fallback if Gmail refuses a message.
-4. **Email**: `AWS_PROFILE=… CF_TOKEN=… scripts/ses-setup.sh`.
-5. **Backups**: `AWS_PROFILE=… scripts/s3-backup-setup.sh`.
+   both with the business Gmail. Once Gmail is connected, customer emails go from
+   it, and so do admin notices. The business doesn't use Amazon SES.
+4. **Backups**: `AWS_PROFILE=… scripts/s3-backup-setup.sh`.
 
 ## Domains
 
@@ -116,13 +114,9 @@ www.upthespout.com.au, upthespout.com, www.upthespout.com {
 redirect. The old staging name, `gutter.mchugh.au`, was retired on
 7 October 2026.
 
-Still to do for the domain:
-
-1. Email: Cloudflare Email Routing on `upthespout.com.au` forwards
-   `vin@upthespout.com.au` to Vin's Gmail; then run `scripts/ses-setup.sh` so
-   the site can send as that address.
-2. Search Console: add `upthespout.com.au` as a domain property and submit
-   `/sitemap.xml`. Use the new URL on the Google Business Profile and in Ads.
+Still to do for the domain: in Search Console, add `upthespout.com.au` as a
+domain property and submit `/sitemap.xml`. Use the new URL on the Google
+Business Profile and in Ads.
 
 ## Brand assets
 

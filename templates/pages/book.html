@@ -2,7 +2,7 @@
 
 {{define "meta"}}
     <title>Book a Gutter Clean — See Your Price | Up The Spout</title>
-    <meta name="description" content="Book gutter cleaning in Melbourne's north-east. Pick your type of house, see the fixed price straight away, and tell me which days suit.">
+    <meta name="description" content="Book gutter cleaning in Melbourne's north-east. Pick your type of house, see the fixed price straight away, and tell us which days suit.">
     <meta property="og:title" content="Book a gutter clean — Up The Spout">
     <meta property="og:description" content="Fixed prices, photo report with every clean, and no payment until the job's done.">
 {{end}}
@@ -15,7 +15,7 @@
         <div class="container">
             <div class="section-label">Book</div>
             <h1 class="section-title">Book a gutter clean.</h1>
-            <p class="page-header-intro">Pick your type of house to see the price, then tell me where and when. I'll confirm a time within a day. Nothing to pay until the job's done.</p>
+            <p class="page-header-intro">Pick your type of house to see the price, then tell us where and when. We'll confirm a time within a day. Nothing to pay until the job's done.</p>
         </div>
     </div>
 
@@ -56,13 +56,13 @@
                         <div class="property-extras">
                             <label class="check-option">
                                 <input type="checkbox" name="plan" value="1"{{if $f.Plan}} checked{{end}}>
-                                <span>Put me on the Fire-ready plan <span class="check-option-note">{{$p.PlanPct}}% off this clean and the next; I'll remind you each spring and autumn</span></span>
+                                <span>Put me on the Fire-ready plan <span class="check-option-note">{{$p.PlanPct}}% off this clean and the next; we'll remind you each spring and autumn</span></span>
                             </label>
                         </div>
                         <div class="price-total" aria-live="polite">
                             <span class="price-total-label">Your price</span>
                             <span class="price-total-amount" id="price-total">${{$f.Price}}</span>
-                            <span class="price-total-note">Includes downpipes flushed, valleys cleared, mess taken away and a photo report.</span>
+                            <span class="price-total-note">Includes every gutter cleared, mess taken away and a photo report.</span>
                         </div>
                     </div>
 
@@ -117,7 +117,7 @@
                             </div>
                         </div>
                         <div class="quote-field quote-field--full{{if $e.issue}} quote-field--error{{end}}">
-                            <label for="issue">Anything I should know? <span class="label-optional">(optional)</span></label>
+                            <label for="issue">Anything we should know? <span class="label-optional">(optional)</span></label>
                             <textarea id="issue" name="issue" rows="4" maxlength="2000" placeholder="e.g. Side gate is locked — code 1234. Friendly dog. Solar panels on the north side. Council fire notice due 15 Dec.">{{$f.Issue}}</textarea>
                             {{with $e.issue}}<span class="field-error">{{.}}</span>{{end}}
                         </div>
@@ -125,7 +125,7 @@
 
                     <div class="book-submit">
                         <button type="submit" class="btn btn--primary quote-btn">Send booking request &#8594;</button>
-                        <p class="quote-submit-note">No payment now. I'll confirm a time before anything is booked in, and you pay after the clean.</p>
+                        <p class="quote-submit-note">No payment now. We'll confirm a time before anything is booked in, and you pay after the clean.</p>
                     </div>
                 </form>
 
@@ -133,8 +133,8 @@
                     <div class="price-card">
                         <div class="price-card-kicker">What happens next</div>
                         <ol class="aside-steps">
-                            <li>I read your request and get back to you within a day to lock in a time.</li>
-                            <li>On the day, I clean every gutter, clear the valleys and flush the downpipes. You don't need to be home.</li>
+                            <li>We read your request and get back to you within a day to lock in a time.</li>
+                            <li>On the day, we clean every gutter and take the mess away. You don't need to be home.</li>
                             <li>You get before-and-after photos with the invoice. Tap your card or pay online.</li>
                         </ol>
                     </div>
