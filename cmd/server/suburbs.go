@@ -142,7 +142,7 @@ var suburbList = []Suburb{
 		Photo:    &Photo{Artist: "Nick carson at English Wikipedia", Licence: "Public domain", LicenceURL: "", Source: "https://commons.wikimedia.org/wiki/File:Yarra_River_at_Warrandyte.jpg"}},
 	{Name: "Warrandyte South", Slug: "warrandyte-south", Postcode: "3134", LGA: "Manningham", DriveMin: 8,
 		Blurb:    "Warrandyte South is the small, leafy pocket between Ringwood–Warrandyte Road, Anzac Road, Jumping Creek and Old Warrandyte Road, inside Manningham's green wedge. Most of the green wedge is designated bushfire prone, and the bush blocks here put gum leaves and bark into gutters all year. A clean in early spring and another in May after the autumn drop suits most homes here.",
-		MetaDesc: "Gutter cleaning in Warrandyte South 3134 for bush blocks: gutters cleared with no one on a ladder, fixed prices. Book online."},
+		MetaDesc: "Gutter cleaning in Warrandyte South 3134 for bush blocks: gutters cleared, debris taken away, fixed prices. Book online."},
 	{Name: "Park Orchards", Slug: "park-orchards", Postcode: "3114", LGA: "Manningham", DriveMin: 10,
 		Blurb:    "Park Orchards started as a 1920s country club estate, and many of the pines planted during the Depression are still standing. Pine needles mat together in gutters and hold water, and with gums around The 100 Acres bushland and large parts of the suburb in the Bushfire Management Overlay, gutters here need regular attention. It's about ten minutes from our base in Warrandyte.",
 		MetaDesc: "Pine needles and gum leaves cleared from gutters in Park Orchards 3114. Fixed prices from $219, mess taken away, photo report. Book online.",
@@ -184,12 +184,12 @@ var suburbList = []Suburb{
 	// ── Maroondah ──
 	{Name: "Ringwood North", Slug: "ringwood-north", Postcode: "3134", LGA: "Maroondah", DriveMin: 10,
 		Blurb:    "Ringwood North is hilly, especially around Loughnan's Hill and Glenvale Road, and it sits on the Warrandyte side of Ringwood. A bushfire burnt between Warrandyte and Ringwood in January 1913, and parts of Maroondah are still designated bushfire prone. On sloping blocks the high side of the roof is hard to see from the ground, so blocked gutters there often go unnoticed until they overflow.",
-		MetaDesc: "Gutter cleaning in Ringwood North 3134 on sloping blocks. Fixed prices from $219, no one on a ladder, dated photo report. Book online.",
+		MetaDesc: "Gutter cleaning in Ringwood North 3134 on sloping blocks. Fixed prices from $219, dated photo report, mess taken away. Book online.",
 		Photo:    &Photo{Artist: "Philip Mallis", Licence: "CC BY-SA 2.0", LicenceURL: "https://creativecommons.org/licenses/by-sa/2.0", Source: "https://commons.wikimedia.org/wiki/File:Maroondah_Highway,_North_Ringwood.jpg"}},
 	{Name: "Warranwood", Slug: "warranwood", Postcode: "3134", LGA: "Maroondah", DriveMin: 12,
 		Blurb:    "Warranwood takes its name from Warrandyte South and Ringwood North, and it was still mostly bushland in the early 1970s. Warranwood Reserve keeps 11 hectares of native bush along Jumping Creek, and plenty of homes nearby sit under tall trees. That means a steady fall of leaves and bark into gutters, so a spring clean before summer is the minimum we'd suggest.",
 		MetaDesc: "Gutter cleaning in Warranwood 3134, close to Warrandyte. Fixed prices from $219, no ladders, debris taken away. Book online."},
 	{Name: "Croydon Hills", Slug: "croydon-hills", Postcode: "3136", LGA: "Maroondah", DriveMin: 15,
-		Blurb:    "Croydon Hills was farmland and orchards until it was developed in the 1980s, mostly as single-storey brick veneer homes on generous blocks. Gardens planted then have had 40 years to grow, and reserves like Candlebark Walk and Narr-Maen Reserve run between the streets. A single-storey home is a fixed $289, with no one on a ladder and everything taken away.",
+		Blurb:    "Croydon Hills was farmland and orchards until it was developed in the 1980s, mostly as single-storey brick veneer homes on generous blocks. Gardens planted then have had 40 years to grow, and reserves like Candlebark Walk and Narr-Maen Reserve run between the streets. A single-storey home is a fixed $289, with everything bagged and taken away.",
 		MetaDesc: "Croydon Hills gutter cleaning: $289 for a single-storey home, no ladders, debris taken away, with a photo report. Book online."},
 }

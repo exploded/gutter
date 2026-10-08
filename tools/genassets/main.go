@@ -59,7 +59,7 @@ const (
 	domain   = "upthespout.com.au"
 	wordmark = "Up The Spout"
 	subline  = "GUTTER CLEANING"
-	pitch    = "Clean gutters. No one on a ladder."
+	pitch    = "Clean gutters, done properly."
 	areaLine = "Melbourne's north-east  ·  Fixed prices  ·  Book online"
 )
 
@@ -1143,10 +1143,10 @@ func brandPlate(img *image.RGBA, scale float64, safeW, safeH float64) {
 
 	roundRect(img, cx-s(26), at(ruleY), cx+s(26), at(ruleY)+s(6), s(3), tangerine)
 
-	// The pitch, one sentence per line: one line is wider than a square crop allows.
+	// The pitch, split at its comma: one line is wider than a square crop allows.
 	p := style{sansMed, s(30), 0}
-	line1, line2, _ := strings.Cut(pitch, ". ")
-	line1 += "."
+	line1, line2, _ := strings.Cut(pitch, ", ")
+	line1 += ","
 	mustFit(math.Max(p.width(line1), p.width(line2)), safeW, "pitch")
 	p.drawC(img, line1, cx, at(pitchY), cream)
 	p.drawC(img, line2, cx, at(pitch2Y), cream)

@@ -44,7 +44,7 @@ const (
 // Fixed card copy. Keep it to what the business can back up: no "fully
 // insured", no "since 20xx", no ratings.
 const (
-	tagline  = "Clean gutters. No one on a ladder."
+	tagline  = "Clean gutters, done properly."
 	services = "Gutters · Downpipes · Clean-up · Photo report"
 	area     = "Melbourne's north-east · Fixed prices · Book online"
 )
