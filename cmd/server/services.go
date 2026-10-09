@@ -76,7 +76,7 @@ var services = []Service{
 		Short:  "Every gutter cleared with professional equipment, and the mess bagged and taken away — with a dated photo report.",
 		Intro:  "A proper clean, done safely. We use professional gutter cleaning equipment, so no one has to risk their life on a ladder. We clear every metre of gutter and take everything away with us.",
 		Body: []string{
-			"Across Melbourne's leafy north-east, gum trees drop leaves, bark and gumnuts all year, so gutters fill faster than most people expect. Once they're full, water spills over the back edge and soaks the fascia and eaves. The timber rots, steel gutters rust through from the inside, and water finds its way into the roof, walls and footings. By then it's a job for a carpenter and a plumber, at many times the price of a clean.",
+			"Across Melbourne's leafy east and north-east, gum trees drop leaves, bark and gumnuts all year, so gutters fill faster than most people expect. Once they're full, water spills over the back edge and soaks the fascia and eaves. The timber rots, steel gutters rust through from the inside, and water finds its way into the roof, walls and footings. By then it's a job for a carpenter and a plumber, at many times the price of a clean.",
 			"You get before-and-after photos of the gutters with your receipt, so you can see the work from the ground. Nothing is burnt and nothing is left in your garden beds.",
 			"If we spot something that needs a plumber — a sagging section, a rusted-through joint, a broken downpipe — we'll photograph it and tell you. Repairs are licensed plumbing work in Victoria, so we don't do them.",
 		},
@@ -90,8 +90,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("Fixed prices from $%d for a unit to $%d for a double storey. Taking the mess away is included.", propertyTypes[0].Price, propertyTypes[len(propertyTypes)-1].Price),
 		Related:   []string{"bushfire-preparation", "fire-ready-plan", "downpipe-unblocking"},
-		MetaTitle: "Gutter Cleaning in Melbourne's North-East — Fixed Prices, Book Online | Up The Spout",
-		MetaDesc:  "Gutter cleaning in Melbourne's north-east: every gutter cleared with professional equipment, no ladders, photo report. Fixed prices, book online.",
+		MetaTitle: "Gutter Cleaning in Melbourne's East and North-East — Fixed Prices, Book Online | Up The Spout",
+		MetaDesc:  "Gutter cleaning in Melbourne's east and north-east: every gutter cleared with professional equipment, no ladders, photo report. Fixed prices, book online.",
 	},
 	{
 		Slug:   "bushfire-preparation",
@@ -112,7 +112,7 @@ var services = []Service{
 		},
 		PriceNote: "Same fixed prices as a standard clean. Book early: October to December is the busiest time of the year.",
 		Related:   []string{"fire-ready-plan", "gutter-cleaning", "downpipe-unblocking"},
-		MetaTitle: "Bushfire Season Gutter Cleaning — Melbourne's North-East | Up The Spout",
+		MetaTitle: "Bushfire Season Gutter Cleaning — Melbourne's East and North-East | Up The Spout",
 		MetaDesc:  "Get your gutters fire-ready before the Fire Danger Period. Dated photo report for council notices and insurers. Fixed prices, book online.",
 	},
 	{
@@ -133,7 +133,7 @@ var services = []Service{
 		PriceNote: fmt.Sprintf("%d%% off every plan clean. Tick \"Fire-ready plan\" when you book.", planPct),
 		Related:   []string{"bushfire-preparation", "gutter-cleaning"},
 		MetaTitle: "Fire-Ready Gutter Plan — Two Cleans a Year | Up The Spout",
-		MetaDesc:  fmt.Sprintf("Spring and autumn gutter cleans at %d%% off each, with reminders. No contract, pay after each clean. Across Melbourne's north-east.", planPct),
+		MetaDesc:  fmt.Sprintf("Spring and autumn gutter cleans at %d%% off each, with reminders. No contract, pay after each clean. Across Melbourne's east and north-east.", planPct),
 	},
 	{
 		Slug:   "downpipe-unblocking",
@@ -152,8 +152,8 @@ var services = []Service{
 		},
 		PriceNote: fmt.Sprintf("A blocked downpipe that needs jetting is $%d, and only with your OK.", downpipePrice),
 		Related:   []string{"gutter-cleaning", "bushfire-preparation"},
-		MetaTitle: "Blocked Downpipe Clearing — Melbourne's North-East | Up The Spout",
-		MetaDesc:  "Blocked downpipes cleared with a jetter, with your OK, where they can be reached. Fixed prices across Melbourne's north-east.",
+		MetaTitle: "Blocked Downpipe Clearing — Melbourne's East and North-East | Up The Spout",
+		MetaDesc:  "Blocked downpipes cleared with a jetter, with your OK, where they can be reached. Fixed prices across Melbourne's east and north-east.",
 	},
 	{
 		Slug:   "pre-sale-and-rentals",
@@ -171,7 +171,7 @@ var services = []Service{
 		},
 		PriceNote: "Same fixed prices. Invoices can go to the owner or the agency.",
 		Related:   []string{"gutter-cleaning", "downpipe-unblocking"},
-		MetaTitle: "Pre-Sale & Rental Gutter Cleaning — Melbourne's North-East | Up The Spout",
+		MetaTitle: "Pre-Sale & Rental Gutter Cleaning — Melbourne's East and North-East | Up The Spout",
 		MetaDesc:  "Gutter cleans before a sale, inspection or new tenancy, with a dated photo report. Invoice the owner or the agency. Fixed prices, book online.",
 	},
 }

@@ -46,7 +46,7 @@ const (
 const (
 	tagline  = "Clean gutters, done properly."
 	services = "Gutters · Downpipes · Clean-up · Photo report"
-	area     = "Melbourne's north-east · Fixed prices · Book online"
+	area     = "Melbourne's east and north-east · Fixed prices · Book online"
 )
 
 func main() {

@@ -99,7 +99,7 @@ const mailTmplSrc = `
 {{define "wrap"}}<!doctype html><html><body style="font-family:-apple-system,Segoe UI,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#1c1c1c;margin:0;padding:24px;background:#f6f5f2">
 <div style="max-width:560px;margin:0 auto;background:#fff;border:1px solid #e6e3dc;border-radius:8px;padding:28px">
 {{.}}
-<p style="margin-top:32px;font-size:12px;color:#777">{{site.Name}} — Melbourne's north-east · <a href="{{site.BaseURL}}" style="color:#777">{{site.BaseURL}}</a></p>
+<p style="margin-top:32px;font-size:12px;color:#777">{{site.Name}} — Melbourne's east and north-east · <a href="{{site.BaseURL}}" style="color:#777">{{site.BaseURL}}</a></p>
 </div></body></html>{{end}}
 
 {{define "row"}}<tr><td style="padding:6px 12px 6px 0;color:#666;white-space:nowrap;vertical-align:top">{{.K}}</td><td style="padding:6px 0;vertical-align:top">{{.V}}</td></tr>{{end}}

@@ -29,7 +29,7 @@ func TestMailTemplatesRender(t *testing.T) {
 			t.Errorf("%s: user input not escaped", name)
 		}
 		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$430.00",
-			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Melbourne's north-east"} {
+			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Melbourne's east and north-east"} {
 			if !strings.Contains(out, want) {
 				t.Errorf("%s: missing %q:\n%s", name, want, out)
 			}

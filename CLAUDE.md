@@ -1,7 +1,7 @@
 # gutter — Up The Spout
 
 Website and booking system for **Up The Spout**, Vin's residential gutter
-cleaning business across Melbourne's north-east (Manningham, Nillumbik,
+cleaning business across Melbourne's east and north-east (Manningham, Nillumbik,
 Maroondah), based in Warrandyte VIC 3113.
 A fork of `C:\Projects\go\localithelp` (Local IT Help), so most mechanics —
 bookings, calendar sync, invoices, receipts, Zeller links, Ads attribution,
@@ -24,7 +24,7 @@ highlights), cream `#FFF7EA` ground. Tangerine, sky and sun are fills only; use
 `--accent` / `--sky-text` for coloured text. Cards and buttons are "stickers":
 2px ink outline plus a hard offset shadow (`--pop`). Speak as the business, "we":
 never name Vin anywhere customers see (site, emails, invoices, cards), and never
-imply a team size. Describe the area as "Melbourne's north-east"; Warrandyte is only the base.
+imply a team size. Describe the area as "Melbourne's east and north-east"; Warrandyte is only the base.
 The mark is `static/img/logo-mark.svg` (gutter, tangerine downpipe, drop, leaf);
 `go run ./tools/genassets` and `go run ./tools/bizcard -logos` re-render
 everything from it.

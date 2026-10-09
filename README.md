@@ -1,7 +1,7 @@
 # Up The Spout
 
 Website and booking system for **Up The Spout**: residential gutter
-cleaning across Melbourne's north-east, run by Vin from Warrandyte VIC 3113. Customers see fixed prices, book
+cleaning across Melbourne's east and north-east, run by Vin from Warrandyte VIC 3113. Customers see fixed prices, book
 online, and get a photo report with every clean. Vin runs bookings, his Google
 Calendar, invoices, receipts and review requests from `/admin`.
 

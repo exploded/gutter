@@ -60,7 +60,7 @@ const (
 	wordmark = "Up The Spout"
 	subline  = "GUTTER CLEANING"
 	pitch    = "Clean gutters, done properly."
-	areaLine = "Melbourne's north-east  ·  Fixed prices  ·  Book online"
+	areaLine = "Melbourne's east and north-east  ·  Fixed prices  ·  Book online"
 )
 
 var services = []string{"Gutters", "Downpipes", "Clean-up", "Photo report"}

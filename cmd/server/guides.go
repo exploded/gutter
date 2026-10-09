@@ -95,7 +95,7 @@ var guides = []Guide{
 		},
 		StopWhen: "The canopy hangs over the roof, the house is two storeys, or you'd rather not have to remember. The Fire-ready plan books a clean each spring and each May at 12% off, and we send the reminder.",
 		Service:  "fire-ready-plan",
-		MetaDesc: "How often to clean gutters under gum trees in Melbourne's north-east: twice a year for most homes, in spring and May, plus checks before fire days and storms.",
+		MetaDesc: "How often to clean gutters under gum trees in Melbourne's east and north-east: twice a year for most homes, in spring and May, plus checks before fire days and storms.",
 	},
 	{
 		Slug:    "signs-gutters-are-blocked",
@@ -119,7 +119,7 @@ var guides = []Guide{
 		},
 		StopWhen: "You've spotted one or more of these signs and the roof isn't one you can safely get to. Book a clean and you'll get before-and-after photos of every run, so you can see what was up there.",
 		Service:  "gutter-cleaning",
-		MetaDesc: "Simple checks from the ground that tell you whether your gutters or downpipes are blocked, with no ladder needed. For homes in Melbourne's north-east.",
+		MetaDesc: "Simple checks from the ground that tell you whether your gutters or downpipes are blocked, with no ladder needed. For homes in Melbourne's east and north-east.",
 	},
 	{
 		Slug:    "cleaning-your-own-gutters-ladder-safety",
