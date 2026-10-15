@@ -373,7 +373,9 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	if f.Phone == "" && f.Email == "" {
 		errs["contact"] = "Please give a phone number or an email address so we can get back to you."
 	}
-	if f.Email != "" && (!strings.Contains(f.Email, "@") || len(f.Email) > 120) {
+	// validEmail takes exactly one bare address: no display name, no comma list
+	// and no line breaks, any of which would add recipients to our mail.
+	if f.Email != "" && (len(f.Email) > 120 || !validEmail(f.Email)) {
 		errs["email"] = "That email address doesn't look right."
 	}
 	if len(f.Phone) > 40 {

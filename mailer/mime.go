@@ -8,6 +8,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/textproto"
+	"strings"
 	"time"
 )
 
@@ -16,6 +17,14 @@ import (
 // values, already formatted (see net/mail.Address.String). It is the raw form
 // the Gmail API sends; SES builds its own.
 func BuildMessage(from, to, replyTo, subject, htmlBody, textBody string, atts ...Attachment) ([]byte, error) {
+	subject = mime.QEncoding.Encode("utf-8", subject)
+	// A line break in a header value would start a new header (Bcc: …) and turn
+	// the business mailbox into an open relay, so refuse the whole message.
+	for _, v := range []string{from, to, replyTo, subject} {
+		if strings.ContainsAny(v, "\r\n") {
+			return nil, fmt.Errorf("mailer: line break in header value %q", v)
+		}
+	}
 	var buf bytes.Buffer
 	hdr := func(k, v string) { fmt.Fprintf(&buf, "%s: %s\r\n", k, v) }
 	hdr("From", from)
@@ -23,7 +32,7 @@ func BuildMessage(from, to, replyTo, subject, htmlBody, textBody string, atts ..
 	if replyTo != "" {
 		hdr("Reply-To", replyTo)
 	}
-	hdr("Subject", mime.QEncoding.Encode("utf-8", subject))
+	hdr("Subject", subject)
 	hdr("Date", time.Now().Format(time.RFC1123Z))
 	hdr("MIME-Version", "1.0")
 

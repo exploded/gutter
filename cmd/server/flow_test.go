@@ -131,6 +131,19 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 	if bs, _ := db.ListBookings(); len(bs) != 0 {
 		t.Fatalf("rejected enquiry was stored: %+v", bs)
 	}
+	// An email value that smuggles in extra recipients (a header line or a
+	// comma list) is refused, or every booking mail would relay spam.
+	for _, bad := range []string{"x@example.test\r\nBcc: v@example.test", "x@example.test, v@example.test", "Zoe <x@example.test>"} {
+		rr = do("POST", "/book", url.Values{
+			"name": {"Zoë O'Brien"}, "email": {bad},
+			"address": {"12 Sample St, Donvale VIC 3111"}, "addr_street": {"12 Sample St"},
+			"addr_suburb": {"Donvale"}, "addr_state": {"VIC"}, "addr_postcode": {"3111"},
+			"property": {"double"}, "service": {"gutter-cleaning"}, "ts": {itoa(time.Now().Unix() - 10)},
+		}, false)
+		if rr.Code != http.StatusUnprocessableEntity || !strings.Contains(rr.Body.String(), "look right") {
+			t.Fatalf("email %q should 422: %d", bad, rr.Code)
+		}
+	}
 	// This one arrives on an ad first, so the booking should end up carrying
 	// both the source and the click behind it.
 	landing := httptest.NewRecorder()

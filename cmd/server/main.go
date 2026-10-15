@@ -90,10 +90,59 @@ func main() {
 	mux := newMux(dir)
 	startScheduler()
 
+	go sweepAuthState()
+
+	// Timeouts so a slow or idle client can't hold connections open forever.
+	// WriteTimeout leaves room for the slowest handler: an invoice PDF mailed
+	// through Gmail while the admin waits.
+	srv := &http.Server{
+		Addr:              ":" + port,
+		Handler:           hsts(canonicalHost(trackSource(mux))),
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
+	}
 	log.Printf("listening on :%s", port)
-	if err := http.ListenAndServe(":"+port, canonicalHost(trackSource(mux))); err != nil {
+	if err := srv.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// hsts tells browsers to use https only, so no request (and no session cookie)
+// ever goes out over plain http. Sent only when the site itself is https.
+func hsts(next http.Handler) http.Handler {
+	if !strings.HasPrefix(site.BaseURL, "https://") {
+		return next
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// sweepAuthState drops expired OAuth states and sessions. Nothing else removes
+// a state that never comes back from Google, so without this anyone could grow
+// memory by requesting /auth/google over and over.
+func sweepAuthState() {
+	for range time.Tick(time.Minute) {
+		sweepExpired(time.Now())
+	}
+}
+
+func sweepExpired(now time.Time) {
+	oauthStates.Range(func(k, v any) bool {
+		if now.After(v.(time.Time)) {
+			oauthStates.Delete(k)
+		}
+		return true
+	})
+	userSessions.Range(func(k, v any) bool {
+		if now.After(v.(*userSession).Expiry) {
+			userSessions.Delete(k)
+		}
+		return true
+	})
 }
 
 // newMux registers every route. Kept separate from main so tests can drive the
@@ -411,9 +460,20 @@ const (
 )
 
 // isLocalPath reports whether a post-login redirect is a same-site relative
-// path, so it can never become an open redirect.
+// path, so it can never become an open redirect. Browsers read a backslash as
+// a slash and skip tabs and newlines, so "/\evil.com" and "/<tab>/evil.com"
+// both mean //evil.com: anything but a plain path is refused.
 func isLocalPath(p string) bool {
-	return strings.HasPrefix(p, "/") && !strings.HasPrefix(p, "//")
+	if !strings.HasPrefix(p, "/") || strings.HasPrefix(p, "//") || strings.Contains(p, `\`) {
+		return false
+	}
+	for _, c := range p {
+		if c < 0x20 || c == 0x7f {
+			return false
+		}
+	}
+	u, err := url.Parse(p)
+	return err == nil && u.Scheme == "" && u.Host == ""
 }
 
 // setLoginCookie writes a short-lived cookie for the login in progress; an
@@ -426,6 +486,7 @@ func setLoginCookie(w http.ResponseWriter, name, value string) {
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+		Secure:   strings.HasPrefix(site.BaseURL, "https://"),
 		MaxAge:   600,
 	}
 	if value == "" {
@@ -569,6 +630,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
+		Secure:   strings.HasPrefix(site.BaseURL, "https://"),
 		MaxAge:   7 * 86400,
 	})
 

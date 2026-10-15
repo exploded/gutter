@@ -65,6 +65,33 @@ func TestBuildMessageNoAttachments(t *testing.T) {
 	}
 }
 
+// A line break in any header value would let it add headers such as Bcc, so
+// the message is refused rather than sent.
+func TestBuildMessageRejectsHeaderInjection(t *testing.T) {
+	bad := "x@example.test\r\nBcc: v@example.test"
+	for name, args := range map[string][3]string{
+		"to":       {"a@example.test", bad, ""},
+		"reply-to": {"a@example.test", "b@example.test", bad},
+		"from":     {bad, "b@example.test", ""},
+	} {
+		if _, err := BuildMessage(args[0], args[1], args[2], "Hi", "<p>hi</p>", "hi"); err == nil {
+			t.Errorf("%s: line break accepted", name)
+		}
+	}
+	// The subject is Q-encoded, so a line break there is harmless and allowed.
+	raw, err := BuildMessage("a@example.test", "b@example.test", "", "Hi\r\nBcc: v@example.test", "<p>hi</p>", "hi")
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := mail.ReadMessage(bytes.NewReader(raw))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Header.Get("Bcc") != "" {
+		t.Errorf("subject injected a Bcc header: %q", m.Header.Get("Bcc"))
+	}
+}
+
 // readParts walks a multipart tree and returns each leaf's decoded body keyed
 // by media type, plus "disposition:<type>" for its Content-Disposition.
 func readParts(t *testing.T, contentType string, body io.Reader) map[string]string {

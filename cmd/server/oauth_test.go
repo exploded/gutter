@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -106,6 +107,87 @@ func TestGoogleLoginRejectsOpenRedirect(t *testing.T) {
 	c := cookieByName(w.Result().Cookies(), loginRedirectCookie)
 	if c == nil || c.MaxAge >= 0 || c.Value != "" {
 		t.Fatalf("redirect cookie = %+v, want cleared", c)
+	}
+}
+
+// Browsers treat a backslash as a slash and drop tabs and newlines, so each of
+// these would land on another site after sign-in.
+func TestIsLocalPath(t *testing.T) {
+	for p, want := range map[string]bool{
+		"/":                   true,
+		"/admin":              true,
+		"/admin/bookings?q=1": true,
+		"":                    false,
+		"admin":               false,
+		"//evil.example":      false,
+		`/\evil.example`:      false,
+		"/\t/evil.example":    false,
+		"/\n/evil.example":    false,
+		"https://evil.test/":  false,
+	} {
+		if got := isLocalPath(p); got != want {
+			t.Errorf("isLocalPath(%q) = %v, want %v", p, got, want)
+		}
+	}
+}
+
+// The session cookie must never travel over plain http on the live site.
+func TestLoginCookiesAreSecureOnHTTPS(t *testing.T) {
+	old := site.BaseURL
+	defer func() { site.BaseURL = old }()
+	site.BaseURL = "https://example.test"
+
+	w := httptest.NewRecorder()
+	setLoginCookie(w, loginRedirectCookie, "/admin")
+	if c := cookieByName(w.Result().Cookies(), loginRedirectCookie); c == nil || !c.Secure {
+		t.Fatalf("login cookie = %+v, want Secure", c)
+	}
+}
+
+func TestHSTS(t *testing.T) {
+	old := site.BaseURL
+	defer func() { site.BaseURL = old }()
+	ok := http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
+
+	site.BaseURL = "https://example.test"
+	w := httptest.NewRecorder()
+	hsts(ok).ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
+	if !strings.HasPrefix(w.Header().Get("Strict-Transport-Security"), "max-age=") {
+		t.Fatalf("https site: HSTS = %q", w.Header().Get("Strict-Transport-Security"))
+	}
+
+	site.BaseURL = "http://localhost:8080"
+	w = httptest.NewRecorder()
+	hsts(ok).ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
+	if h := w.Header().Get("Strict-Transport-Security"); h != "" {
+		t.Fatalf("local http site sent HSTS %q", h)
+	}
+}
+
+// Abandoned logins and old sessions are dropped; live ones stay.
+func TestSweepExpired(t *testing.T) {
+	now := time.Now()
+	oauthStates.Store("old-state", now.Add(-time.Second))
+	oauthStates.Store("live-state", now.Add(time.Minute))
+	userSessions.Store("old-sess", &userSession{Expiry: now.Add(-time.Second)})
+	userSessions.Store("live-sess", &userSession{Expiry: now.Add(time.Hour)})
+	defer func() {
+		oauthStates.Delete("live-state")
+		userSessions.Delete("live-sess")
+	}()
+
+	sweepExpired(now)
+	if _, ok := oauthStates.Load("old-state"); ok {
+		t.Error("expired state kept")
+	}
+	if _, ok := oauthStates.Load("live-state"); !ok {
+		t.Error("live state dropped")
+	}
+	if _, ok := userSessions.Load("old-sess"); ok {
+		t.Error("expired session kept")
+	}
+	if _, ok := userSessions.Load("live-sess"); !ok {
+		t.Error("live session dropped")
 	}
 }
 
