@@ -17,16 +17,21 @@
 
     <section class="admin-section">
         <div class="container">
+            <div id="admin-flash">{{template "flash" $d.Flash}}</div>
             {{if $d.ForID}}
             <div class="admin-status admin-status--success admin-flash">Picking a time for <a href="/admin/bookings/{{$d.ForID}}">#{{$d.ForID}} {{$d.ForName}}</a> — click a free slot.</div>
             {{end}}
             {{if $d.BusyErr}}
             <div class="admin-status admin-status--error admin-flash">Google Calendar busy times unavailable: {{$d.BusyErr}}</div>
             {{end}}
+            {{if $d.OffErr}}
+            <div class="admin-status admin-status--error admin-flash">Couldn't read time off from Google Calendar: {{$d.OffErr}}</div>
+            {{end}}
             <div class="cal-toolbar">
                 <a class="btn btn--ghost btn--sm" href="/admin/calendar?week={{$d.Prev}}{{if $d.ForID}}&for={{$d.ForID}}{{end}}">&#8592; Prev</a>
                 <a class="btn btn--ghost btn--sm" href="/admin/calendar?week={{$d.ThisWeek}}{{if $d.ForID}}&for={{$d.ForID}}{{end}}">This week</a>
                 <a class="btn btn--ghost btn--sm" href="/admin/calendar?week={{$d.Next}}{{if $d.ForID}}&for={{$d.ForID}}{{end}}">Next &#8594;</a>
+                <a class="btn btn--ghost btn--sm" href="#time-off">Block out time</a>
                 <a class="btn btn--ghost btn--sm" href="/admin/calendar/settings">Calendar sync{{if not $d.BusyOn}} (off){{end}}</a>
                 <span class="cal-week-label">{{$d.WeekLabel}}</span>
             </div>
@@ -40,8 +45,9 @@
                 </div>
                 {{range $d.Days}}
                 <div class="cal-col{{if .IsToday}} cal-today{{end}}">
-                    {{range .Slots}}{{if .Href}}<a class="cal-slot{{if .OnHour}} cal-slot--hour{{end}}" href="{{.Href}}" title="{{.Time}}"></a>{{else}}<div class="cal-slot{{if .OnHour}} cal-slot--hour{{end}}"></div>{{end}}{{end}}
+                    {{range .Slots}}{{if .Href}}<a class="cal-slot{{if .OnHour}} cal-slot--hour{{end}}" href="{{.Href}}" title="{{if $d.ForID}}{{.Time}}{{else}}Block out time from {{.Time}}{{end}}"></a>{{else}}<div class="cal-slot{{if .OnHour}} cal-slot--hour{{end}}"></div>{{end}}{{end}}
                     {{range .Busy}}<div class="cal-busy" style="top:{{.Top}}px;height:{{.Height}}px" title="Busy {{.Label}} (from your other calendars)"><span class="cal-busy-label">busy</span></div>{{end}}
+                    {{range .Off}}<a class="cal-off" href="#time-off" style="top:{{.Top}}px;height:{{.Height}}px" title="{{.Label}}"><span class="cal-busy-label">time off</span></a>{{end}}
                     {{range .Events}}
                     <a class="cal-event cal-event--{{.Row.Status}}" href="{{.Href}}" style="top:{{.Top}}px;height:{{.Height}}px" title="{{.Label}} — {{.Row.Name}}{{if .Row.Suburb}}, {{.Row.Suburb}}{{end}}">
                         <span class="cal-event-time">{{.Label}}</span>
@@ -53,6 +59,79 @@
                 {{end}}
             </div>
             </div>
+
+            <div class="admin-card cal-time-off" id="time-off">
+                <h2 class="admin-card-title">Block out time</h2>
+                {{if $d.BusyOn}}
+                <p class="admin-note">
+                    Customers can't book an online window that touches time off. It's saved in Google Calendar
+                    next to your visits, so you can also move or delete it there, or add an event to the
+                    {{.Site.Name}} calendar on your phone: the website follows within a couple of minutes.
+                    Click an empty spot on the calendar to start from there.
+                </p>
+                {{template "time-off-form" .}}
+                {{else}}
+                <p class="admin-note">
+                    Time off is kept in Google Calendar. <a href="/admin/calendar/settings">Connect Google Calendar</a>
+                    to block out time here.
+                </p>
+                {{end}}
+                {{if $d.Upcoming}}
+                <h3 class="admin-card-title cal-time-off-head">Coming up</h3>
+                <ul class="admin-list">
+                    {{range $d.Upcoming}}
+                    <li class="cal-time-off-row">
+                        <span><strong>{{.When}}</strong>{{if .Note}} · {{.Note}}{{end}}</span>
+                        <form method="post" action="/admin/calendar/off/{{.EventID}}/delete"
+                              onsubmit="return confirm('Remove this time off? Online bookings open up again.')">
+                            {{template "csrf" $.CSRF}}
+                            <button class="btn btn--ghost btn--sm btn--danger" type="submit">Remove</button>
+                        </form>
+                    </li>
+                    {{end}}
+                </ul>
+                {{end}}
+            </div>
         </div>
     </section>
+{{end}}
+
+{{/* The form alone is the htmx target: a rejected entry comes back as this
+     fragment (422) with the message and the typed values. A saved one answers
+     with HX-Redirect, because the grid, the list and the flash all change.
+     Without the script it posts and redirects like any other form. */}}
+{{define "time-off-form"}}
+    {{$f := .PageData.Off}}
+    <form method="post" action="/admin/calendar/off" class="admin-form-stack" id="time-off-form"
+          hx-post="/admin/calendar/off" hx-target="this" hx-swap="outerHTML" hx-disable="find button">
+        {{template "csrf" .CSRF}}
+        <input type="hidden" name="week" value="{{$f.Week}}">
+        {{if $f.Err}}<div class="admin-status admin-status--error" role="alert">{{$f.Err}}</div>{{end}}
+        <div class="admin-form-inline">
+            <div class="admin-field">
+                <label for="off-date">Day</label>
+                <input class="admin-input" type="date" id="off-date" name="date" value="{{$f.Date}}" required>
+            </div>
+            <div class="admin-field">
+                <label for="off-from">From</label>
+                <input class="admin-input" type="time" id="off-from" name="from" value="{{$f.From}}" step="900">
+            </div>
+            <div class="admin-field">
+                <label for="off-to">To</label>
+                <input class="admin-input" type="time" id="off-to" name="to" value="{{$f.To}}" step="900">
+            </div>
+            <div class="admin-field">
+                <label for="off-until">Last day (if more than one)</label>
+                <input class="admin-input" type="date" id="off-until" name="until" value="{{$f.Until}}">
+            </div>
+        </div>
+        <div class="admin-form-inline">
+            <div class="admin-field admin-field--wide">
+                <label for="off-note">Note (only you see it)</label>
+                <input class="admin-input" id="off-note" name="note" value="{{$f.Note}}" maxlength="200" placeholder="Dentist, school pick-up, holiday…">
+            </div>
+            <button class="btn btn--primary btn--sm" type="submit">Block it out</button>
+        </div>
+        <p class="admin-muted">Leave the times blank to block whole days. Over several days, the time off runs from the start time on the first day to the end time on the last.</p>
+    </form>
 {{end}}

@@ -23,6 +23,8 @@ type fakeCalendar struct {
 	fbAsked   []string // calendar ids the last FreeBusy call covered
 	patchErr  error    // returned by the next PatchEvent
 	insertErr error
+	listErr   error // returned by every ListEvents
+	lists     int   // ListEvents calls made
 }
 
 func newFakeCalendar() *fakeCalendar {
@@ -65,6 +67,32 @@ func (f *fakeCalendar) DeleteEvent(_ context.Context, _, eventID string) error {
 	return nil
 }
 
+func (f *fakeCalendar) ListEvents(_ context.Context, _ string, from, to time.Time) ([]gcalEvent, error) {
+	if f.listErr != nil {
+		return nil, f.listErr
+	}
+	f.lists++
+	var out []gcalEvent
+	for id, ev := range f.events {
+		if st, en, ok := eventSpan(ev); ok && st.Before(to) && en.After(from) {
+			cp := *ev
+			cp.ID = id
+			out = append(out, cp)
+		}
+	}
+	return out, nil
+}
+
+func (f *fakeCalendar) GetEvent(_ context.Context, _, eventID string) (*gcalEvent, error) {
+	ev, ok := f.events[eventID]
+	if !ok {
+		return nil, errNotFound
+	}
+	cp := *ev
+	cp.ID = eventID
+	return &cp, nil
+}
+
 func (f *fakeCalendar) ListCalendars(context.Context) ([]gcalCalendar, error) { return f.cals, nil }
 
 func (f *fakeCalendar) CreateCalendar(_ context.Context, summary, _ string) (string, error) {
@@ -86,7 +114,8 @@ func connectFake(t *testing.T, f *fakeCalendar) {
 	prev := gcalClientFor
 	gcalClientFor = func(*db.GoogleCalendar) (calendarAPI, error) { return f, nil }
 	busyCache.clear()
-	t.Cleanup(func() { gcalClientFor = prev; busyCache.clear() })
+	timeOffCache.clear()
+	t.Cleanup(func() { gcalClientFor = prev; busyCache.clear(); timeOffCache.clear() })
 }
 
 func openTestDB(t *testing.T, name string) {

@@ -43,6 +43,9 @@ Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-h
 - `cmd/server/suburbs.go` — the service area (15 suburbs, unique blurbs; `TestSuburbs` rejects thin copy).
 - `cmd/server/guides.go` — `/guides` articles.
 - `cmd/server/pages.go` — public handlers incl. `/book`; `admin_*.go` — admin.
+- `cmd/server/timeoff.go` — time off. Google Calendar is the only record (no
+  table): the form inserts the event and every view reads the app's calendar
+  back, so edits in Google count. Any non-booking event there blocks time.
 - `cmd/server/slots.go` — online AM/PM booking windows, checked against
   bookings and Google free/busy. Never offer a window the app couldn't check.
 - `tools/bizcard` — Officeworks business-card PDF; `tools/genassets` — icons/OG image; `tools/brand` — logo files and fonts.

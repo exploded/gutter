@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"gutter/db"
@@ -621,6 +622,7 @@ type calDay struct {
 	Slots   []calSlot
 	Events  []calEvent
 	Busy    []calBusy
+	Off     []calBusy // time off blocked out in the app; Label carries the note
 }
 
 // calBusy is a block of time the admin is busy according to their other Google
@@ -645,6 +647,17 @@ type calendarData struct {
 	ForName   string
 	BusyOn    bool   // Google Calendar sync is connected, so busy blocks are shown
 	BusyErr   string // set when the busy lookup failed; the week still renders
+	OffErr    string // set when time off couldn't be read from Google
+	Flash     flash
+	Off       timeOffForm  // the "Block out time" form
+	Upcoming  []timeOffRow // time off from today on, to review or remove
+}
+
+// timeOffRow is one span in the "Coming up" list.
+type timeOffRow struct {
+	EventID string
+	When    string
+	Note    string
 }
 
 func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
@@ -671,7 +684,10 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 		SlotPx:    calSlotPx,
 		ColPx:     (calEndHour - calStartHour) * 60 / calSlotMin * calSlotPx,
 		ForID:     forID,
+		Flash:     readFlash(r),
+		Off:       timeOffPrefill(r.URL.Query().Get("off")),
 	}
+	d.Off.Week = weekStart.Format("2006-01-02")
 	if forID != 0 {
 		if fb, err := db.GetBooking(forID); err == nil {
 			d.ForName = fb.Name
@@ -681,13 +697,43 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 		d.Hours = append(d.Hours, h)
 	}
 
-	// Busy times from the admin's other Google calendars. Never fatal: on
-	// failure the week renders without them and says so.
+	// Time off, read from Google in one go for both the week and the "Coming
+	// up" list, alongside the busy times from the admin's other calendars.
+	// Neither is fatal: on failure the week renders without it and says so.
+	now := time.Now()
+	offFrom, offTo := weekStart, db.Today().AddDate(0, 0, timeOffListDays)
+	if now.Before(offFrom) {
+		offFrom = now
+	}
+	if weekEnd.After(offTo) {
+		offTo = weekEnd
+	}
+	var (
+		offs   []timeOff
+		offErr error
+		wg     sync.WaitGroup
+	)
+	wg.Add(1)
+	go func() { defer wg.Done(); offs, offErr = listTimeOff(offFrom, offTo, true) }()
 	busy, busyErr := busyIntervals(weekStart, weekEnd)
+	wg.Wait()
 	d.BusyOn = calendarSyncConnected()
 	if busyErr != nil {
 		logGCal("busy times", busyErr)
 		d.BusyErr = busyErr.Error()
+	}
+	if offErr != nil {
+		logGCal("time off", offErr)
+		d.OffErr = offErr.Error()
+	}
+	var off []timeOff
+	for _, t := range offs {
+		if t.Start.Before(weekEnd) && t.End.After(weekStart) {
+			off = append(off, t)
+		}
+		if t.End.After(now) {
+			d.Upcoming = append(d.Upcoming, timeOffRow{EventID: t.EventID, When: fmtTimeOff(t), Note: t.Note})
+		}
 	}
 
 	today := db.Today()
@@ -699,6 +745,9 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 				slot := calSlot{Time: time.Date(2000, 1, 1, h, m, 0, 0, time.UTC).Format("15:04"), OnHour: m == 0}
 				if forID != 0 {
 					slot.Href = "/admin/bookings/" + strconv.FormatInt(forID, 10) + "?start=" + date.Format("2006-01-02") + "T" + slot.Time
+				} else {
+					// Otherwise a click starts blocking out time from there.
+					slot.Href = "/admin/calendar?week=" + d.Off.Week + "&off=" + date.Format("2006-01-02") + "T" + slot.Time + "#time-off"
 				}
 				day.Slots = append(day.Slots, slot)
 			}
@@ -725,6 +774,15 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 		day.Busy = busyBlocksFor(busy, date)
+		for _, t := range off {
+			if b, ok := clipToDay(t.Start, t.End, date); ok {
+				b.Label = "Time off " + b.Label
+				if t.Note != "" {
+					b.Label += ": " + t.Note
+				}
+				day.Off = append(day.Off, b)
+			}
+		}
 		d.Days = append(d.Days, day)
 	}
 	render(w, r, "admin-calendar", d)
@@ -734,26 +792,44 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 // outside the displayed hours. An interval spanning midnight yields a block on
 // each day it covers.
 func busyBlocksFor(busy []busyInterval, date time.Time) []calBusy {
-	dayStart := time.Date(date.Year(), date.Month(), date.Day(), calStartHour, 0, 0, 0, db.Melbourne)
-	dayEnd := time.Date(date.Year(), date.Month(), date.Day(), calEndHour, 0, 0, 0, db.Melbourne)
 	var out []calBusy
 	for _, b := range busy {
-		st, en := b.Start.In(db.Melbourne), b.End.In(db.Melbourne)
-		if st.Before(dayStart) {
-			st = dayStart
+		if blk, ok := clipToDay(b.Start, b.End, date); ok {
+			out = append(out, blk)
 		}
-		if en.After(dayEnd) {
-			en = dayEnd
-		}
-		if !en.After(st) {
-			continue
-		}
-		top := int(st.Sub(dayStart).Minutes()) * calSlotPx / calSlotMin
-		height := int(en.Sub(st).Minutes()) * calSlotPx / calSlotMin
-		if height < 2 {
-			height = 2
-		}
-		out = append(out, calBusy{Top: top, Height: height, Label: fmtClock(st) + " – " + fmtClock(en)})
 	}
 	return out
+}
+
+// clipToDay places [start, end) in one day column, clipped to the displayed
+// hours; ok is false when none of it shows that day.
+func clipToDay(start, end, date time.Time) (calBusy, bool) {
+	dayStart := time.Date(date.Year(), date.Month(), date.Day(), calStartHour, 0, 0, 0, db.Melbourne)
+	dayEnd := time.Date(date.Year(), date.Month(), date.Day(), calEndHour, 0, 0, 0, db.Melbourne)
+	st, en := start.In(db.Melbourne), end.In(db.Melbourne)
+	if st.Before(dayStart) {
+		st = dayStart
+	}
+	if en.After(dayEnd) {
+		en = dayEnd
+	}
+	if !en.After(st) {
+		return calBusy{}, false
+	}
+	top := int(st.Sub(dayStart).Minutes()) * calSlotPx / calSlotMin
+	height := int(en.Sub(st).Minutes()) * calSlotPx / calSlotMin
+	if height < 2 {
+		height = 2
+	}
+	return calBusy{Top: top, Height: height, Label: fmtClock(st) + " – " + fmtClock(en)}, true
+}
+
+// timeOffPrefill fills the "Block out time" form from a clicked calendar slot
+// (?off=2006-01-02T15:04): that day, from that time, for an hour.
+func timeOffPrefill(v string) timeOffForm {
+	t, err := time.ParseInLocation("2006-01-02T15:04", v, db.Melbourne)
+	if err != nil {
+		return timeOffForm{}
+	}
+	return timeOffForm{Date: t.Format("2006-01-02"), From: t.Format("15:04"), To: t.Add(time.Hour).Format("15:04")}
 }

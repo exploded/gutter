@@ -22,6 +22,7 @@ the shared mechanics in more depth.
 - `cmd/server/pages.go` — public pages and the `/book` form (property, plan, live price)
 - `cmd/server/admin_bookings.go`, `admin_invoices.go` — admin bookings, calendar, invoices, customers
 - `cmd/server/gcal*.go` — Google Calendar sync; `scheduler.go` — reminders, digest, backups
+- `cmd/server/timeoff.go` — time off, read from and written to the app's Google calendar
 - `cmd/server/seo.go`, `llms.go` — robots, sitemap, JSON-LD helpers, `/llms.txt`, `/api/pricing`
 - `templates/` — layouts and one file per page; `static/` — CSS, JS, fonts, images
 - `db/schema.sql`, `db/queries.sql` → `sqlc generate` → `db/sqlc/`
@@ -59,8 +60,8 @@ The Fire-ready plan takes 12% off each of two cleans a year. No GST is charged.
    the price shown, and a default duration from the price list.
    - **Pick a time now** books a free morning (8am–12pm) or afternoon
      (12pm–5pm) window straight away: it goes into Google Calendar and the
-     customer gets the confirmation. A window is offered only when no booking
-     and no busy time on Vin's Google calendars overlaps it, and it's
+     customer gets the confirmation. A window is offered only when no booking,
+     no time off and no busy time on Vin's Google calendars overlaps it, and it's
      re-checked live on submit. Windows come from `openHours`, start at least
      12 hours out, run three weeks ahead, and one booking fills a window
      (`cmd/server/slots.go`). With the calendar disconnected, or Google
@@ -70,6 +71,13 @@ The Fire-ready plan takes 12% off each of two cleans a year. No GST is charged.
 2. **Schedule** it on the booking page or the week calendar. The customer gets a
    confirmation with an `.ics` invite; it also lands in Vin's Google Calendar.
    Rescheduling an online booking sets an exact time in place of its window.
+   - **Block out time** under the week calendar (or click an empty spot on
+     it) to take hours or whole days off. It's saved straight into the
+     Up The Spout Google calendar as "Time off", and Google is the only
+     record: move or delete it there, or add an event to that calendar on the
+     phone, and the website follows within about 2 minutes. Online windows
+     that touch it stop being offered. Every event on that calendar that
+     isn't a booking counts, unless it's marked "free".
 3. **Done** → **Create invoice**: prefilled from the price list (clean,
    plan discount), so the total matches what the customer saw. Add downpipe
    jetting or the neighbour deal with the editor buttons.

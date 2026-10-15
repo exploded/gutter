@@ -71,6 +71,7 @@ type gcalEvent struct {
 	Description        string           `json:"description,omitempty"`
 	Location           string           `json:"location,omitempty"`
 	Status             string           `json:"status,omitempty"`
+	Transparency       string           `json:"transparency,omitempty"` // "transparent" = shown as free
 	Start              *gcalEventTime   `json:"start,omitempty"`
 	End                *gcalEventTime   `json:"end,omitempty"`
 	Reminders          *gcalReminders   `json:"reminders,omitempty"`
@@ -78,8 +79,11 @@ type gcalEvent struct {
 	Source             *gcalEventSource `json:"source,omitempty"`
 }
 
+// gcalEventTime is either a moment (DateTime + TimeZone) or, for an all-day
+// event, a bare Date ('YYYY-MM-DD'; the end date is exclusive).
 type gcalEventTime struct {
 	DateTime string `json:"dateTime,omitempty"`
+	Date     string `json:"date,omitempty"`
 	TimeZone string `json:"timeZone,omitempty"`
 }
 
@@ -122,6 +126,10 @@ type calendarAPI interface {
 	ListCalendars(ctx context.Context) ([]gcalCalendar, error)
 	CreateCalendar(ctx context.Context, summary, timeZone string) (string, error)
 	FreeBusy(ctx context.Context, calendarIDs []string, from, to time.Time) ([]busyInterval, error)
+	// ListEvents returns the events overlapping [from, to), with recurring
+	// events expanded into single instances. Cancelled events are left out.
+	ListEvents(ctx context.Context, calendarID string, from, to time.Time) ([]gcalEvent, error)
+	GetEvent(ctx context.Context, calendarID, eventID string) (*gcalEvent, error)
 }
 
 // errNotFound is returned when Google reports 404/410 for an event. Deleting an
@@ -211,6 +219,79 @@ func (c *gcalClient) PatchEvent(ctx context.Context, calendarID, eventID string,
 func (c *gcalClient) DeleteEvent(ctx context.Context, calendarID, eventID string) error {
 	return c.do(ctx, http.MethodDelete,
 		"/calendars/"+url.PathEscape(calendarID)+"/events/"+url.PathEscape(eventID), nil, nil)
+}
+
+func (c *gcalClient) ListEvents(ctx context.Context, calendarID string, from, to time.Time) ([]gcalEvent, error) {
+	var all []gcalEvent
+	page := ""
+	for {
+		q := url.Values{
+			"timeMin":      {from.UTC().Format(time.RFC3339)},
+			"timeMax":      {to.UTC().Format(time.RFC3339)},
+			"singleEvents": {"true"},
+			"orderBy":      {"startTime"},
+			"maxResults":   {"2500"},
+		}
+		if page != "" {
+			q.Set("pageToken", page)
+		}
+		var out struct {
+			Items         []gcalEvent `json:"items"`
+			NextPageToken string      `json:"nextPageToken"`
+		}
+		if err := c.do(ctx, http.MethodGet, "/calendars/"+url.PathEscape(calendarID)+"/events?"+q.Encode(), nil, &out); err != nil {
+			return nil, err
+		}
+		for _, ev := range out.Items {
+			if ev.Status != "cancelled" {
+				all = append(all, ev)
+			}
+		}
+		if out.NextPageToken == "" {
+			return all, nil
+		}
+		page = out.NextPageToken
+	}
+}
+
+func (c *gcalClient) GetEvent(ctx context.Context, calendarID, eventID string) (*gcalEvent, error) {
+	var out gcalEvent
+	if err := c.do(ctx, http.MethodGet,
+		"/calendars/"+url.PathEscape(calendarID)+"/events/"+url.PathEscape(eventID), nil, &out); err != nil {
+		return nil, err
+	}
+	if out.Status == "cancelled" {
+		return nil, errNotFound
+	}
+	return &out, nil
+}
+
+// eventSpan reads an event's [start, end). Google answers with an offset
+// ("…T09:00:00+11:00"); a bare local time is read in the event's zone, else
+// Melbourne. All-day events give Melbourne midnights. ok is false when the
+// times can't be read.
+func eventSpan(ev *gcalEvent) (start, end time.Time, ok bool) {
+	read := func(t *gcalEventTime) (time.Time, bool) {
+		if t == nil {
+			return time.Time{}, false
+		}
+		if t.DateTime != "" {
+			if v, err := time.Parse(time.RFC3339, t.DateTime); err == nil {
+				return v, true
+			}
+			loc := db.Melbourne
+			if l, err := time.LoadLocation(t.TimeZone); err == nil && t.TimeZone != "" {
+				loc = l
+			}
+			v, err := time.ParseInLocation("2006-01-02T15:04:05", t.DateTime, loc)
+			return v, err == nil
+		}
+		v, err := time.ParseInLocation("2006-01-02", t.Date, db.Melbourne)
+		return v, err == nil
+	}
+	start, ok1 := read(ev.Start)
+	end, ok2 := read(ev.End)
+	return start, end, ok1 && ok2 && end.After(start)
 }
 
 func (c *gcalClient) ListCalendars(ctx context.Context) ([]gcalCalendar, error) {
@@ -425,6 +506,7 @@ func handleGCalDisconnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	busyCache.clear()
+	timeOffCache.clear()
 	redirectMsg(w, r, "/admin/calendar/settings", "ok",
 		"Disconnected. Visits already in Google Calendar were left there — delete them by hand if you don't want them.")
 }
@@ -453,34 +535,36 @@ func logGCal(what string, err error) {
 
 // busyCache memoises freebusy.query results per range so paging back and forth
 // through the calendar, or reloading /book, doesn't hammer Google.
-var busyCache = &busyCacheT{ttl: 2 * time.Minute}
+var busyCache = &rangeCache[[]busyInterval]{ttl: 2 * time.Minute}
 
-type busyCacheT struct {
+// rangeCache holds Google answers keyed by the time range asked about.
+type rangeCache[V any] struct {
 	mu   sync.Mutex
 	ttl  time.Duration
-	vals map[string]busyEntry
+	vals map[string]cacheEntry[V]
 }
 
-type busyEntry struct {
+type cacheEntry[V any] struct {
 	at   time.Time
-	vals []busyInterval
+	vals V
 }
 
-func (c *busyCacheT) get(key string, now time.Time) ([]busyInterval, bool) {
+func (c *rangeCache[V]) get(key string, now time.Time) (V, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	e, ok := c.vals[key]
 	if !ok || now.Sub(e.at) > c.ttl {
-		return nil, false
+		var zero V
+		return zero, false
 	}
 	return e.vals, true
 }
 
-func (c *busyCacheT) put(key string, now time.Time, vals []busyInterval) {
+func (c *rangeCache[V]) put(key string, now time.Time, vals V) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	if c.vals == nil {
-		c.vals = map[string]busyEntry{}
+		c.vals = map[string]cacheEntry[V]{}
 	}
 	// Drop stale ranges so the map stays as small as the live working set.
 	for k, e := range c.vals {
@@ -488,10 +572,10 @@ func (c *busyCacheT) put(key string, now time.Time, vals []busyInterval) {
 			delete(c.vals, k)
 		}
 	}
-	c.vals[key] = busyEntry{at: now, vals: vals}
+	c.vals[key] = cacheEntry[V]{at: now, vals: vals}
 }
 
-func (c *busyCacheT) clear() {
+func (c *rangeCache[V]) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.vals = nil

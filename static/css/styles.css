@@ -2440,6 +2440,16 @@ a.cal-slot:hover { background: rgba(255, 122, 33, 0.12); cursor: pointer; }
     border-top: 1px solid rgba(18, 40, 74, 0.18); border-bottom: 1px solid rgba(18, 40, 74, 0.18);
     background: repeating-linear-gradient(135deg, rgba(18, 40, 74, 0.10) 0 4px, rgba(18, 40, 74, 0.03) 4px 8px);
 }
+/* Time off blocked out in the app: same hatch as busy time, in tangerine, and
+   clickable through to the list where it can be removed. */
+.cal-off {
+    position: absolute; left: 0; right: 0; box-sizing: border-box; z-index: 1; display: block;
+    border-top: 1px solid rgba(255, 122, 33, 0.55); border-bottom: 1px solid rgba(255, 122, 33, 0.55);
+    background: repeating-linear-gradient(135deg, rgba(255, 122, 33, 0.28) 0 4px, rgba(255, 122, 33, 0.08) 4px 8px);
+}
+.cal-time-off { margin-top: 1.5rem; }
+.cal-time-off-head { margin-top: 1.25rem; }
+.cal-time-off-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
 .cal-busy-label { position: absolute; right: 3px; bottom: 1px; font-size: 0.55rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
 
 /* Calendar sync settings page */

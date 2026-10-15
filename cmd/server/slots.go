@@ -12,8 +12,9 @@ import (
 
 // Online booking slots. On /book a customer can pick a morning or afternoon
 // arrival window instead of asking us to call. A window is offered only when
-// nothing overlaps it: no booking in the app, and no busy time on any of the
-// admin's Google calendars (less the ones excluded in calendar settings).
+// nothing overlaps it: no booking in the app, no time off on the app's Google
+// calendar (timeoff.go), and no busy time on any of the admin's other Google
+// calendars (less the ones excluded in calendar settings).
 //
 // The check needs the calendar connection. Without it, or when Google can't be
 // reached, no windows are offered and the form falls back to "talk to us
@@ -169,7 +170,8 @@ type slotDay struct {
 
 // availability loads what the windows in [from, to) are checked against.
 // Bookings are fetched from a day early so a long visit running into the range
-// still counts.
+// still counts. Time off, read from the app's own Google calendar alongside
+// the busy times, comes back merged into the busy intervals.
 func availability(from, to time.Time, fresh bool) ([]db.Booking, []busyInterval, error) {
 	if !calendarSyncConnected() {
 		return nil, nil, fmt.Errorf("calendar not connected")
@@ -178,15 +180,32 @@ func availability(from, to time.Time, fresh bool) ([]db.Booking, []busyInterval,
 	if fresh {
 		query = busyIntervalsFresh
 	}
+	var (
+		off    []timeOff
+		offErr error
+		wg     sync.WaitGroup
+	)
+	wg.Add(1)
+	go func() { defer wg.Done(); off, offErr = listTimeOff(from, to, !fresh) }()
 	busy, err := query(from, to)
+	wg.Wait()
 	if err != nil {
 		return nil, nil, fmt.Errorf("busy times: %w", err)
+	}
+	if offErr != nil {
+		return nil, nil, fmt.Errorf("time off: %w", offErr)
 	}
 	bs, err := db.ListBookingsBetween(from.Add(-24*time.Hour), to)
 	if err != nil {
 		return nil, nil, fmt.Errorf("bookings: %w", err)
 	}
-	return bs, busy, nil
+	// Copy before appending: busy may be the cached slice.
+	all := make([]busyInterval, 0, len(busy)+len(off))
+	all = append(all, busy...)
+	for _, t := range off {
+		all = append(all, busyInterval{Start: t.Start, End: t.End})
+	}
+	return bs, all, nil
 }
 
 // openSlots returns the picker's days. ok is false when the calendar can't be

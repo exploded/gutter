@@ -207,6 +207,8 @@ func newMux(dir string) *http.ServeMux {
 	mux.HandleFunc("POST /admin/bookings/{id}/address", requireAdmin(handleAdminBookingAddress))
 	mux.HandleFunc("GET /admin/address-search", requireAdmin(handleAdminAddressSearch))
 	mux.HandleFunc("GET /admin/calendar", requireAdmin(handleAdminCalendar))
+	mux.HandleFunc("POST /admin/calendar/off", requireAdmin(handleAdminTimeOffCreate))
+	mux.HandleFunc("POST /admin/calendar/off/{id}/delete", requireAdmin(handleAdminTimeOffDelete))
 	mux.HandleFunc("GET /admin/calendar/settings", requireAdmin(handleAdminCalendarSettings))
 	mux.HandleFunc("POST /admin/calendar/connect", requireAdmin(handleGCalConnect))
 	mux.HandleFunc("POST /admin/calendar/disconnect", requireAdmin(handleGCalDisconnect))

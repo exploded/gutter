@@ -87,7 +87,7 @@
                             <label>
                                 <input type="checkbox" name="use" value="{{.ID}}"
                                        {{if .IsApp}}disabled{{else if not .Skipped}}checked{{end}}>
-                                {{.Name}}{{if .Primary}} <span class="admin-tag">primary</span>{{end}}{{if .IsApp}} <span class="admin-tag">this app's visits — already shown</span>{{end}}
+                                {{.Name}}{{if .Primary}} <span class="admin-tag">primary</span>{{end}}{{if .IsApp}} <span class="admin-tag">this app's visits and time off — already shown</span>{{end}}
                             </label>
                         </li>
                         {{end}}
