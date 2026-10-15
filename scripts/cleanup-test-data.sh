@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Remove test data from the live database:
+# Wipe pre-launch test data from the live database. Every booking, invoice,
+# invoice line and customer goes, along with:
 #
-#   1. Attribution rows left behind by testing the Google Ads tracking setup -
-#      ad clicks with no gclid, which only a test fetch produces while
-#      auto-tagging is on (real ad clicks always carry one), plus any gclid we
-#      made up ourselves while testing the deploy.
-#   2. Bookings #1 and #2, which were entered by hand as tests, along with
-#      anything hanging off them: invoices, invoice lines, and the test
-#      customer if nothing else of theirs remains.
-#   3. Software quote #1, another test. Quotes carry their own data and own
-#      nothing else, so the row is the whole of it.
+#   - ad clicks attached to a test booking, and
+#   - ad clicks with no gclid, which only a test fetch produces while
+#     auto-tagging is on (real ad clicks always carry one), plus any gclid we
+#     made up ourselves while testing the deploy.
+#
+# Untouched: admin sign-ins (users), Google Calendar and Gmail connections,
+# scheduler history, and real unbooked ad clicks. Invoice numbers start again
+# at 1000, since the next number is MAX(number) + 1.
 #
 # Dry run by default - it prints exactly what it would delete and stops. Pass
 # --apply to go ahead. Applying stops the service, backs the database up, and
@@ -21,10 +21,8 @@ set -euo pipefail
 
 APP=gutter
 DB=/var/www/$APP/app.db
-BOOKINGS="1,2"                     # test bookings to remove
-QUOTES="1"                         # test software quotes to remove
 TEST_GCLIDS="'SHIP-CHECK'"         # gclids we invented while testing, never real clicks
-TEST_CLICKS="booking_id = 0 AND (gclid = '' OR gclid IN ($TEST_GCLIDS))"
+TEST_CLICKS="booking_id <> 0 OR gclid = '' OR gclid IN ($TEST_GCLIDS)"
 BACKUP_DIR=/var/www/$APP/backups
 APPLY=false
 [ "${1:-}" = "--apply" ] && APPLY=true
@@ -44,46 +42,37 @@ fi
 
 q() { sqlite3 -header -column "$DB" "$1"; }
 
-echo "=== Bookings to delete ==="
-q "SELECT id, name, suburb, status, source, created_at,
-          CASE WHEN gcal_event_id = '' THEN '-' ELSE gcal_event_id END AS gcal
-   FROM bookings WHERE id IN ($BOOKINGS);"
+echo "=== Bookings to delete (all) ==="
+q "SELECT id, name, suburb, status, start_at, created_at,
+          CASE WHEN gcal_event_id = '' THEN '-' ELSE 'yes' END AS in_gcal
+   FROM bookings ORDER BY id;"
 
 echo
-echo "=== Their invoices (deleted with them) ==="
-q "SELECT id, number, status, total_cents FROM invoices WHERE booking_id IN ($BOOKINGS);"
+echo "=== Invoices to delete (all) ==="
+q "SELECT id, number, booking_id, status, total_cents, issued_at FROM invoices ORDER BY id;"
 
 echo
-echo "=== Their customers (deleted only if nothing else of theirs remains) ==="
-q "SELECT c.id, c.name, c.email,
-          (SELECT COUNT(*) FROM bookings b WHERE b.customer_id = c.id) AS bookings,
-          (SELECT COUNT(*) FROM invoices i WHERE i.customer_id = c.id) AS invoices
-   FROM customers c
-   WHERE c.id IN (SELECT customer_id FROM bookings WHERE id IN ($BOOKINGS) AND customer_id <> 0);"
+echo "=== Customers to delete (all) ==="
+q "SELECT id, name, email, suburb, created_at FROM customers ORDER BY id;"
 
 echo
-echo "=== Software quotes to delete ==="
-q "SELECT id, name, email, total_cost, status, user_id, created_at
-   FROM quotes WHERE id IN ($QUOTES);"
+echo "=== Test ad clicks to delete ==="
+q "SELECT id, booking_id, source, gclid, keyword, landing, created_at
+   FROM ad_clicks WHERE $TEST_CLICKS ORDER BY id;"
 
 echo
-echo "=== Test ad clicks to delete (never booked, no real gclid) ==="
-q "SELECT id, source, gclid, keyword, campaign, landing, created_at
-   FROM ad_clicks WHERE $TEST_CLICKS;"
-
-echo
-echo "=== Ad clicks that will survive (real ones) ==="
+echo "=== Ad clicks that will survive (real, unbooked) ==="
 q "SELECT COUNT(*) AS kept, MIN(created_at) AS oldest, MAX(created_at) AS newest
    FROM ad_clicks WHERE NOT ($TEST_CLICKS);"
 
 # A calendar event outlives its booking: Google keeps it, and deleting the row
 # here leaves nothing to cancel it with.
-GCAL=$(sqlite3 "$DB" "SELECT COUNT(*) FROM bookings WHERE id IN ($BOOKINGS) AND gcal_event_id <> '';")
+GCAL=$(sqlite3 "$DB" "SELECT COUNT(*) FROM bookings WHERE gcal_event_id <> '';")
 if [ "$GCAL" != "0" ]; then
     echo
-    echo "!! $GCAL of these bookings still has a Google Calendar event."
-    echo "!! Delete it in Google Calendar first, or it will linger with nothing"
-    echo "!! in the app pointing at it."
+    echo "!! $GCAL booking(s) above still have a Google Calendar event (in_gcal = yes)."
+    echo "!! Delete those events in Google Calendar too, or they will linger with"
+    echo "!! nothing in the app pointing at them."
 fi
 
 if [ "$APPLY" != true ]; then
@@ -105,26 +94,14 @@ sqlite3 "$DB" <<SQL
 PRAGMA foreign_keys = ON;
 BEGIN;
 
--- Remember whose bookings these were before the rows go.
-CREATE TEMP TABLE victims AS
-SELECT DISTINCT customer_id FROM bookings WHERE id IN ($BOOKINGS) AND customer_id <> 0;
-
-DELETE FROM invoice_items WHERE invoice_id IN (SELECT id FROM invoices WHERE booking_id IN ($BOOKINGS));
-DELETE FROM invoices WHERE booking_id IN ($BOOKINGS);
-DELETE FROM ad_clicks WHERE booking_id IN ($BOOKINGS);
-DELETE FROM bookings WHERE id IN ($BOOKINGS);
-
--- Only take the customer if the test bookings were all they had.
-DELETE FROM customers WHERE id IN (SELECT customer_id FROM victims)
-  AND id NOT IN (SELECT customer_id FROM bookings)
-  AND id NOT IN (SELECT customer_id FROM invoices);
-
--- Test fetches of the tracking setup, and our own invented gclids.
 DELETE FROM ad_clicks WHERE $TEST_CLICKS;
+DELETE FROM invoice_items;
+DELETE FROM invoices;
+DELETE FROM bookings;
+DELETE FROM customers;
 
--- Test software quotes. Any login account behind one is left alone: users are
--- the Google sign-ins, and yours is in there too.
-DELETE FROM quotes WHERE id IN ($QUOTES);
+-- Restart the row ids too, so the first real booking is #1.
+DELETE FROM sqlite_sequence WHERE name IN ('bookings', 'invoices', 'invoice_items', 'customers');
 
 COMMIT;
 VACUUM;
@@ -140,7 +117,6 @@ echo "=== What's left ==="
 q "SELECT (SELECT COUNT(*) FROM bookings)  AS bookings,
           (SELECT COUNT(*) FROM invoices)  AS invoices,
           (SELECT COUNT(*) FROM customers) AS customers,
-          (SELECT COUNT(*) FROM quotes)    AS quotes,
           (SELECT COUNT(*) FROM ad_clicks) AS ad_clicks;"
 
 echo
