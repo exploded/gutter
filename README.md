@@ -44,10 +44,10 @@ Edit `cmd/server/pricing.go` and redeploy. Current list:
 
 | Property | Price |
 | --- | --- |
-| Unit or townhouse | $219 |
-| Single-storey house | $289 |
-| Large single storey or split level | $389 |
-| Double-storey house | $489 |
+| Unit or townhouse | $190 |
+| Single-storey house | $235 |
+| Large single storey or split level | $350 |
+| Double-storey house | $395 |
 | Blocked downpipe jetted (with the customer's OK) | $90 each |
 
 The Fire-ready plan takes 12% off each of two cleans a year. No GST is charged.

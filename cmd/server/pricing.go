@@ -20,10 +20,10 @@ type PropertyType struct {
 }
 
 var propertyTypes = []PropertyType{
-	{Slug: "unit", Name: "Unit or townhouse", Note: "Single level, small roof", Price: 219, Minutes: 60},
-	{Slug: "single", Name: "Single-storey house", Note: "Up to 4 bedrooms", Price: 289, Minutes: 90},
-	{Slug: "large", Name: "Large single storey or split level", Note: "5+ bedrooms, or two roof levels", Price: 389, Minutes: 120},
-	{Slug: "double", Name: "Double-storey house", Note: "Two full storeys", Price: 489, Minutes: 150},
+	{Slug: "unit", Name: "Unit or townhouse", Note: "Single level, small roof", Price: 190, Minutes: 60},
+	{Slug: "single", Name: "Single-storey house", Note: "Up to 4 bedrooms", Price: 235, Minutes: 90},
+	{Slug: "large", Name: "Large single storey or split level", Note: "5+ bedrooms, or two roof levels", Price: 350, Minutes: 120},
+	{Slug: "double", Name: "Double-storey house", Note: "Two full storeys", Price: 395, Minutes: 150},
 }
 
 const (
@@ -74,7 +74,7 @@ func (p *PropertyType) PlanYear() int { return 2 * p.PlanPrice() }
 // PlanSaving is what the plan saves over two full-price cleans.
 func (p *PropertyType) PlanSaving() int { return 2*p.Price - p.PlanYear() }
 
-// priceRange renders the cheapest-to-dearest span of the list, e.g. "$219–$489".
+// priceRange renders the cheapest-to-dearest span of the list, e.g. "$190–$395".
 func priceRange() string {
 	lo, hi := propertyTypes[0].Price, propertyTypes[0].Price
 	for _, p := range propertyTypes {

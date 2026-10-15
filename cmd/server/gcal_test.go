@@ -104,7 +104,7 @@ func TestEventForBooking(t *testing.T) {
 	b := &db.Booking{
 		ID: 7, Name: "Ann", Phone: "0400 111 222", Email: "ann@example.test",
 		Suburb: "Donvale", Address: "12 Smith St, Donvale VIC 3111", ServiceSlug: "bushfire-preparation",
-		PropertyType: "double", OnPlan: true, QuoteCents: 43000,
+		PropertyType: "double", OnPlan: true, QuoteCents: 34800,
 		Issue: "Side gate code 1234", AdminNotes: "Bring the roof anchor",
 		Status: db.BookingBooked, DurationMin: 90,
 		StartAt: time.Date(2026, 8, 26, 10, 0, 0, 0, db.Melbourne),
@@ -134,7 +134,7 @@ func TestEventForBooking(t *testing.T) {
 		t.Errorf("booking id property = %q, want 7", got)
 	}
 	for _, want := range []string{"0400 111 222", "ann@example.test", "Service: Fire-season gutter clean",
-		"Price: $430.00 (Fire-ready plan)", "Side gate code 1234", "Notes: Bring the roof anchor",
+		"Price: $348.00 (Fire-ready plan)", "Side gate code 1234", "Notes: Bring the roof anchor",
 		"https://example.test/admin/bookings/7"} {
 		if !strings.Contains(ev.Description, want) {
 			t.Errorf("description missing %q:\n%s", want, ev.Description)

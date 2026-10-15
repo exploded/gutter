@@ -298,7 +298,7 @@ func TestJSONLD(t *testing.T) {
 	// Home page LocalBusiness: concrete priceRange and a booking action.
 	// (Match slash-free fragments — html/template escapes "/" inside <script>.)
 	home := get(mux, "/").Body.String()
-	for _, want := range []string{"ReserveAction", "$219–$489 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout Gutter Cleaning"`, `"alternateName": "Up The Spout"`} {
+	for _, want := range []string{"ReserveAction", "$190–$395 per clean (AUD)", `"Reservation"`, `"name": "Up The Spout Gutter Cleaning"`, `"alternateName": "Up The Spout"`} {
 		if !strings.Contains(home, want) {
 			t.Errorf("home JSON-LD missing %s", want)
 		}

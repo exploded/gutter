@@ -24,7 +24,7 @@ func TestLlmsTxt(t *testing.T) {
 	}
 	// Pricing facts, service area and agent guidance must all be present.
 	for _, want := range []string{
-		"Warrandyte VIC 3113).", "$219", "$289", "$389", "$489",
+		"Warrandyte VIC 3113).", "$190", "$235", "$350", "$395",
 		"$90 each", "12% off each", "$30 off each house", "Seniors Card holders: 20% off",
 		"Donvale", "Warrandyte", "me@example.test",
 		"no booking API", "service, property, plan (1), issue, name, phone, email, preferred_time",
@@ -127,8 +127,8 @@ func TestAPIPricing(t *testing.T) {
 			t.Errorf("property type %d = %+v, want %+v", i, got, want)
 		}
 	}
-	if single := p.PropertyTypes[1]; single.Slug != "single" || single.Price != 289 || single.PlanPrice != 254 {
-		t.Errorf("single storey = %+v, want $289, or $254 on the plan", single)
+	if single := p.PropertyTypes[1]; single.Slug != "single" || single.Price != 235 || single.PlanPrice != 207 {
+		t.Errorf("single storey = %+v, want $235, or $207 on the plan", single)
 	}
 	if len(p.Includes) == 0 {
 		t.Error("every_clean_includes is empty")
@@ -156,15 +156,15 @@ func TestBookPrefill(t *testing.T) {
 	mux := seoTestSetup(t)
 
 	// Valid params are echoed into the form, and the price shown matches them:
-	// $489 double storey, less 12% on the plan = $430.
+	// $395 double storey, less 12% on the plan = $348.
 	body := get(mux, "/book?service=bushfire-preparation&property=double&plan=1&name=Jane&phone=0400000000"+
 		"&email=jane%40example.com&issue=Side+gate+code+1234&preferred_time=Tue+am").Body.String()
 	for _, want := range []string{
 		`value="Jane"`, `value="0400000000"`, `value="jane@example.com"`, `value="Tue am"`,
 		`value="bushfire-preparation" selected`,
-		`value="double" data-price="489" checked`,
+		`value="double" data-price="395" checked`,
 		`name="plan" value="1" checked`,
-		`id="price-total">$430<`,
+		`id="price-total">$348<`,
 		`>Side gate code 1234</textarea>`,
 	} {
 		if !strings.Contains(body, want) {
@@ -174,7 +174,7 @@ func TestBookPrefill(t *testing.T) {
 
 	// No (or an unknown) property starts on the default row with no extras.
 	body = get(mux, "/book?property=mansion").Body.String()
-	for _, want := range []string{`value="single" data-price="289" checked`, `id="price-total">$289<`} {
+	for _, want := range []string{`value="single" data-price="235" checked`, `id="price-total">$235<`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("default form missing %s", want)
 		}

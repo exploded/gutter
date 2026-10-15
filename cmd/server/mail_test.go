@@ -14,9 +14,9 @@ func TestMailTemplatesRender(t *testing.T) {
 		PropertyType: "double", OnPlan: true,
 		QuoteCents: int64(quoteDollars(propertyTypesBySlug["double"], true)) * 100,
 		Issue:      "Side gate code 1234\nFriendly dog", PreferredTime: "Tomorrow arvo", IP: "1.2.3.4"}
-	// $489 less 12% for the plan, rounded to whole dollars.
+	// $395 less 12% for the plan, rounded to whole dollars.
 	property, price := bookingSummary(b)
-	if property != "Double-storey house, Fire-ready plan" || price != "$430.00" {
+	if property != "Double-storey house, Fire-ready plan" || price != "$348.00" {
 		t.Errorf("bookingSummary = %q, %q", property, price)
 	}
 	for _, name := range []string{"booking-admin", "booking-customer"} {
@@ -28,7 +28,7 @@ func TestMailTemplatesRender(t *testing.T) {
 		if strings.Contains(out, "<b>Bold</b>") {
 			t.Errorf("%s: user input not escaped", name)
 		}
-		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$430.00",
+		for _, want := range []string{"https://example.test", "Ann", "Double-storey house", "$348.00",
 			"Fire-season gutter clean", "Up The Spout Gutter Cleaning — Melbourne's east and north-east"} {
 			if !strings.Contains(out, want) {
 				t.Errorf("%s: missing %q:\n%s", name, want, out)

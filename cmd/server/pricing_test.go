@@ -14,10 +14,10 @@ func TestPriceList(t *testing.T) {
 		price, mins  int
 		plan, saving int
 	}{
-		{"unit", 219, 60, 193, 52},
-		{"single", 289, 90, 254, 70},
-		{"large", 389, 120, 342, 94},
-		{"double", 489, 150, 430, 118},
+		{"unit", 190, 60, 167, 46},
+		{"single", 235, 90, 207, 56},
+		{"large", 350, 120, 308, 84},
+		{"double", 395, 150, 348, 94},
 	}
 	if len(propertyTypes) != len(want) {
 		t.Fatalf("got %d property types, want %d", len(propertyTypes), len(want))
@@ -41,12 +41,12 @@ func TestPriceList(t *testing.T) {
 	if _, ok := findPropertyType(defaultPropertyType); !ok {
 		t.Errorf("default property type %q is not on the list", defaultPropertyType)
 	}
-	if got := priceRange(); got != "$219–$489" {
+	if got := priceRange(); got != "$190–$395" {
 		t.Errorf("priceRange() = %q", got)
 	}
 	pi := pricing()
 	if pi.Downpipe != 90 || pi.PlanPct != 12 || pi.Neighbour != 30 || pi.Referral != 20 ||
-		pi.Range != "$219–$489" || len(pi.Types) != len(propertyTypes) {
+		pi.Range != "$190–$395" || len(pi.Types) != len(propertyTypes) {
 		t.Errorf("pricing() = %+v", pi)
 	}
 }
@@ -58,10 +58,10 @@ func TestQuoteDollars(t *testing.T) {
 		plan bool
 		want int
 	}{
-		{single, false, 289},
-		{single, true, 254}, // 289 × 0.88 = 254.32
-		{double, true, 430}, // 489 × 0.88 = 430.32
-		{unit, true, 193},   // 219 × 0.88 = 192.72, rounded
+		{single, false, 235},
+		{single, true, 207}, // 235 × 0.88 = 206.8, rounded
+		{double, true, 348}, // 395 × 0.88 = 347.6, rounded
+		{unit, true, 167},   // 190 × 0.88 = 167.2
 	} {
 		if got := quoteDollars(c.p, c.plan); got != c.want {
 			t.Errorf("quoteDollars(%s, plan=%v) = %d, want %d", c.p.Slug, c.plan, got, c.want)
@@ -98,10 +98,10 @@ func TestSeedInvoiceItems(t *testing.T) {
 
 	booked := &db.Booking{PropertyType: "double", OnPlan: true}
 	// The customer page's kind wins over the booking, with no extras.
-	if items := seedInvoiceItems(booked, "unit"); len(items) != 1 || items[0].UnitCents != 21900 {
+	if items := seedInvoiceItems(booked, "unit"); len(items) != 1 || items[0].UnitCents != 19000 {
 		t.Errorf("kind=unit: %+v", items)
 	}
-	if items := seedInvoiceItems(nil, "large"); len(items) != 1 || items[0].UnitCents != 38900 {
+	if items := seedInvoiceItems(nil, "large"); len(items) != 1 || items[0].UnitCents != 35000 {
 		t.Errorf("kind=large, no booking: %+v", items)
 	}
 	// Nothing to go on starts a blank draft.
@@ -125,8 +125,8 @@ func TestSeedInvoiceItems(t *testing.T) {
 // TestBookFormPrice: the booking page shows the price for the form's current
 // choices before any script runs, and nothing for an unknown property.
 func TestBookFormPrice(t *testing.T) {
-	if got := (bookForm{PropertyType: "large", Plan: true}).Price(); got != 342 {
-		t.Errorf("large on the plan = %d, want 342", got)
+	if got := (bookForm{PropertyType: "large", Plan: true}).Price(); got != 308 {
+		t.Errorf("large on the plan = %d, want 308", got)
 	}
 	if got := (bookForm{PropertyType: "nope", Plan: true}).Price(); got != 0 {
 		t.Errorf("unknown property = %d, want 0", got)
