@@ -43,6 +43,7 @@ type Booking struct {
 	Source           string `json:"source"`
 	OnPlan           int64  `json:"on_plan"`
 	QuoteCents       int64  `json:"quote_cents"`
+	Slot             string `json:"slot"`
 }
 
 type Customer struct {

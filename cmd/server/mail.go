@@ -105,8 +105,9 @@ const mailTmplSrc = `
 {{define "row"}}<tr><td style="padding:6px 12px 6px 0;color:#666;white-space:nowrap;vertical-align:top">{{.K}}</td><td style="padding:6px 0;vertical-align:top">{{.V}}</td></tr>{{end}}
 
 {{define "booking-admin"}}
-<h2 style="margin:0 0 4px">New booking request #{{.ID}}</h2>
+<h2 style="margin:0 0 4px">{{if .Booked}}Booked online #{{.ID}}{{else}}New booking request #{{.ID}}{{end}}</h2>
 {{if .Suspicious}}<p style="background:#fff3cd;border:1px solid #ffe69c;padding:8px 12px;border-radius:6px"><strong>Flagged as suspicious</strong> — form timing looked automated. Marked as spam in admin; treat with care.</p>{{end}}
+{{if .Booked}}<p style="background:#e8f4ff;border:1px solid #b6dcff;padding:8px 12px;border-radius:6px">They picked a free window and are <strong>booked in for {{.Booked}}</strong>. It's in the calendar and they've been sent a confirmation.</p>{{end}}
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "Name" .B.Name)}}
 {{template "row" (kv "Phone" .B.Phone)}}
@@ -178,10 +179,18 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 		svcTitle = s.Title
 	}
 	property, price := bookingSummary(b)
-	data := map[string]any{"ID": id, "B": b, "ServiceTitle": svcTitle, "Property": property, "Price": price, "Suspicious": suspicious}
+	booked := ""
+	if s, ok := bookingWindow(b); ok {
+		booked = s.Label()
+	}
+	data := map[string]any{"ID": id, "B": b, "ServiceTitle": svcTitle, "Property": property, "Price": price,
+		"Suspicious": suspicious, "Booked": booked}
 
 	// Admin notice — reply goes straight to the customer.
 	subj := fmt.Sprintf("Booking #%d: %s", id, b.Name)
+	if booked != "" {
+		subj = fmt.Sprintf("Booked online #%d: %s, %s", id, b.Name, fmtVisit(b))
+	}
 	if svcTitle != "" {
 		subj += " — " + svcTitle
 	}
@@ -193,12 +202,22 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 		log.Printf("email: render booking-admin: %v", err)
 		return
 	}
-	text := fmt.Sprintf("New booking request #%d\n\nName: %s\nPhone: %s\nEmail: %s\nAddress: %s\nService: %s\nProperty: %s\nPrice shown: %s\nPreferred time: %s\n\n%s\n\n%s/admin\n",
-		id, b.Name, b.Phone, b.Email, b.Address, svcTitle, property, price, b.PreferredTime, b.Issue, site.BaseURL)
+	head := fmt.Sprintf("New booking request #%d", id)
+	if booked != "" {
+		head = fmt.Sprintf("Booked online #%d for %s (in the calendar, confirmation sent)", id, booked)
+	}
+	text := fmt.Sprintf("%s\n\nName: %s\nPhone: %s\nEmail: %s\nAddress: %s\nService: %s\nProperty: %s\nPrice shown: %s\nPreferred time: %s\n\n%s\n\n%s/admin\n",
+		head, b.Name, b.Phone, b.Email, b.Address, svcTitle, property, price, b.PreferredTime, b.Issue, site.BaseURL)
 	send(notifyEmail, subj, html, text, b.Email)
 
 	// Customer confirmation
 	if b.Email == "" || suspicious {
+		return
+	}
+	if booked != "" {
+		// Booked into a window: send the real confirmation with the calendar
+		// invite, in the background so the customer isn't kept waiting.
+		go func() { logMailErr("online booking confirmation", sendBookingConfirmation(b, false)) }()
 		return
 	}
 	html, err = renderMail("booking-customer", data)

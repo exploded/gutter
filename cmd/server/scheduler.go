@@ -228,7 +228,7 @@ const mailSchedulerTmplSrc = `
 <p>Just a reminder that we're booked in to see you tomorrow.</p>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "When" .When)}}
-{{template "row" (kv "Duration" .Duration)}}
+{{if .Arrival}}{{template "row" (kv "Arrival" .Arrival)}}{{else}}{{template "row" (kv "Duration" .Duration)}}{{end}}
 {{if .ServiceTitle}}{{template "row" (kv "Service" .ServiceTitle)}}{{end}}
 {{if .Where}}{{template "row" (kv "Where" .Where)}}{{end}}
 </table>
@@ -240,7 +240,7 @@ const mailSchedulerTmplSrc = `
 <h2 style="margin:0 0 4px">In {{.In}}: {{.B.Name}}{{if .ServiceTitle}} — {{.ServiceTitle}}{{end}}</h2>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "When" .When)}}
-{{template "row" (kv "Duration" .Duration)}}
+{{if .Arrival}}{{template "row" (kv "Arrival" .Arrival)}}{{else}}{{template "row" (kv "Duration" .Duration)}}{{end}}
 {{template "row" (kv "Phone" .B.Phone)}}
 {{if .B.Address}}{{template "row" (kv "Address" .B.Address)}}{{else if .B.Suburb}}{{template "row" (kv "Suburb" .B.Suburb)}}{{end}}
 </table>
@@ -288,9 +288,9 @@ func sendBookingReminder(b *db.Booking) error {
 	if err != nil {
 		return fmt.Errorf("render booking-reminder: %w", err)
 	}
-	text := fmt.Sprintf("Hi %s — a reminder that we're booked in to clean your gutters tomorrow.\n\nWhen: %s\nDuration: %s\n%s\n\nIf the time no longer suits, reply to this email and we'll sort out another one.\n\n— %s\n%s\n",
-		b.Name, d.When, d.Duration, d.Where, site.Brand, site.BaseURL)
-	return sendNow(b.Email, "Reminder: gutter clean tomorrow — "+fmtWhen(b.StartAt), html, text, site.Email)
+	text := fmt.Sprintf("Hi %s — a reminder that we're booked in to clean your gutters tomorrow.\n\nWhen: %s\n%s\n%s\n\nIf the time no longer suits, reply to this email and we'll sort out another one.\n\n— %s\n%s\n",
+		b.Name, d.When, d.timeLine(), d.Where, site.Brand, site.BaseURL)
+	return sendNow(b.Email, "Reminder: gutter clean tomorrow — "+fmtVisit(b), html, text, site.Email)
 }
 
 // bookingSoonData is the view for the admin heads-up.
@@ -320,9 +320,13 @@ func sendBookingSoon(b *db.Booking, now time.Time) error {
 	if d.ServiceTitle != "" {
 		svc = " — " + d.ServiceTitle
 	}
-	text := fmt.Sprintf("In %s: %s%s\n\nWhen: %s (%s)\nPhone: %s\nWhere: %s\n\n%s\n\n%s\n%s/admin/bookings/%d\n",
-		d.In, b.Name, svc, d.When, d.Duration, b.Phone, where, b.Issue, b.AdminNotes, site.BaseURL, b.ID)
-	subj := fmt.Sprintf("In %s: %s, %s%s", d.In, b.Name, fmtClock(b.StartAt), svc)
+	text := fmt.Sprintf("In %s: %s%s\n\nWhen: %s\n%s\nPhone: %s\nWhere: %s\n\n%s\n\n%s\n%s/admin/bookings/%d\n",
+		d.In, b.Name, svc, d.When, d.timeLine(), b.Phone, where, b.Issue, b.AdminNotes, site.BaseURL, b.ID)
+	at := fmtClock(b.StartAt)
+	if s, ok := bookingWindow(b); ok {
+		at = s.Hours()
+	}
+	subj := fmt.Sprintf("In %s: %s, %s%s", d.In, b.Name, at, svc)
 	return sendNow(notifyEmail, subj, html, text, b.Email)
 }
 

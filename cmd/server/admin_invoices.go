@@ -267,7 +267,7 @@ func handleAdminInvoice(w http.ResponseWriter, r *http.Request) {
 		ReviewAsked:    fmtDate(inv.ReviewAskedAt),
 	}
 	if v.Booking != nil {
-		d.When = fmtWhen(v.Booking.StartAt)
+		d.When = fmtVisit(v.Booking)
 	}
 	for _, it := range v.Items {
 		d.Lines = append(d.Lines, invoiceLine{
@@ -657,7 +657,7 @@ func handleInvoicePublic(w http.ResponseWriter, r *http.Request) {
 		Paidish: inv.Status == db.InvoicePaid, Void: inv.Status == db.InvoiceVoid,
 	}
 	if v.Booking != nil {
-		d.When = fmtWhen(v.Booking.StartAt)
+		d.When = fmtVisit(v.Booking)
 	}
 	for _, it := range v.Items {
 		d.Lines = append(d.Lines, invoiceLine{

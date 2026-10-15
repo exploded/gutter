@@ -46,10 +46,14 @@ func TestTemplatesRender(t *testing.T) {
 		"book": bookPageData{Services: services, Types: propertyTypes,
 			Form:   bookForm{PropertyType: "double", Plan: true, Service: "fire-ready-plan"},
 			Errors: map[string]string{"name": "x", "contact": "y", "property": "p", "address": "a", "issue": "i"}, TS: 1},
-		"book-plain":  newBookPage(bookForm{PropertyType: defaultPropertyType}, map[string]string{}),
-		"pricing":     nil,
-		"book-thanks": nil,
-		"guides":      struct{ Groups []guideGroup }{groupGuides()},
+		"book-plain": newBookPage(bookForm{PropertyType: defaultPropertyType}, map[string]string{}),
+		"book-slots": bookPageData{Services: services, Types: propertyTypes, CanBook: true, Days: sampleSlotDays(),
+			Form:   bookForm{PropertyType: "single", When: whenSlot, Slot: sampleSlotDays()[0].Slots[0].Key()},
+			Errors: map[string]string{"slot": "taken"}, TS: 1},
+		"pricing":            nil,
+		"book-thanks":        nil,
+		"book-thanks-booked": struct{ Booked string }{"Tuesday 20 October, morning (8am–12pm)"},
+		"guides":             struct{ Groups []guideGroup }{groupGuides()},
 		"guide": struct {
 			G      *Guide
 			Others []*Guide
@@ -76,6 +80,9 @@ func TestTemplatesRender(t *testing.T) {
 			Children: bookingRows([]db.Booking{booked}), Statuses: db.BookingStatuses, CanInvoice: true, FollowupText: "Return",
 			Click: &db.AdClick{Token: "tok", Source: db.SourceGoogleAds, GCLID: "abc123", Keyword: "gutter cleaning near me",
 				Campaign: "22334455", Landing: "/areas/donvale", BookingID: 1, CreatedAt: time.Now()}},
+		"admin-booking-window": adminBookingData{B: &db.Booking{ID: 4, Name: "W", Status: "booked", Slot: db.SlotPM,
+			StartAt: time.Date(2026, 10, 20, 12, 0, 0, 0, db.Melbourne), DurationMin: 300}, Row: newBookingRow(db.Booking{ID: 4}),
+			Durations: durationChoices, Duration: 90, Window: "Tuesday 20 October, afternoon (12pm–5pm)", StartValue: "2026-10-20T12:00"},
 		"admin-booking-nocust": adminBookingData{B: &db.Booking{ID: 3, Name: "X", Status: "new"}, Row: newBookingRow(db.Booking{ID: 3}), Durations: durationChoices, StartValue: "2026-08-20T09:30"},
 		"admin-booking-new": adminBookingNewData{Flash: flash{OK: "x"},
 			Form: phoneBookingForm{Name: "Ann", Address: "1 Example Ct, Donvale VIC 3111", AddrStreet: "1 Example Ct", AddrSuburb: "Donvale", AddrState: "VIC", AddrPostcode: "3111",
@@ -134,7 +141,7 @@ func TestTemplatesRender(t *testing.T) {
 	}
 	// Variants (name suffix after the page) reuse the same template with different data.
 	pageOf := func(name string) string {
-		for _, p := range []string{"admin-booking-nocust", "admin-invoice-sent", "invoice-public-paid", "admin-review-card-empty", "admin-calendar-settings-off", "admin-email-off", "book-plain"} {
+		for _, p := range []string{"admin-booking-nocust", "admin-invoice-sent", "invoice-public-paid", "admin-review-card-empty", "admin-calendar-settings-off", "admin-email-off", "book-plain", "book-slots", "book-thanks-booked", "admin-booking-window"} {
 			if name == p {
 				return name[:strings.LastIndex(name, "-")]
 			}

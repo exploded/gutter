@@ -131,7 +131,7 @@ func invoicePDF(v *invoiceView) ([]byte, error) {
 			pdf.SetX(110)
 		}
 		if !v.Booking.StartAt.IsZero() {
-			pdf.CellFormat(80, 5, tr(fmtWhen(v.Booking.StartAt)), "", 2, "L", false, 0, "")
+			pdf.CellFormat(80, 5, tr(fmtVisit(v.Booking)), "", 2, "L", false, 0, "")
 			pdf.SetX(110)
 		}
 		if v.Booking.Suburb != "" {

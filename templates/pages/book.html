@@ -15,7 +15,7 @@
         <div class="container">
             <div class="section-label">Book</div>
             <h1 class="section-title">Book a gutter clean.</h1>
-            <p class="page-header-intro">Pick your type of house to see the price, then tell us where and when. We'll confirm a time within a day. Nothing to pay until the job's done.</p>
+            <p class="page-header-intro">{{if .PageData.CanBook}}Pick your type of house to see the price, then book a free morning or afternoon, or ask us to call first.{{else}}Pick your type of house to see the price, then tell us where and when. We'll confirm a time within a day.{{end}} Nothing to pay until the job's done.</p>
         </div>
     </div>
 
@@ -111,10 +111,6 @@
                                     {{end}}
                                 </select>
                             </div>
-                            <div class="quote-field">
-                                <label for="preferred_time">When suits you?</label>
-                                <input type="text" id="preferred_time" name="preferred_time" maxlength="200" placeholder="e.g. any weekday, or before 20 Nov" value="{{$f.PreferredTime}}">
-                            </div>
                         </div>
                         <div class="quote-field quote-field--full{{if $e.issue}} quote-field--error{{end}}">
                             <label for="issue">Anything we should know? <span class="label-optional">(optional)</span></label>
@@ -123,9 +119,62 @@
                         </div>
                     </div>
 
+                    <div class="quote-group book-when{{if $e.slot}} book-when--error{{end}}" id="when">
+                        <h2 class="quote-group-title">When</h2>
+                        {{if .PageData.CanBook}}
+                        <fieldset class="property-picker when-mode">
+                            <legend class="sr-only">How would you like to book?</legend>
+                            <label class="property-option when-option">
+                                <input type="radio" name="when" value="slot"{{if eq $f.When "slot"}} checked{{end}}>
+                                <span class="property-option-body">
+                                    <span class="property-option-name">Pick a time now</span>
+                                    <span class="property-option-note">Choose a free morning or afternoon and you're booked in.</span>
+                                </span>
+                            </label>
+                            <label class="property-option when-option">
+                                <input type="radio" name="when" value="discuss"{{if eq $f.When "discuss"}} checked{{end}}>
+                                <span class="property-option-body">
+                                    <span class="property-option-name">Talk to us first</span>
+                                    <span class="property-option-note">Ask a question or tell us which days suit. We'll call within a day to settle a time.</span>
+                                </span>
+                            </label>
+                        </fieldset>
+                        <fieldset class="slot-panel">
+                            <legend class="slot-legend">Free times over the next three weeks. We'll arrive some time in the window you pick, and email you a confirmation.</legend>
+                            <div class="slot-days">
+                                {{range .PageData.Days}}
+                                <div class="slot-day">
+                                    <div class="slot-day-name">{{.Date.Format "Mon"}} <strong>{{.Date.Format "2 Jan"}}</strong></div>
+                                    {{range .Slots}}
+                                    {{if .Free}}
+                                    <label class="slot-chip">
+                                        <input type="radio" name="slot" value="{{.Key}}"{{if eq .Key $f.Slot}} checked{{end}}>
+                                        <span class="slot-chip-part">{{if eq .Part "am"}}AM{{else}}PM{{end}}</span>
+                                        <span class="slot-chip-hours">{{.Hours}}</span>
+                                    </label>
+                                    {{else}}
+                                    <span class="slot-chip slot-chip--taken"><span class="slot-chip-part">{{if eq .Part "am"}}AM{{else}}PM{{end}}</span><span class="slot-chip-hours">Booked</span></span>
+                                    {{end}}
+                                    {{end}}
+                                </div>
+                                {{end}}
+                            </div>
+                            {{with $e.slot}}<span class="field-error">{{.}}</span>{{end}}
+                        </fieldset>
+                        {{else}}
+                        <input type="hidden" name="when" value="discuss">
+                        {{with $e.slot}}<p class="field-error">{{.}}</p>{{end}}
+                        {{end}}
+                        <div class="quote-field discuss-panel">
+                            <label for="preferred_time">When suits you? <span class="label-optional">(optional)</span></label>
+                            <input type="text" id="preferred_time" name="preferred_time" maxlength="200" placeholder="e.g. any weekday, or before 20 Nov" value="{{$f.PreferredTime}}">
+                            {{with $e.preferred_time}}<span class="field-error">{{.}}</span>{{end}}
+                        </div>
+                    </div>
+
                     <div class="book-submit">
-                        <button type="submit" class="btn btn--primary quote-btn">Send booking request &#8594;</button>
-                        <p class="quote-submit-note">No payment now. We'll confirm a time before anything is booked in, and you pay after the clean.</p>
+                        <button type="submit" class="btn btn--primary quote-btn"><span class="when-slot-only">Book it &#8594;</span><span class="when-discuss-only">Send booking request &#8594;</span></button>
+                        <p class="quote-submit-note"><span class="when-slot-only">No payment now. You pay after the clean.</span><span class="when-discuss-only">No payment now. We'll confirm a time before anything is booked in, and you pay after the clean.</span></p>
                     </div>
                 </form>
 
@@ -133,7 +182,7 @@
                     <div class="price-card">
                         <div class="price-card-kicker">What happens next</div>
                         <ol class="aside-steps">
-                            <li>We read your request and get back to you within a day to lock in a time.</li>
+                            {{if .PageData.CanBook}}<li>Pick a free morning or afternoon and you're booked in straight away. Rather talk first? We'll call within a day.</li>{{else}}<li>We read your request and get back to you within a day to lock in a time.</li>{{end}}
                             <li>On the day, we clean every gutter and take the mess away. You don't need to be home.</li>
                             <li>You get before-and-after photos with the invoice. Tap your card or pay online.</li>
                         </ol>

@@ -451,14 +451,17 @@ func logGCal(what string, err error) {
 
 // ── Busy times ──
 
-// busyCache memoises freebusy.query results per week so paging back and forth
-// through the calendar doesn't hammer Google.
+// busyCache memoises freebusy.query results per range so paging back and forth
+// through the calendar, or reloading /book, doesn't hammer Google.
 var busyCache = &busyCacheT{ttl: 2 * time.Minute}
 
 type busyCacheT struct {
 	mu   sync.Mutex
 	ttl  time.Duration
-	key  string
+	vals map[string]busyEntry
+}
+
+type busyEntry struct {
 	at   time.Time
 	vals []busyInterval
 }
@@ -466,22 +469,32 @@ type busyCacheT struct {
 func (c *busyCacheT) get(key string, now time.Time) ([]busyInterval, bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c.key != key || now.Sub(c.at) > c.ttl {
+	e, ok := c.vals[key]
+	if !ok || now.Sub(e.at) > c.ttl {
 		return nil, false
 	}
-	return c.vals, true
+	return e.vals, true
 }
 
 func (c *busyCacheT) put(key string, now time.Time, vals []busyInterval) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.key, c.at, c.vals = key, now, vals
+	if c.vals == nil {
+		c.vals = map[string]busyEntry{}
+	}
+	// Drop stale ranges so the map stays as small as the live working set.
+	for k, e := range c.vals {
+		if now.Sub(e.at) > c.ttl {
+			delete(c.vals, k)
+		}
+	}
+	c.vals[key] = busyEntry{at: now, vals: vals}
 }
 
 func (c *busyCacheT) clear() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.key, c.vals = "", nil
+	c.vals = nil
 }
 
 // busyIntervals returns busy blocks from every calendar on the admin's account
@@ -489,9 +502,18 @@ func (c *busyCacheT) clear() {
 // (nil, nil) when sync isn't connected, and never blocks longer than
 // busyTimeout — the admin calendar page renders without busy times on failure.
 //
-// Kept separate from the calendar view so the customer-facing slot picker
-// (TODO 12) can reuse it.
+// The customer-facing slot picker (slots.go) reuses it.
 func busyIntervals(from, to time.Time) ([]busyInterval, error) {
+	return queryBusy(from, to, true)
+}
+
+// busyIntervalsFresh is busyIntervals without the cache, for the final check
+// before a customer's chosen slot is booked.
+func busyIntervalsFresh(from, to time.Time) ([]busyInterval, error) {
+	return queryBusy(from, to, false)
+}
+
+func queryBusy(from, to time.Time, cached bool) ([]busyInterval, error) {
 	g, err := db.GetGoogleCalendar()
 	if err != nil {
 		return nil, err
@@ -500,7 +522,7 @@ func busyIntervals(from, to time.Time) ([]busyInterval, error) {
 		return nil, nil
 	}
 	key := from.Format(time.RFC3339) + "/" + to.Format(time.RFC3339)
-	if vals, ok := busyCache.get(key, time.Now()); ok {
+	if vals, ok := busyCache.get(key, time.Now()); ok && cached {
 		return vals, nil
 	}
 

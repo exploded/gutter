@@ -2648,6 +2648,45 @@ a.area-chip:hover { background: var(--sun); box-shadow: 3px 3px 0 var(--ink); tr
     .property-option-price { grid-column: 2; }
 }
 
+/* Booking: when. Both panels show by default; :has() hides the one the
+   customer didn't choose, so a browser without it still gets a working form. */
+.when-mode { grid-template-columns: 1fr 1fr; margin-bottom: 1.1rem; }
+.when-option { grid-template-columns: auto 1fr; align-items: start; }
+.when-option input { margin-top: 0.2rem; }
+.when-slot-only { display: none; }
+.book-form:has(input[name="when"][value="slot"]:checked) .when-slot-only { display: inline; }
+.book-form:has(input[name="when"][value="slot"]:checked) .when-discuss-only,
+.book-form:has(input[name="when"][value="slot"]:checked) .discuss-panel,
+.book-form:has(input[name="when"][value="discuss"]:checked) .slot-panel { display: none; }
+.slot-panel { border: 0; padding: 0; margin: 0 0 1rem; min-width: 0; }
+.slot-legend { padding: 0; margin-bottom: 0.8rem; font-size: 0.92rem; color: var(--text-secondary); }
+.slot-days { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.6rem; }
+.slot-day {
+    display: grid; gap: 0.4rem; align-content: start; padding: 0.6rem;
+    border: 2px solid rgba(18, 40, 74, 0.2); border-radius: var(--radius-sm); background: var(--bg-surface);
+}
+.slot-day-name { font-size: 0.85rem; color: var(--text-muted); }
+.slot-day-name strong { color: var(--text-primary); font-weight: 700; }
+.slot-chip {
+    position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 0.4rem;
+    padding: 0.45rem 0.6rem; border: 2px solid var(--border-brand); border-radius: 8px;
+    background: var(--bg-elevated); cursor: pointer; transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.slot-chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.slot-chip:hover { border-color: var(--ink); }
+.slot-chip:has(input:focus-visible) { outline: 3px solid var(--sky-text); outline-offset: 2px; }
+.slot-chip:has(input:checked) { border-color: var(--ink); background: var(--sun-tint); box-shadow: 3px 3px 0 var(--ink); }
+.slot-chip-part { font-weight: 700; color: var(--text-primary); }
+.slot-chip-hours { font-size: 0.78rem; color: var(--text-muted); white-space: nowrap; }
+.slot-chip--taken { cursor: default; border-style: dashed; border-color: var(--border); background: transparent; }
+.slot-chip--taken:hover { border-color: var(--border); }
+.slot-chip--taken .slot-chip-part, .slot-chip--taken .slot-chip-hours { color: var(--text-muted); }
+.book-when--error .slot-days { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: var(--radius-sm); }
+@media (max-width: 560px) {
+    .when-mode { grid-template-columns: 1fr; }
+    .slot-days { grid-template-columns: 1fr 1fr; }
+}
+
 /* Plan comparison table on /pricing */
 .plan-table td:first-child { font-weight: 600; }
 

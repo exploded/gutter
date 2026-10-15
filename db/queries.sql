@@ -26,39 +26,39 @@ RETURNING id;
 
 -- name: GetBooking :one
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings WHERE id = ?;
 
 -- name: ListBookings :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings ORDER BY id DESC;
 
 -- name: ListBookingsByStatus :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings WHERE status = ? ORDER BY id DESC;
 
 -- name: ListBookingsBetween :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings
 WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam')
 ORDER BY start_at;
 
 -- name: ListBookingsByCustomer :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings WHERE customer_id = ? ORDER BY id DESC;
 
 -- name: ListChildBookings :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings WHERE parent_booking_id = ? ORDER BY id;
 
 -- name: ListUnlinkedBookings :many
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings WHERE customer_id = 0 AND status <> 'spam' ORDER BY id;
 
 -- name: CountBookingsByStatus :many
@@ -78,7 +78,7 @@ UPDATE bookings SET status = ?, updated_at = datetime('now') WHERE id = ?;
 
 -- name: UpdateBookingSchedule :exec
 -- Rescheduling clears the reminder stamps so the new time gets its own reminder + heads-up.
-UPDATE bookings SET start_at = ?, duration_min = ?, status = 'booked', reminder_sent_at = '', admin_alert_sent_at = '', updated_at = datetime('now') WHERE id = ?;
+UPDATE bookings SET start_at = ?, duration_min = ?, slot = ?, status = 'booked', reminder_sent_at = '', admin_alert_sent_at = '', updated_at = datetime('now') WHERE id = ?;
 
 -- name: UpdateBookingNotes :exec
 UPDATE bookings SET admin_notes = ?, updated_at = datetime('now') WHERE id = ?;
@@ -96,7 +96,7 @@ UPDATE bookings SET address = ?, suburb = ?, updated_at = datetime('now') WHERE 
 -- Scheduled visits in [from, to) whose customer has an email and no reminder
 -- yet. Any status short of cancelled/spam counts - same rule as the calendar.
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings
 WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam') AND email <> '' AND reminder_sent_at = ''
 ORDER BY start_at;
@@ -105,7 +105,7 @@ ORDER BY start_at;
 -- Scheduled visits in [from, to) the admin has not been alerted about yet.
 -- Any status short of cancelled/spam counts - same rule as the calendar.
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings
 WHERE start_at >= ? AND start_at < ? AND status NOT IN ('cancelled', 'spam') AND admin_alert_sent_at = ''
 ORDER BY start_at;
@@ -131,7 +131,7 @@ UPDATE bookings SET admin_alert_sent_at = datetime('now') WHERE id = ?;
 -- one-second resolution: an edit landing in the same second as a push would
 -- otherwise look clean. It also retries anything Google rejected last time.
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings
 WHERE (
         gcal_synced_at = '' OR gcal_synced_at < updated_at
@@ -145,7 +145,7 @@ LIMIT ?;
 -- name: ListBookingsForCalendarBackfill :many
 -- Every booking that should have an event, for the "resync all" button.
 SELECT id, name, phone, email, suburb, service_slug, property_type, issue, preferred_time, status, ip, created_at,
-       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents
+       customer_id, start_at, duration_min, admin_notes, parent_booking_id, updated_at, address, reminder_sent_at, admin_alert_sent_at, gcal_event_id, gcal_synced_at, source, on_plan, quote_cents, slot
 FROM bookings
 WHERE (start_at >= ? AND start_at < ?) OR gcal_event_id <> ''
 ORDER BY start_at, id;

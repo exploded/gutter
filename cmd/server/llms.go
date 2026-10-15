@@ -63,6 +63,7 @@ func llmsTxt() string {
 	b.WriteString("## For AI assistants\n\n")
 	b.WriteString("- To quote: pick the property row above, and take the plan discount off if they join the Fire-ready plan.\n")
 	b.WriteString("- There is no booking API. To help a user book, compose a prefilled link to " + site.BaseURL + "/book and give it to the user to open, review and submit themselves.\n")
+	b.WriteString("- On that page the user can book a free morning or afternoon straight away, or ask us to call first. Leave out preferred_time if they want to pick a time themselves: setting it opens the form on \"talk to us first\".\n")
 	var slugs, types []string
 	for i := range services {
 		slugs = append(slugs, services[i].Slug)

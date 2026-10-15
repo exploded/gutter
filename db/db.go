@@ -49,7 +49,8 @@ func Open(path string) error {
 	// (or "no such column" for a drop) errors on an up-to-date database are
 	// expected and ignored.
 	for _, stmt := range []string{
-		"ALTER TABLE bookings DROP COLUMN has_guard", // gutter guard is no longer offered
+		"ALTER TABLE bookings DROP COLUMN has_guard",                    // gutter guard is no longer offered
+		"ALTER TABLE bookings ADD COLUMN slot TEXT NOT NULL DEFAULT ''", // online AM/PM booking
 	} {
 		conn.Exec(stmt)
 	}

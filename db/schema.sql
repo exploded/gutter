@@ -33,7 +33,8 @@ CREATE TABLE IF NOT EXISTS bookings (
     gcal_synced_at      TEXT  NOT NULL DEFAULT '',  -- UTC datetime of the last successful push; < updated_at = dirty
     source              TEXT  NOT NULL DEFAULT '',  -- where the booking came from: google-ads, phone, referral…
     on_plan             INTEGER NOT NULL DEFAULT 0, -- 1 = customer joined the Fire-ready plan (two cleans a year, plan price)
-    quote_cents         INTEGER NOT NULL DEFAULT 0  -- price shown when they booked (base, less plan discount)
+    quote_cents         INTEGER NOT NULL DEFAULT 0, -- price shown when they booked (base, less plan discount)
+    slot                TEXT    NOT NULL DEFAULT '' -- am | pm when the customer booked an arrival window online; '' = exact time
 );
 
 CREATE INDEX IF NOT EXISTS idx_bookings_start_at ON bookings(start_at);

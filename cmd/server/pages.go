@@ -186,8 +186,16 @@ type bookForm struct {
 	PropertyType  string // price-list row slug
 	Plan          bool   // join the Fire-ready plan
 	Issue         string // optional notes: access, dogs, solar panels
-	PreferredTime string
+	When          string // whenSlot: book a window now; whenDiscuss: talk to us first
+	Slot          string // the picked window's key, e.g. "2026-10-20-am"
+	PreferredTime string // free text, for whenDiscuss
 }
+
+// The two ways to send the form.
+const (
+	whenSlot    = "slot"
+	whenDiscuss = "discuss"
+)
 
 // Price is the clean's price for the form's current choices, so the page
 // shows the right figure before any script runs (and after a failed submit).
@@ -205,10 +213,20 @@ type bookPageData struct {
 	Form     bookForm
 	Errors   map[string]string
 	TS       int64
+	Days     []slotDay // free arrival windows; empty when none can be offered
+	CanBook  bool      // the calendar could be checked, so windows may be offered
 }
 
 func newBookPage(f bookForm, errs map[string]string) bookPageData {
-	return bookPageData{Services: services, Types: propertyTypes, Form: f, Errors: errs, TS: time.Now().Unix()}
+	days, ok := openSlots(time.Now())
+	d := bookPageData{Services: services, Types: propertyTypes, Form: f, Errors: errs, TS: time.Now().Unix(),
+		Days: days, CanBook: ok && len(days) > 0}
+	if !d.CanBook {
+		d.Form.When = whenDiscuss
+	} else if d.Form.When == "" {
+		d.Form.When = whenSlot
+	}
+	return d
 }
 
 func handleBookForm(w http.ResponseWriter, r *http.Request) {
@@ -235,6 +253,10 @@ func handleBookForm(w http.ResponseWriter, r *http.Request) {
 		Issue:         pre("issue", 2000),
 		PreferredTime: pre("preferred_time", 200),
 	}
+	// A link that already says when suits them is asking us to call.
+	if f.PreferredTime != "" {
+		f.When = whenDiscuss
+	}
 	if _, ok := findService(f.Service); !ok {
 		f.Service = ""
 	}
@@ -245,7 +267,17 @@ func handleBookForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBookThanks(w http.ResponseWriter, r *http.Request) {
-	render(w, r, "book-thanks", nil)
+	// ?booked= carries the window the customer just booked, so the page can
+	// repeat it back. It is display only; a forged one changes nothing.
+	var booked string
+	if t, err := time.ParseInLocation("2006-01-02", r.URL.Query().Get("day"), db.Melbourne); err == nil {
+		for _, s := range windowsOn(t) {
+			if s.Part == r.URL.Query().Get("booked") {
+				booked = s.Label()
+			}
+		}
+	}
+	render(w, r, "book-thanks", struct{ Booked string }{booked})
 }
 
 // bookingHits tracks recent booking submissions per IP for a simple rate limit.
@@ -309,7 +341,12 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		PropertyType:  trim("property"),
 		Plan:          r.FormValue("plan") == "1",
 		Issue:         trim("issue"),
+		When:          trim("when"),
+		Slot:          trim("slot"),
 		PreferredTime: trim("preferred_time"),
+	}
+	if f.When != whenSlot {
+		f.When, f.Slot = whenDiscuss, ""
 	}
 	ip := clientIP(r)
 
@@ -359,12 +396,52 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	if _, ok := findService(f.Service); !ok {
 		f.Service = ""
 	}
+	var slot bookingSlot
+	if f.When == whenSlot {
+		if f.Email == "" {
+			errs["email"] = "Please add your email so we can send your booking confirmation."
+		}
+		var ok bool
+		if slot, ok = slotForKey(f.Slot, time.Now()); !ok {
+			errs["slot"] = "Please pick a day and a time."
+			f.Slot = ""
+		}
+	}
 
-	if len(errs) > 0 {
+	rejectForm := func() {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		render(w, r, "book", newBookPage(f, errs))
+	}
+	if len(errs) > 0 {
+		rejectForm()
 		return
+	}
+
+	// A suspicious submission never takes a window: it is stored as a plain
+	// request (marked spam below) so a bot can't fill the diary.
+	booking := f.When == whenSlot && !suspicious
+	if booking {
+		// Hold the lock from the final check until the window is booked, so
+		// two customers can't both take it.
+		slotMu.Lock()
+		defer slotMu.Unlock()
+		free, err := slotStillFree(slot)
+		switch {
+		case err != nil:
+			log.Printf("booking: check slot %s: %v", slot.Key(), err)
+			errs["slot"] = "We couldn't check the calendar just now, so we can't book a time online. Send this as a request and we'll call to settle a time."
+		case !free:
+			errs["slot"] = "Sorry, that time has just been taken. Please pick another."
+			f.Slot = ""
+		}
+		if len(errs) > 0 {
+			rejectForm()
+			return
+		}
+		f.PreferredTime = "Booked online: " + slot.Short()
+	} else if f.When == whenSlot {
+		f.PreferredTime = slot.Short()
 	}
 
 	fullAddress := f.AddrStreet + ", " + f.AddrSuburb + " " + f.AddrState + " " + f.AddrPostcode
@@ -415,8 +492,20 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 			log.Printf("booking: mark suspicious #%d: %v", id, err)
 		}
 	}
-	log.Printf("booking #%d from %s (%s / %s) service=%s property=%s plan=%v suspicious=%v",
-		id, f.Name, f.Phone, f.Email, f.Service, pt.Slug, f.Plan, suspicious)
+	thanks := "/book/thanks"
+	if booking {
+		if err := db.ScheduleBookingSlot(id, slot.Start, slot.Minutes(), slot.Part); err != nil {
+			// The request is saved, so fall back to treating it as one: the
+			// admin email still arrives and we call to settle a time.
+			log.Printf("booking: schedule #%d into %s: %v", id, slot.Key(), err)
+		} else {
+			b.ID, b.StartAt, b.DurationMin, b.Slot, b.Status = id, slot.Start, slot.Minutes(), slot.Part, db.BookingBooked
+			syncBookingSoon(id)
+			thanks += "?day=" + slot.Start.Format("2006-01-02") + "&booked=" + slot.Part
+		}
+	}
+	log.Printf("booking #%d from %s (%s / %s) service=%s property=%s plan=%v slot=%s suspicious=%v",
+		id, f.Name, f.Phone, f.Email, f.Service, pt.Slug, f.Plan, b.Slot, suspicious)
 	notifyBooking(id, b, suspicious)
-	http.Redirect(w, r, "/book/thanks", http.StatusSeeOther)
+	http.Redirect(w, r, thanks, http.StatusSeeOther)
 }

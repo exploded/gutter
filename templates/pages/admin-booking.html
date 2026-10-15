@@ -164,7 +164,8 @@
 {{define "booking-schedule-card"}}
     {{$d := .PageData}}{{$b := $d.B}}{{$csrf := .CSRF}}
     <div class="admin-card" id="schedule-card">
-        <h2 class="admin-card-title">{{if $b.StartAt.IsZero}}Schedule the visit{{else}}Scheduled: {{$d.Row.When}} ({{$b.DurationMin}} min){{end}}</h2>
+        <h2 class="admin-card-title">{{if $b.StartAt.IsZero}}Schedule the visit{{else if $d.Window}}Booked online: {{$d.Window}}{{else}}Scheduled: {{$d.Row.When}} ({{$b.DurationMin}} min){{end}}</h2>
+        {{if $d.Window}}<p class="admin-muted">The customer picked this arrival window on the website, and the calendar holds all of it. Rescheduling below sets an exact time instead.</p>{{end}}
         <form method="POST" action="/admin/bookings/{{$b.ID}}/schedule" class="admin-form-inline"
               hx-post="/admin/bookings/{{$b.ID}}/schedule" hx-target="#schedule-card" hx-swap="outerHTML" hx-disable="find button">
             {{template "csrf" $csrf}}
@@ -175,7 +176,7 @@
             <div class="admin-field admin-field--narrow">
                 <label for="duration">Duration</label>
                 <select class="admin-input" id="duration" name="duration">
-                    {{range $d.Durations}}<option value="{{.}}"{{if eq . $b.DurationMin}} selected{{end}}>{{.}} min</option>{{end}}
+                    {{range $d.Durations}}<option value="{{.}}"{{if eq . $d.Duration}} selected{{end}}>{{.}} min</option>{{end}}
                 </select>
             </div>
             <label class="admin-check"><input type="checkbox" name="notify" value="1"{{if $b.Email}} checked{{else}} disabled{{end}}> Email confirmation{{if not $b.Email}} (no email){{end}}</label>

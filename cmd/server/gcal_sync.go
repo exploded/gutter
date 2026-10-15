@@ -53,6 +53,11 @@ func eventForBooking(b *db.Booking) *gcalEvent {
 	}
 
 	var desc strings.Builder
+	if s, ok := bookingWindow(b); ok {
+		// Booked online: the event holds the whole arrival window.
+		title = strings.ToUpper(s.Part) + " window — " + title
+		fmt.Fprintf(&desc, "Booked online. Arrive between %s.\n\n", s.Hours())
+	}
 	if b.Phone != "" {
 		fmt.Fprintf(&desc, "Phone: %s\n", b.Phone)
 	}

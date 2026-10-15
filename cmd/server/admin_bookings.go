@@ -35,7 +35,7 @@ func bookingRows(bs []db.Booking) []bookingRow {
 }
 
 func newBookingRow(b db.Booking) bookingRow {
-	r := bookingRow{Booking: b, When: fmtWhen(b.StartAt), Preview: b.Issue}
+	r := bookingRow{Booking: b, When: fmtVisit(&b), Preview: b.Issue}
 	if s, ok := findService(b.ServiceSlug); ok {
 		r.ServiceTitle = s.Title
 	}
@@ -176,6 +176,8 @@ type adminBookingData struct {
 	Cust         *db.Customer
 	StartValue   string // datetime-local value for the schedule form
 	Durations    []int
+	Duration     int    // the duration preselected in the schedule form
+	Window       string // "Tuesday 20 October, morning (8am-12pm)" when booked online as a window
 	Invoices     []db.Invoice
 	Parent       *db.Booking
 	Children     []bookingRow
@@ -230,6 +232,16 @@ func buildBookingData(r *http.Request, b *db.Booking) adminBookingData {
 		start = db.Today().AddDate(0, 0, 1).Add(9 * time.Hour)
 	}
 	d.StartValue = start.In(db.Melbourne).Format("2006-01-02T15:04")
+	d.Duration = b.DurationMin
+	if s, ok := bookingWindow(b); ok {
+		// The booking holds the whole window. Rescheduling pins an exact time,
+		// so offer the job's usual length rather than the window's.
+		d.Window = s.Label()
+		d.Duration = 90
+		if p, ok := findPropertyType(b.PropertyType); ok {
+			d.Duration = p.Minutes
+		}
+	}
 	d.Invoices, _ = db.ListInvoicesByBooking(b.ID)
 	if b.ParentBookingID != 0 {
 		d.Parent, _ = db.GetBooking(b.ParentBookingID)

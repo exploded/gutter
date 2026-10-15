@@ -1,7 +1,8 @@
 {{template "base" .}}
 
 {{define "meta"}}
-    <title>Thanks — Booking Request Received | Up The Spout</title>
+    {{$booked := ""}}{{with .PageData}}{{$booked = .Booked}}{{end}}
+    <title>{{if $booked}}You're Booked In{{else}}Thanks — Booking Request Received{{end}} | Up The Spout</title>
     <meta name="robots" content="noindex">
 {{end}}
 
@@ -12,9 +13,16 @@
 {{define "content"}}
     <div class="page-header">
         <div class="container">
+            {{$booked := ""}}{{with .PageData}}{{$booked = .Booked}}{{end}}
+            {{with $booked}}
+            <div class="section-label">Booking confirmed</div>
+            <h1 class="section-title">You're booked in.</h1>
+            <p class="page-header-intro">We'll see you <strong>{{.}}</strong>. A confirmation with a calendar invite is on its way to your inbox. If the day is declared Extreme or Catastrophic fire danger, we'll be in touch to move it.</p>
+            {{else}}
             <div class="section-label">Booking request sent</div>
             <h1 class="section-title">Thanks — we'll be in touch within a day.</h1>
             <p class="page-header-intro">We'll get back to you to lock in a time. If there's a deadline, like a council Fire Prevention Notice, {{if .Site.Phone}}call <a href="{{.Site.PhoneHref}}">{{.Site.Phone}}</a>{{else}}email <a href="mailto:{{.Site.Email}}">{{.Site.Email}}</a>{{end}}.</p>
+            {{end}}
         </div>
     </div>
     <section class="quote-section">

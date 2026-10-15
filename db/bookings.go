@@ -53,6 +53,7 @@ type Booking struct {
 	Source          string    // where it came from: google-ads, phone, referral…
 	OnPlan          bool      // joined the Fire-ready plan (two cleans a year at the plan price)
 	QuoteCents      int64     // price shown when they booked; 0 = no price given (admin-created)
+	Slot            string    // SlotAM or SlotPM when booked online as an arrival window; "" = exact time
 }
 
 // EndAt is StartAt + DurationMin (zero when unscheduled).
@@ -72,7 +73,7 @@ func sqlcBooking(r sqlc.Booking) Booking {
 		CreatedAt: parseUTC(r.CreatedAt), UpdatedAt: parseUTC(r.UpdatedAt),
 		ReminderSentAt: parseUTC(r.ReminderSentAt), AdminAlertAt: parseUTC(r.AdminAlertSentAt),
 		GCalEventID: r.GcalEventID, GCalSyncedAt: parseUTC(r.GcalSyncedAt), Source: r.Source,
-		OnPlan: r.OnPlan != 0, QuoteCents: r.QuoteCents,
+		OnPlan: r.OnPlan != 0, QuoteCents: r.QuoteCents, Slot: r.Slot,
 	}
 }
 
@@ -214,10 +215,24 @@ func UpdateBookingStatus(id int64, status string) error {
 	return q.UpdateBookingStatus(context.Background(), sqlc.UpdateBookingStatusParams{Status: status, ID: id})
 }
 
-// ScheduleBooking sets the visit time and marks the booking booked.
+// Arrival windows a customer can book online (see cmd/server/slots.go).
+const (
+	SlotAM = "am"
+	SlotPM = "pm"
+)
+
+// ScheduleBooking sets an exact visit time and marks the booking booked. It
+// clears any arrival window: the admin has pinned the time down.
 func ScheduleBooking(id int64, start time.Time, durationMin int) error {
+	return ScheduleBookingSlot(id, start, durationMin, "")
+}
+
+// ScheduleBookingSlot books the visit as an arrival window: start is the
+// window's opening and durationMin its length, so the calendar holds the
+// whole window.
+func ScheduleBookingSlot(id int64, start time.Time, durationMin int, slot string) error {
 	return q.UpdateBookingSchedule(context.Background(), sqlc.UpdateBookingScheduleParams{
-		StartAt: FormatStartAt(start), DurationMin: int64(durationMin), ID: id,
+		StartAt: FormatStartAt(start), DurationMin: int64(durationMin), Slot: slot, ID: id,
 	})
 }
 

@@ -24,7 +24,7 @@ const mailBillingTmplSrc = `
 <p>{{if .Rescheduled}}Here are the new details.{{else}}Thanks — you're booked in.{{end}} Please reply to this email{{if site.Phone}} or call {{site.Phone}}{{end}} if anything changes.</p>
 <table style="border-collapse:collapse;margin:12px 0 20px">
 {{template "row" (kv "When" .When)}}
-{{template "row" (kv "Duration" .Duration)}}
+{{if .Arrival}}{{template "row" (kv "Arrival" .Arrival)}}{{else}}{{template "row" (kv "Duration" .Duration)}}{{end}}
 {{if .ServiceTitle}}{{template "row" (kv "Service" .ServiceTitle)}}{{end}}
 {{if .Where}}{{template "row" (kv "Where" .Where)}}{{end}}
 </table>
@@ -86,7 +86,8 @@ const mailBillingTmplSrc = `
 type bookingMailData struct {
 	B            *db.Booking
 	When         string
-	Duration     string
+	Duration     string // "" for an arrival window
+	Arrival      string // "Between 8am and 12pm" for an arrival window, else ""
 	ServiceTitle string
 	Where        string
 	Issue        string
@@ -106,7 +107,21 @@ func newBookingMailData(b *db.Booking) bookingMailData {
 	if b.Suburb != "" {
 		d.Where = "Your place in " + b.Suburb
 	}
+	if s, ok := bookingWindow(b); ok {
+		d.When = s.Start.Format("Monday 2 January 2006") + ", " + strings.ToLower(s.PartName())
+		d.Duration = ""
+		d.Arrival = "Between " + clock12(s.Start.Format("15:04")) + " and " + clock12(s.End.Format("15:04"))
+	}
 	return d
+}
+
+// timeLine is the plain-text line under "When": the arrival window or the
+// visit's length.
+func (d bookingMailData) timeLine() string {
+	if d.Arrival != "" {
+		return "Arrival: " + d.Arrival
+	}
+	return "Duration: " + d.Duration
 }
 
 // sendBookingConfirmation emails the customer their (re)scheduled visit with
@@ -121,12 +136,12 @@ func sendBookingConfirmation(b *db.Booking, rescheduled bool) error {
 	if err != nil {
 		return fmt.Errorf("render booking-confirm: %w", err)
 	}
-	subj := "Your gutter clean is booked — " + fmtWhen(b.StartAt)
+	subj := "Your gutter clean is booked — " + fmtVisit(b)
 	if rescheduled {
-		subj = "Your gutter clean has been moved — " + fmtWhen(b.StartAt)
+		subj = "Your gutter clean has been moved — " + fmtVisit(b)
 	}
-	text := fmt.Sprintf("Hi %s — %s\n\nWhen: %s\nDuration: %s\n%s\nReply to this email if anything changes.\n\n— %s\n%s\n",
-		b.Name, strings.TrimSuffix(subj, " — "+fmtWhen(b.StartAt)), d.When, d.Duration, d.Where, site.Brand, site.BaseURL)
+	text := fmt.Sprintf("Hi %s — %s\n\nWhen: %s\n%s\n%s\nReply to this email if anything changes.\n\n— %s\n%s\n",
+		b.Name, strings.TrimSuffix(subj, " — "+fmtVisit(b)), d.When, d.timeLine(), d.Where, site.Brand, site.BaseURL)
 	ics := mailer.Attachment{Filename: "gutter-clean.ics", ContentType: "text/calendar", Data: []byte(bookingICS(b, d.ServiceTitle))}
 	return sendNow(b.Email, subj, html, text, site.Email, ics)
 }
