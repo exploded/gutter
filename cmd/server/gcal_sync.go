@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"strconv"
 	"strings"
 	"time"
@@ -157,7 +157,7 @@ func syncBookingSoon(id int64) {
 		}
 		b, err := db.GetBooking(id)
 		if err != nil {
-			logErrorf("gcal: load booking #%d: %v", id, err)
+			slog.Error("gcal: load booking", "booking", id, "err", err)
 			return
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), gcalTimeout)
@@ -167,7 +167,7 @@ func syncBookingSoon(id int64) {
 			return
 		}
 		if err := db.MarkGoogleCalendarSynced(); err != nil {
-			logErrorf("gcal: stamp sync: %v", err)
+			slog.Error("gcal: stamp sync", "err", err)
 		}
 	}()
 }
@@ -177,7 +177,7 @@ func syncBookingSoon(id int64) {
 func calendarTarget() (*db.GoogleCalendar, calendarAPI, bool) {
 	g, err := db.GetGoogleCalendar()
 	if err != nil {
-		logErrorf("gcal: load connection: %v", err)
+		slog.Error("gcal: load connection", "err", err)
 		return nil, nil, false
 	}
 	if !g.Connected() {
@@ -196,7 +196,7 @@ func calendarTarget() (*db.GoogleCalendar, calendarAPI, bool) {
 func calendarSyncConnected() bool {
 	g, err := db.GetGoogleCalendar()
 	if err != nil {
-		logErrorf("gcal: load connection: %v", err)
+		slog.Error("gcal: load connection", "err", err)
 		return false
 	}
 	return g.Connected()
@@ -213,7 +213,7 @@ func syncCalendar(now time.Time) int {
 	}
 	bs, err := db.ListBookingsForCalendarSync(now.Add(-syncPast), now.Add(syncFuture), syncLimit)
 	if err != nil {
-		logErrorf("gcal: list dirty bookings: %v", err)
+		slog.Error("gcal: list dirty bookings", "err", err)
 		return 0
 	}
 	if len(bs) == 0 {
@@ -222,7 +222,7 @@ func syncCalendar(now time.Time) int {
 	n, failed := pushBookings(api, g.CalendarID, bs)
 	if failed == 0 {
 		if err := db.MarkGoogleCalendarSynced(); err != nil {
-			logErrorf("gcal: stamp sync: %v", err)
+			slog.Error("gcal: stamp sync", "err", err)
 		}
 	}
 	return n
@@ -238,16 +238,16 @@ func resyncAllBookings() int {
 	now := time.Now().In(db.Melbourne)
 	bs, err := db.ListBookingsForCalendarBackfill(now.Add(-syncPast), now.Add(syncFuture))
 	if err != nil {
-		logErrorf("gcal: list bookings for resync: %v", err)
+		slog.Error("gcal: list bookings for resync", "err", err)
 		return 0
 	}
 	n, failed := pushBookings(api, g.CalendarID, bs)
 	if failed == 0 {
 		if err := db.MarkGoogleCalendarSynced(); err != nil {
-			logErrorf("gcal: stamp sync: %v", err)
+			slog.Error("gcal: stamp sync", "err", err)
 		}
 	}
-	log.Printf("gcal: resync pushed %d booking(s), %d failed", n, failed)
+	slog.Info("gcal: resync pushed", "bookings", n, "failed", failed)
 	return n
 }
 

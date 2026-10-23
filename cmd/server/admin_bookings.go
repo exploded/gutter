@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"sort"
@@ -139,7 +140,7 @@ func handleAdminBookings(w http.ResponseWriter, r *http.Request) {
 		bs, err = db.ListBookingsByStatus(status)
 	}
 	if err != nil {
-		logErrorf("admin bookings: %v", err)
+		slog.Error("admin bookings", "err", err)
 		http.Error(w, "failed to load bookings", http.StatusInternalServerError)
 		return
 	}
@@ -193,7 +194,7 @@ func loadBooking(w http.ResponseWriter, r *http.Request) *db.Booking {
 		if errors.Is(err, sql.ErrNoRows) {
 			http.NotFound(w, r)
 		} else {
-			logErrorf("admin booking: %v", err)
+			slog.Error("admin booking", "err", err)
 			http.Error(w, "failed to load booking", http.StatusInternalServerError)
 		}
 		return nil
@@ -293,7 +294,7 @@ func handleAdminBookingSchedule(w http.ResponseWriter, r *http.Request) {
 	}
 	rescheduled := b.Status == db.BookingBooked && !b.StartAt.IsZero() && !b.StartAt.Equal(start)
 	if err := db.ScheduleBooking(b.ID, start, dur); err != nil {
-		logErrorf("schedule booking #%d: %v", b.ID, err)
+		slog.Error("schedule booking", "booking", b.ID, "err", err)
 		bookingCard(w, r, b, "booking-schedule-swap", http.StatusInternalServerError, "err", "Could not save the schedule.")
 		return
 	}
@@ -329,7 +330,7 @@ func handleAdminBookingStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := db.UpdateBookingStatus(b.ID, status); err != nil {
-		logErrorf("booking #%d status: %v", b.ID, err)
+		slog.Error("booking status", "booking", b.ID, "err", err)
 		bookingCard(w, r, b, "booking-status-swap", http.StatusInternalServerError, "err", "Could not update the status.")
 		return
 	}
@@ -419,7 +420,7 @@ func handleAdminBookingAddress(w http.ResponseWriter, r *http.Request) {
 			err = db.SetBookingCustomer(b.ID, id)
 		}
 		if err != nil {
-			logErrorf("booking #%d address: link customer: %v", b.ID, err)
+			slog.Error("booking address: link customer", "booking", b.ID, "err", err)
 			redirectMsg(w, r, back, "err", "Could not link a customer to save the address against.")
 			return
 		}
@@ -427,18 +428,18 @@ func handleAdminBookingAddress(w http.ResponseWriter, r *http.Request) {
 	}
 	c, err := db.GetCustomer(b.CustomerID)
 	if err != nil {
-		logErrorf("booking #%d address: load customer: %v", b.ID, err)
+		slog.Error("booking address: load customer", "booking", b.ID, "err", err)
 		redirectMsg(w, r, back, "err", "Could not load the customer record.")
 		return
 	}
 	if err := db.UpdateBookingAddress(b.ID, full, suburb); err != nil {
-		logErrorf("booking #%d address: %v", b.ID, err)
+		slog.Error("booking address", "booking", b.ID, "err", err)
 		redirectMsg(w, r, back, "err", "Could not save the address.")
 		return
 	}
 	c.Address, c.Suburb = full, suburb
 	if err := db.UpdateCustomer(c); err != nil {
-		logErrorf("booking #%d address: sync customer: %v", b.ID, err)
+		slog.Error("booking address: sync customer", "booking", b.ID, "err", err)
 	}
 	syncBookingSoon(b.ID)
 	redirectMsg(w, r, back, "ok", "Address saved: "+full)
@@ -455,7 +456,7 @@ func handleAdminBookingFollowup(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := db.CreateFollowup(b, issue)
 	if err != nil {
-		logErrorf("followup for #%d: %v", b.ID, err)
+		slog.Error("followup", "booking", b.ID, "err", err)
 		redirectMsg(w, r, "/admin/bookings/"+strconv.FormatInt(b.ID, 10), "err", "Could not create the follow-up booking.")
 		return
 	}
@@ -560,7 +561,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 	customerID, err := db.FindOrCreateCustomer(f.Name, f.Email, f.Phone, f.Suburb)
 	if err != nil {
 		// Not fatal — the booking is still recorded; the boot-time backfill links it later.
-		logErrorf("phone booking: customer upsert: %v", err)
+		slog.Error("phone booking: customer upsert", "err", err)
 	}
 	if customerID != 0 && fullAddress != "" {
 		// Fill in a blank customer address; corrections go through the booking
@@ -568,7 +569,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 		if c, err := db.GetCustomer(customerID); err == nil && c.Address == "" {
 			c.Address, c.Suburb = fullAddress, f.AddrSuburb
 			if err := db.UpdateCustomer(c); err != nil {
-				logErrorf("phone booking: fill customer address: %v", err)
+				slog.Error("phone booking: fill customer address", "err", err)
 			}
 		}
 	}
@@ -584,7 +585,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := db.InsertBooking(nb)
 	if err != nil {
-		logErrorf("phone booking: insert: %v", err)
+		slog.Error("phone booking: insert", "err", err)
 		redirectMsg(w, r, "/admin/bookings/new", "err", "Could not save the booking.")
 		return
 	}
@@ -669,7 +670,7 @@ func handleAdminCalendar(w http.ResponseWriter, r *http.Request) {
 	weekEnd := weekStart.AddDate(0, 0, 7)
 	bs, err := db.ListBookingsBetween(weekStart, weekEnd)
 	if err != nil {
-		logErrorf("calendar: %v", err)
+		slog.Error("calendar", "err", err)
 		http.Error(w, "failed to load calendar", http.StatusInternalServerError)
 		return
 	}

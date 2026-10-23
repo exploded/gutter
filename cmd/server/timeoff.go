@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -314,7 +315,7 @@ func timeOffClashes(start, end time.Time) string {
 	// A visit starting up to a day earlier can still run into the span.
 	bs, err := db.ListBookingsBetween(start.Add(-24*time.Hour), end)
 	if err != nil {
-		logErrorf("time off: clashes: %v", err)
+		slog.Error("time off: clashes", "err", err)
 		return ""
 	}
 	var names []string

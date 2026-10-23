@@ -2,7 +2,7 @@ package main
 
 import (
 	"hash/fnv"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
@@ -352,7 +352,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 
 	// Honeypot: real users never see this field. Pretend success, save nothing.
 	if trim("website") != "" {
-		log.Printf("booking: honeypot hit from %s", ip)
+		slog.Info("booking: honeypot hit", "ip", ip)
 		http.Redirect(w, r, "/book/thanks", http.StatusSeeOther)
 		return
 	}
@@ -431,7 +431,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		free, err := slotStillFree(slot)
 		switch {
 		case err != nil:
-			logErrorf("booking: check slot %s: %v", slot.Key(), err)
+			slog.Error("booking: check slot", "slot", slot.Key(), "err", err)
 			errs["slot"] = "We couldn't check the calendar just now, so we can't book a time online. Send this as a request and we'll call to settle a time."
 		case !free:
 			errs["slot"] = "Sorry, that time has just been taken. Please pick another."
@@ -452,7 +452,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	customerID, err := db.FindOrCreateCustomer(f.Name, f.Email, f.Phone, f.AddrSuburb)
 	if err != nil {
-		logErrorf("booking: customer upsert failed: %v", err)
+		slog.Error("booking: customer upsert failed", "err", err)
 		// Not fatal: the booking is still recorded; the boot-time backfill will link it later.
 	}
 	if customerID != 0 {
@@ -461,7 +461,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		if c, err := db.GetCustomer(customerID); err == nil && c.Address == "" {
 			c.Address, c.Suburb = fullAddress, f.AddrSuburb
 			if err := db.UpdateCustomer(c); err != nil {
-				logErrorf("booking: fill customer address: %v", err)
+				slog.Error("booking: fill customer address", "err", err)
 			}
 		}
 	}
@@ -484,14 +484,14 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := db.InsertBooking(b)
 	if err != nil {
-		logErrorf("booking: insert failed: %v", err)
+		slog.Error("booking: insert failed", "err", err)
 		http.Error(w, "Sorry — something went wrong saving your request. Please call or email instead.", http.StatusInternalServerError)
 		return
 	}
 	linkBookingClick(w, r, id)
 	if suspicious {
 		if err := db.UpdateBookingStatus(id, "spam"); err != nil {
-			logErrorf("booking: mark suspicious #%d: %v", id, err)
+			slog.Error("booking: mark suspicious", "booking", id, "err", err)
 		}
 	}
 	thanks := "/book/thanks"
@@ -499,15 +499,15 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		if err := db.ScheduleBookingSlot(id, slot.Start, slot.Minutes(), slot.Part); err != nil {
 			// The request is saved, so fall back to treating it as one: the
 			// admin email still arrives and we call to settle a time.
-			logErrorf("booking: schedule #%d into %s: %v", id, slot.Key(), err)
+			slog.Error("booking: schedule into slot", "booking", id, "slot", slot.Key(), "err", err)
 		} else {
 			b.ID, b.StartAt, b.DurationMin, b.Slot, b.Status = id, slot.Start, slot.Minutes(), slot.Part, db.BookingBooked
 			syncBookingSoon(id)
 			thanks += "?day=" + slot.Start.Format("2006-01-02") + "&booked=" + slot.Part
 		}
 	}
-	log.Printf("booking #%d from %s (%s / %s) service=%s property=%s plan=%v slot=%s suspicious=%v",
-		id, f.Name, f.Phone, f.Email, f.Service, pt.Slug, f.Plan, b.Slot, suspicious)
+	slog.Info("booking received", "booking", id, "name", f.Name, "phone", f.Phone, "email", f.Email,
+		"service", f.Service, "property", pt.Slug, "plan", f.Plan, "slot", b.Slot, "suspicious", suspicious)
 	notifyBooking(id, b, suspicious)
 	http.Redirect(w, r, thanks, http.StatusSeeOther)
 }

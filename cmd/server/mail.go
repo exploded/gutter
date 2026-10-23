@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"log"
+	"log/slog"
 	"strings"
 
 	"gutter/db"
@@ -42,7 +42,7 @@ func send(to, subject, html, text, replyTo string) {
 	}
 	go func() {
 		if err := deliver(to, subject, html, text, replyTo); err != nil {
-			logErrorf("email: %v", err)
+			slog.Error("email", "err", err)
 		}
 	}()
 }
@@ -56,7 +56,7 @@ func sendNow(to, subject, html, text, replyTo string, atts ...mailer.Attachment)
 		return fmt.Errorf("no recipient address")
 	}
 	if !mailEnabled() {
-		log.Printf("email: (disabled) would send %q to %s with %d attachment(s)", subject, to, len(atts))
+		slog.Info("email: (disabled) would send", "subject", subject, "to", to, "attachments", len(atts))
 		return nil
 	}
 	return deliver(to, subject, html, text, replyTo, atts...)
@@ -180,7 +180,7 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 	}
 	html, err := renderMail("booking-admin", data)
 	if err != nil {
-		logErrorf("email: render booking-admin: %v", err)
+		slog.Error("email: render booking-admin", "err", err)
 		return
 	}
 	head := fmt.Sprintf("New booking request #%d", id)
@@ -203,7 +203,7 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 	}
 	html, err = renderMail("booking-customer", data)
 	if err != nil {
-		logErrorf("email: render booking-customer: %v", err)
+		slog.Error("email: render booking-customer", "err", err)
 		return
 	}
 	text = fmt.Sprintf("Thanks %s — we've got your request and will be in touch within a day to lock in a time.\n\nProperty: %s\nPrice: %s\nAddress: %s\n\n— %s\n%s\n",

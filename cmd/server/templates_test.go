@@ -100,7 +100,7 @@ func TestTemplatesRender(t *testing.T) {
 		"admin-calendar-settings-off": calSettingsData{Configured: true, AdminEmail: "me@example.test"},
 		"admin-email": emailSettingsData{Flash: flash{OK: "x"}, Configured: true, AdminEmail: "me@example.test",
 			NotifyEmail: "me@example.test",
-			Conn: &db.GoogleMail{AccountEmail: "me@example.test", RefreshToken: "r", ConnectedAt: time.Now(), LastSentAt: time.Now(), LastError: "boom"}},
+			Conn:        &db.GoogleMail{AccountEmail: "me@example.test", RefreshToken: "r", ConnectedAt: time.Now(), LastSentAt: time.Now(), LastError: "boom"}},
 		"admin-email-off": emailSettingsData{Configured: true, AdminEmail: "me@example.test"},
 		"admin-invoices":  adminInvoicesData{Status: "sent", Statuses: []string{"draft", "sent"}, Rows: []invoiceRow{{Invoice: *inv, Ref: "INV-1001", CustName: "Ann", Issued: "20 Aug 2026"}}, TotalOut: 500},
 		"admin-invoice": func() adminInvoiceData {
