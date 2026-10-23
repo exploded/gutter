@@ -14,8 +14,9 @@ this public repo). The code-side items:
 - [ ] Replace stock suburb photos with Vin's own (`tools/areaphoto`); add a photo of the work to the home page
 - [ ] `REVIEW_URL` and `SAME_AS` once the Google Business Profile is verified
 - [x] `GA4_ID` (live 7 October 2026)
-- [x] `GOOGLE_ADS_ID` (A-Part Ads account). Booking and phone-tap conversions are imported from GA4, so the two label vars stay empty
-- [x] Ads campaign "Up the spout clicks": targets the 15 service-area suburbs (presence only; Warranwood and Croydon Hills as 2 km radii, since Google has no suburb entry for them), Search only (15 October 2026). Update it when `suburbs.go` changes
+- [x] `GOOGLE_ADS_ID` = `AW-18514382268`, the Up The Spout Ads account (moved from A-Part's on 16 October 2026). Booking and phone-tap conversions are imported from GA4, so the two label vars stay empty
+- [x] Cleaned up the A-Part Ads account: old gutter campaign and imported Up The Spout conversions removed, no GA4 link to the Up The Spout property (16 October 2026)
+- [x] Ads campaign "Up the spout clicks" (Up The Spout Ads account): targets the 15 service-area suburbs (presence only; Warranwood and Croydon Hills as 2 km radii, since Google has no suburb entry for them), Search only (15 October 2026). Update it when `suburbs.go` changes
 - [ ] Delete the `warrandyte-gutters-backups` bucket once backups land in `upthespout-backups`
 
 ## Features
