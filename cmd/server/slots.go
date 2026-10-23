@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"sync"
 	"time"
@@ -219,7 +218,7 @@ func openSlots(now time.Time) (days []slotDay, ok bool) {
 	bs, busy, err := availability(from, to, false)
 	if err != nil {
 		if calendarSyncConnected() {
-			log.Printf("slots: %v", err)
+			logErrorf("slots: %v", err)
 		}
 		return nil, false
 	}

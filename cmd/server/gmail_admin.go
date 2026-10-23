@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"gutter/db"
@@ -23,7 +22,7 @@ type emailSettingsData struct {
 func handleAdminEmailSettings(w http.ResponseWriter, r *http.Request) {
 	conn, err := db.GetGoogleMail()
 	if err != nil {
-		log.Printf("gmail settings: %v", err)
+		logErrorf("gmail settings: %v", err)
 		http.Error(w, "failed to load email settings", http.StatusInternalServerError)
 		return
 	}
@@ -56,7 +55,7 @@ func handleAdminEmailTest(w http.ResponseWriter, r *http.Request) {
 	}
 	html, err := renderMail("gmail-test", map[string]string{"From": g.email})
 	if err != nil {
-		log.Printf("gmail test: render: %v", err)
+		logErrorf("gmail test: render: %v", err)
 		emailSettingsMsg(w, r, http.StatusInternalServerError, "err", "Could not build the test email.")
 		return
 	}

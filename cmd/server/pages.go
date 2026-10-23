@@ -431,7 +431,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		free, err := slotStillFree(slot)
 		switch {
 		case err != nil:
-			log.Printf("booking: check slot %s: %v", slot.Key(), err)
+			logErrorf("booking: check slot %s: %v", slot.Key(), err)
 			errs["slot"] = "We couldn't check the calendar just now, so we can't book a time online. Send this as a request and we'll call to settle a time."
 		case !free:
 			errs["slot"] = "Sorry, that time has just been taken. Please pick another."
@@ -452,7 +452,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	customerID, err := db.FindOrCreateCustomer(f.Name, f.Email, f.Phone, f.AddrSuburb)
 	if err != nil {
-		log.Printf("booking: customer upsert failed: %v", err)
+		logErrorf("booking: customer upsert failed: %v", err)
 		// Not fatal: the booking is still recorded; the boot-time backfill will link it later.
 	}
 	if customerID != 0 {
@@ -461,7 +461,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		if c, err := db.GetCustomer(customerID); err == nil && c.Address == "" {
 			c.Address, c.Suburb = fullAddress, f.AddrSuburb
 			if err := db.UpdateCustomer(c); err != nil {
-				log.Printf("booking: fill customer address: %v", err)
+				logErrorf("booking: fill customer address: %v", err)
 			}
 		}
 	}
@@ -484,14 +484,14 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := db.InsertBooking(b)
 	if err != nil {
-		log.Printf("booking: insert failed: %v", err)
+		logErrorf("booking: insert failed: %v", err)
 		http.Error(w, "Sorry — something went wrong saving your request. Please call or email instead.", http.StatusInternalServerError)
 		return
 	}
 	linkBookingClick(w, r, id)
 	if suspicious {
 		if err := db.UpdateBookingStatus(id, "spam"); err != nil {
-			log.Printf("booking: mark suspicious #%d: %v", id, err)
+			logErrorf("booking: mark suspicious #%d: %v", id, err)
 		}
 	}
 	thanks := "/book/thanks"
@@ -499,7 +499,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		if err := db.ScheduleBookingSlot(id, slot.Start, slot.Minutes(), slot.Part); err != nil {
 			// The request is saved, so fall back to treating it as one: the
 			// admin email still arrives and we call to settle a time.
-			log.Printf("booking: schedule #%d into %s: %v", id, slot.Key(), err)
+			logErrorf("booking: schedule #%d into %s: %v", id, slot.Key(), err)
 		} else {
 			b.ID, b.StartAt, b.DurationMin, b.Slot, b.Status = id, slot.Start, slot.Minutes(), slot.Part, db.BookingBooked
 			syncBookingSoon(id)

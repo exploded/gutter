@@ -50,6 +50,8 @@ func main() {
 	}
 
 	loadEnv(filepath.Join(dir, ".env"))
+	stopLogShip := setupLogging()
+	defer stopLogShip()
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -336,13 +338,13 @@ func render(w http.ResponseWriter, r *http.Request, page string, data any) {
 	// 500 below could never be sent because the header had already gone out.
 	var buf bytes.Buffer
 	if err := tmpl.ExecuteTemplate(&buf, "base", pd); err != nil {
-		log.Printf("render %s: %v", page, err)
+		logErrorf("render %s: %v", page, err)
 		http.Error(w, "render error", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if _, err := buf.WriteTo(w); err != nil && !isClientGone(err) {
-		log.Printf("render %s: write: %v", page, err)
+		logWarnf("render %s: write: %v", page, err)
 	}
 }
 
@@ -386,14 +388,14 @@ func renderFragment(w http.ResponseWriter, r *http.Request, page, name string, s
 	// 200 would be swapped into the page as if it were good.
 	var buf bytes.Buffer
 	if err := tmpl.ExecuteTemplate(&buf, name, pd); err != nil {
-		log.Printf("render fragment %s/%s: %v", page, name, err)
+		logErrorf("render fragment %s/%s: %v", page, name, err)
 		http.Error(w, "render error", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
 	if _, err := buf.WriteTo(w); err != nil && !isClientGone(err) {
-		log.Printf("render fragment %s/%s: write: %v", page, name, err)
+		logWarnf("render fragment %s/%s: write: %v", page, name, err)
 	}
 }
 
@@ -583,7 +585,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	token, err := googleOAuth.Exchange(context.Background(), code)
 	if err != nil {
-		log.Printf("google oauth exchange: %v", err)
+		logWarnf("google oauth exchange: %v", err)
 		http.Error(w, "authentication failed", http.StatusInternalServerError)
 		return
 	}
@@ -592,7 +594,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	client := googleOAuth.Client(context.Background(), token)
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
-		log.Printf("google userinfo: %v", err)
+		logWarnf("google userinfo: %v", err)
 		http.Error(w, "failed to get user info", http.StatusInternalServerError)
 		return
 	}
@@ -605,7 +607,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		Picture string `json:"picture"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&gUser); err != nil {
-		log.Printf("google userinfo decode: %v", err)
+		logErrorf("google userinfo decode: %v", err)
 		http.Error(w, "failed to parse user info", http.StatusInternalServerError)
 		return
 	}
@@ -613,7 +615,7 @@ func handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 	// Upsert user in DB
 	user, err := db.UpsertUser(gUser.ID, gUser.Email, gUser.Name, gUser.Picture)
 	if err != nil {
-		log.Printf("upsert user: %v", err)
+		logErrorf("upsert user: %v", err)
 		http.Error(w, "failed to save user", http.StatusInternalServerError)
 		return
 	}
@@ -698,16 +700,16 @@ func isAdmin(user *db.User) bool {
 func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	counts, err := db.CountBookingsByStatus()
 	if err != nil {
-		log.Printf("admin: count bookings: %v", err)
+		logErrorf("admin: count bookings: %v", err)
 	}
 	outstanding, err := db.SumOutstandingCents()
 	if err != nil {
-		log.Printf("admin: outstanding: %v", err)
+		logErrorf("admin: outstanding: %v", err)
 	}
 	weekStart := startOfWeek(db.Today())
 	week, err := db.ListBookingsBetween(weekStart, weekStart.AddDate(0, 0, 7))
 	if err != nil {
-		log.Printf("admin: week bookings: %v", err)
+		logErrorf("admin: week bookings: %v", err)
 	}
 	sources, unattributed := sourceRows()
 	clicks, adBookings := adPerformance()
@@ -756,12 +758,12 @@ func adPerformance() (clicks, bookings int) {
 	since := time.Now().UTC().AddDate(0, 0, -adWindowDays)
 	clicks, err := db.CountAdClicksSince(since)
 	if err != nil {
-		log.Printf("admin: count ad clicks: %v", err)
+		logErrorf("admin: count ad clicks: %v", err)
 		return 0, 0
 	}
 	bookings, err = db.CountBookingsBySourceSince(db.SourceGoogleAds, since)
 	if err != nil {
-		log.Printf("admin: count ad bookings: %v", err)
+		logErrorf("admin: count ad bookings: %v", err)
 	}
 	return clicks, bookings
 }
@@ -782,12 +784,12 @@ type sourceRow struct {
 func sourceRows() ([]sourceRow, int64) {
 	counts, err := db.CountBookingsBySource()
 	if err != nil {
-		log.Printf("admin: count bookings by source: %v", err)
+		logErrorf("admin: count bookings by source: %v", err)
 		return nil, 0
 	}
 	paid, err := db.SumPaidBySource()
 	if err != nil {
-		log.Printf("admin: paid by source: %v", err)
+		logErrorf("admin: paid by source: %v", err)
 	}
 	rows := make([]sourceRow, 0, len(counts))
 	byValue := map[string]int{}
@@ -819,7 +821,7 @@ func sourceRows() ([]sourceRow, int64) {
 	// Anything paid that no booking can explain, so the block adds up.
 	total, err := db.SumPaidCents()
 	if err != nil {
-		log.Printf("admin: paid total: %v", err)
+		logErrorf("admin: paid total: %v", err)
 		return rows, 0
 	}
 	return rows, total - attributed
@@ -963,7 +965,7 @@ func tagToken(v string) string {
 		switch {
 		case c >= 'a' && c <= 'z', c >= 'A' && c <= 'Z', c >= '0' && c <= '9', c == '-', c == '_':
 		default:
-			log.Printf("ignoring malformed Google tag value %q", v)
+			logWarnf("ignoring malformed Google tag value %q", v)
 			return ""
 		}
 	}
@@ -976,7 +978,7 @@ func tagID(v, prefix string) string {
 	v = tagToken(v)
 	if !strings.HasPrefix(v, prefix) {
 		if v != "" {
-			log.Printf("ignoring Google tag ID %q: expected the %s prefix", v, prefix)
+			logWarnf("ignoring Google tag ID %q: expected the %s prefix", v, prefix)
 		}
 		return ""
 	}

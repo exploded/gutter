@@ -36,7 +36,7 @@ func initMail() {
 	if mail.Enabled() {
 		log.Printf("email: SES enabled, from=%q notify=%q region=%s", from, notifyEmail, region)
 	} else {
-		log.Printf("email: not configured (set AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) — notifications disabled")
+		logWarnf("email: not configured (set AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) — notifications disabled")
 	}
 }
 
@@ -53,7 +53,7 @@ func send(to, subject, html, text, replyTo string) {
 	}
 	go func() {
 		if err := deliver(to, subject, html, text, replyTo); err != nil {
-			log.Printf("email: %v", err)
+			logErrorf("email: %v", err)
 		}
 	}()
 }
@@ -90,7 +90,7 @@ func deliver(to, subject, html, text, replyTo string, atts ...mailer.Attachment)
 		if err == nil || !mail.Enabled() {
 			return err
 		}
-		log.Printf("email: Gmail failed, sending %q to %s through SES instead", subject, to)
+		logWarnf("email: Gmail failed, sending %q to %s through SES instead", subject, to)
 	}
 	return mail.SendWithAttachments(to, subject, html, text, replyTo, atts...)
 }
@@ -199,7 +199,7 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 	}
 	html, err := renderMail("booking-admin", data)
 	if err != nil {
-		log.Printf("email: render booking-admin: %v", err)
+		logErrorf("email: render booking-admin: %v", err)
 		return
 	}
 	head := fmt.Sprintf("New booking request #%d", id)
@@ -222,7 +222,7 @@ func notifyBooking(id int64, b *db.Booking, suspicious bool) {
 	}
 	html, err = renderMail("booking-customer", data)
 	if err != nil {
-		log.Printf("email: render booking-customer: %v", err)
+		logErrorf("email: render booking-customer: %v", err)
 		return
 	}
 	text = fmt.Sprintf("Thanks %s — we've got your request and will be in touch within a day to lock in a time.\n\nProperty: %s\nPrice: %s\nAddress: %s\n\n— %s\n%s\n",

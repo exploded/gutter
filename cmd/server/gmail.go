@@ -79,7 +79,7 @@ func gmailFrom() string {
 func loadGmail() {
 	g, err := db.GetGoogleMail()
 	if err != nil {
-		log.Printf("gmail: load connection: %v", err)
+		logErrorf("gmail: load connection: %v", err)
 		return
 	}
 	setGmail(g)
@@ -106,14 +106,14 @@ func setGmail(g *db.GoogleMail) {
 func (s *gmailSender) send(to, subject, html, text, replyTo string, atts ...mailer.Attachment) error {
 	err := s.post(to, subject, html, text, replyTo, atts...)
 	if err != nil {
-		log.Printf("gmail: %v", err)
+		logErrorf("gmail: %v", err)
 		if e := db.SetGoogleMailError(time.Now().In(db.Melbourne).Format("2 Jan 3:04 pm") + ": " + err.Error()); e != nil {
-			log.Printf("gmail: record error: %v", e)
+			logErrorf("gmail: record error: %v", e)
 		}
 		return err
 	}
 	if e := db.MarkGoogleMailSent(); e != nil {
-		log.Printf("gmail: record send: %v", e)
+		logErrorf("gmail: record send: %v", e)
 	}
 	return nil
 }
@@ -189,7 +189,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 
 	tok, err := gmailOAuth.Exchange(ctx, r.URL.Query().Get("code"))
 	if err != nil {
-		log.Printf("gmail: token exchange: %v", err)
+		logWarnf("gmail: token exchange: %v", err)
 		redirectMsg(w, r, back, "err", "Could not complete the Google connection.")
 		return
 	}
@@ -206,7 +206,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 	// Mail must go out from the business's own account, not a support login.
 	email, err := googleAccountEmail(ctx, gmailOAuth.Client(ctx, tok))
 	if err != nil {
-		log.Printf("gmail: userinfo: %v", err)
+		logWarnf("gmail: userinfo: %v", err)
 		redirectMsg(w, r, back, "err", "Could not read the Google account details.")
 		return
 	}
@@ -216,7 +216,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := db.SaveGoogleMail(email, tok.RefreshToken); err != nil {
-		log.Printf("gmail: save connection: %v", err)
+		logErrorf("gmail: save connection: %v", err)
 		redirectMsg(w, r, back, "err", "Could not save the connection.")
 		return
 	}
@@ -226,7 +226,7 @@ func handleGmailCallback(w http.ResponseWriter, r *http.Request) {
 
 func handleGmailDisconnect(w http.ResponseWriter, r *http.Request) {
 	if err := db.DisconnectGoogleMail(); err != nil {
-		log.Printf("gmail: disconnect: %v", err)
+		logErrorf("gmail: disconnect: %v", err)
 		redirectMsg(w, r, "/admin/email", "err", "Could not disconnect.")
 		return
 	}
