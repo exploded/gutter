@@ -142,7 +142,7 @@ Business Profile and in Ads.
 - Logo: `static/img/logo-mark.svg` (mark). Lockups and PNGs: `tools/brand/out/`.
 - Icons and social images: `go run ./tools/genassets`.
 - Business cards for Officeworks (90 × 55 mm, 5 mm bleed, PDF):
-  `go run ./tools/bizcard -name "Vin …" -phone "04xx xxx xxx"`.
+  `go run ./tools/bizcard -name Vin -phone "04xx xxx xxx"`.
 
 ## Deploy
 

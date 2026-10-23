@@ -14,16 +14,17 @@ import (
 	"github.com/skip2/go-qrcode"
 )
 
-// card is what the user asked to print.
+// card is what the user asked to print. The phone number leads the back; the
+// name, if given, is a first name above it, with no title.
 type card struct {
-	Name, Phone, Title, Email, Web, ABN string
-	Proof, Guides                       bool
+	Name, Phone, Email, Web, ABN string
+	Proof, Guides                bool
 }
 
 // prepare tidies the fields and enforces the one rule that matters most: a
 // print PDF never goes out with placeholder or missing contact details.
 func (c *card) prepare() error {
-	for _, f := range []*string{&c.Name, &c.Phone, &c.Title, &c.Email, &c.Web, &c.ABN} {
+	for _, f := range []*string{&c.Name, &c.Phone, &c.Email, &c.Web, &c.ABN} {
 		*f = strings.Join(strings.Fields(*f), " ")
 	}
 	c.Web = strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(strings.ToLower(c.Web), "https://"), "http://"), "/")
@@ -34,24 +35,14 @@ func (c *card) prepare() error {
 		return fmt.Errorf("-email %q doesn't look like an email address", c.Email)
 	}
 	if c.Proof {
-		if c.Name == "" {
-			c.Name = "Firstname Lastname"
-		}
 		if c.Phone == "" {
 			c.Phone = "04XX XXX XXX"
 		}
 		return nil
 	}
-	var missing []string
-	if c.Name == "" {
-		missing = append(missing, "-name")
-	}
 	if c.Phone == "" {
-		missing = append(missing, "-phone")
-	}
-	if len(missing) > 0 {
-		return fmt.Errorf("refusing to make a print PDF without %s: placeholder contact details must never reach the printer.\n"+
-			"Pass the real details, or add -proof for a design-review copy stamped PROOF", strings.Join(missing, " and "))
+		return fmt.Errorf("refusing to make a print PDF without -phone: placeholder contact details must never reach the printer.\n" +
+			"Pass the real number, or add -proof for a design-review copy stamped PROOF")
 	}
 	digits := 0
 	for _, r := range c.Phone {
@@ -68,13 +59,13 @@ func (c *card) prepare() error {
 // cardPage is the template data for card.tmpl.
 type cardPage struct {
 	assets
-	Mode                                string // print | front | back
-	Proof, Guides                       bool
-	LockupClass                         string
-	Name, Title, Phone, Email, Web, ABN string
-	Tagline, Services, Area             string
-	QR                                  template.HTML
-	QRSymbolMM, QRTotalMM, QRQuietMM    string // CSS lengths in mm
+	Mode                             string // print | front | back
+	Proof, Guides                    bool
+	LockupClass                      string
+	Name, Phone, Email, Web, ABN     string
+	Tagline, Services, Area          string
+	QR                               template.HTML
+	QRSymbolMM, QRTotalMM, QRQuietMM string // CSS lengths in mm
 }
 
 // Preview sizes in CSS px: the 90 × 55 mm trim, or with -guides the whole
@@ -107,7 +98,7 @@ func makeCard(chrome string, a assets, c card, outDir string) error {
 
 	p := cardPage{
 		assets: a, Proof: c.Proof, Guides: c.Guides, LockupClass: "on-ink",
-		Name: c.Name, Title: c.Title, Phone: c.Phone, Email: c.Email, Web: c.Web, ABN: c.ABN,
+		Name: c.Name, Phone: c.Phone, Email: c.Email, Web: c.Web, ABN: c.ABN,
 		Tagline: tagline, Services: services, Area: area, QR: qr,
 		QRSymbolMM: mm(qrSymbolMM),
 		QRTotalMM:  mm(module * float64(modules+2*qrQuietModules)),

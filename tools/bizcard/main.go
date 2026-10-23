@@ -5,7 +5,7 @@
 // every side (so each PDF page is 100 × 65 mm), text and logos at least 5 mm
 // inside the trim, no crop marks. Page 1 is the front, page 2 the back.
 //
-//	go run ./tools/bizcard -name "Vin …" -phone "04xx xxx xxx" [-title Owner] [-email …] [-web upthespout.com.au] [-abn "…"] [-out tools/brand/out]
+//	go run ./tools/bizcard -phone "04xx xxx xxx" [-name Vin] [-email …] [-web upthespout.com.au] [-abn "…"] [-out tools/brand/out]
 //	go run ./tools/bizcard -proof    # design review: placeholders allowed, every side stamped PROOF
 //	go run ./tools/bizcard -logos    # logo-lockup.png, logo-lockup-dark.png, logo-mark-1024.png, logo-lockup.pdf
 //
@@ -54,9 +54,8 @@ func main() {
 	log.SetPrefix("bizcard: ")
 
 	var c card
-	flag.StringVar(&c.Name, "name", "", "name for the back of the card (required unless -proof)")
+	flag.StringVar(&c.Name, "name", "", "first name above the phone number (optional)")
 	flag.StringVar(&c.Phone, "phone", "", "phone number, as it should be printed (required unless -proof)")
-	flag.StringVar(&c.Title, "title", "Owner", "role under the name; empty to omit")
 	flag.StringVar(&c.Email, "email", "", "email address (optional)")
 	flag.StringVar(&c.Web, "web", "upthespout.com.au", "website domain; the QR code points at https://<web>/book")
 	flag.StringVar(&c.ABN, "abn", "", "ABN, printed small on the back (optional)")

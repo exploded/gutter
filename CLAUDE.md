@@ -23,8 +23,9 @@ Easy-going, sunny, tradie signwriting. Navy ink `#12284A`, tangerine `#FF7A21`
 highlights), cream `#FFF7EA` ground. Tangerine, sky and sun are fills only; use
 `--accent` / `--sky-text` for coloured text. Cards and buttons are "stickers":
 2px ink outline plus a hard offset shadow (`--pop`). Speak as the business, "we":
-never name Vin anywhere customers see (site, emails, invoices, cards), and never
-imply a team size. Describe the area as "Melbourne's east and north-east"; Warrandyte is only the base.
+never name Vin anywhere customers see (site, emails, invoices, review cards), and
+never imply a team size. The one exception is the business card: his first name,
+no title, above the phone number. Describe the area as "Melbourne's east and north-east"; Warrandyte is only the base.
 The mark is `static/img/logo-mark.svg` (gutter, tangerine downpipe, drop, leaf);
 `go run ./tools/genassets` and `go run ./tools/bizcard -logos` re-render
 everything from it.

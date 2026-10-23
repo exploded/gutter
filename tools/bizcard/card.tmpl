@@ -55,12 +55,15 @@ html[data-mode="back"]:not([data-guides]) .page{margin:-5mm 0 0 -5mm}
 .back{background:var(--cream)}
 .back .top{display:flex;justify-content:space-between;align-items:flex-start}
 .back .who{flex:1;min-width:0}
+/* The number is the headline; an optional first name sits above it. */
 .back .name{font-family:"UTS Display",sans-serif;font-weight:400;font-size:14pt;line-height:1.2;
   letter-spacing:.01em;color:var(--ink);white-space:nowrap}
-.back .title{margin-top:1mm;font-weight:800;font-size:6.5pt;letter-spacing:.16em;
+.back .name + .label{margin-top:2.4mm}
+.back .label{font-weight:800;font-size:6.5pt;letter-spacing:.16em;
   text-transform:uppercase;color:var(--tangerine-text);white-space:nowrap}
-.back .phone{margin-top:3.4mm;font-weight:800;font-size:12pt;line-height:1.1;letter-spacing:.01em;color:var(--ink);
-  white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.back .phone{margin-top:1mm;font-family:"UTS Display",sans-serif;font-weight:400;font-size:17pt;line-height:1.1;
+  letter-spacing:.02em;color:var(--ink);white-space:nowrap;font-variant-numeric:lining-nums tabular-nums}
+.back .phone + .contact{margin-top:2.6mm}
 .back .contact{margin-top:1mm;font-weight:500;font-size:7.5pt;line-height:1.35;color:var(--ink);
   white-space:nowrap}
 .back .contact.web{color:var(--sky-text)}
@@ -110,9 +113,9 @@ html[data-mode="back"]:not([data-guides]) .page{margin:-5mm 0 0 -5mm}
   <div class="safe">
     <div class="top">
       <div class="who">
-        <h1 class="name" data-fit="9">{{.Name}}</h1>
-        {{with .Title}}<p class="title" data-fit="6.5">{{.}}</p>{{end}}
-        <p class="phone" data-fit="9">{{.Phone}}</p>
+        {{with .Name}}<p class="name" data-fit="9">{{.}}</p>{{end}}
+        <p class="label">Call or text</p>
+        <h1 class="phone" data-fit="9">{{.Phone}}</h1>
         {{with .Email}}<p class="contact email" data-fit="6.5">{{.}}</p>{{end}}
         <p class="contact web" data-fit="6.5">{{.Web}}</p>
       </div>
