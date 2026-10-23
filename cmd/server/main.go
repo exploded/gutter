@@ -739,7 +739,7 @@ type adminDashData struct {
 	Outstanding  int64 // cents, invoices sent but unpaid
 	Week         []bookingRow
 	CalendarOn   bool   // Google Calendar sync is connected
-	GmailFrom    string // Gmail account customer mail goes from; "" = SES
+	GmailFrom    string // Gmail account mail goes from; "" = not connected
 	Sources      []sourceRow
 	Unattributed int64 // cents paid on invoices with no booking behind them
 	AdDays       int   // window the two ad numbers below cover

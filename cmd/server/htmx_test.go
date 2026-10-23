@@ -27,7 +27,6 @@ func TestBookingStatusHTMX(t *testing.T) {
 		t.Fatal(err)
 	}
 	site = siteConfig{Name: businessName, Brand: brandName, BaseURL: "https://example.test", Email: "me@example.test", Prices: pricing(), Suburbs: suburbs}
-	mail = nil
 
 	sessTok := "sess-" + generateSessionToken()
 	userSessions.Store(sessTok, &userSession{User: &db.User{Email: "james67@gmail.com"}, Expiry: time.Now().Add(time.Hour), CSRF: "csrf1"})

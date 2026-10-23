@@ -13,10 +13,8 @@ type emailSettingsData struct {
 	Flash       flash
 	Configured  bool // GOOGLE_CLIENT_ID present, so connecting is possible
 	Conn        *db.GoogleMail
-	SESOn       bool // SES keys set: admin notices and the Gmail fallback
 	AdminEmail  string
 	NotifyEmail string
-	SiteEmail   string
 }
 
 func handleAdminEmailSettings(w http.ResponseWriter, r *http.Request) {
@@ -30,15 +28,13 @@ func handleAdminEmailSettings(w http.ResponseWriter, r *http.Request) {
 		Flash:       readFlash(r),
 		Configured:  gmailOAuth != nil,
 		Conn:        conn,
-		SESOn:       mail.Enabled(),
 		AdminEmail:  adminEmail(),
 		NotifyEmail: notifyEmail,
-		SiteEmail:   site.Email,
 	})
 }
 
 // handleAdminEmailTest sends a test message through Gmail to whoever is
-// signed in. It skips the SES fallback, so a failure shows Google's reason.
+// signed in, so a failure shows Google's reason.
 func handleAdminEmailTest(w http.ResponseWriter, r *http.Request) {
 	g := gmail.Load()
 	if g == nil {

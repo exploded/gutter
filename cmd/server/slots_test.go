@@ -147,7 +147,6 @@ func TestBookSlotFlow(t *testing.T) {
 		t.Fatal(err)
 	}
 	site.Prices, site.Name, site.Brand = pricing(), businessName, brandName
-	mail = nil
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /book", handleBookForm)

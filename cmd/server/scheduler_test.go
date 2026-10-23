@@ -18,7 +18,7 @@ func TestScheduler(t *testing.T) {
 	}
 	defer db.Close()
 	site = siteConfig{BaseURL: "https://example.test", Email: "me@example.test", Phone: "0400 000 000"}
-	mail, notifyEmail = nil, "me@example.test"
+	notifyEmail = "me@example.test"
 
 	// Tuesday 25 Aug 2026, 17:00 Melbourne.
 	now := time.Date(2026, 8, 25, 17, 0, 0, 0, db.Melbourne)
@@ -168,7 +168,6 @@ func TestSchedulerMailTemplates(t *testing.T) {
 		}
 	}
 	// nil mailer: every send is a logged no-op
-	mail = nil
 	if err := sendBookingReminder(b); err != nil {
 		t.Error(err)
 	}

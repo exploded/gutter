@@ -1,3 +1,4 @@
+// Package mailer builds the raw email messages the Gmail API sends.
 package mailer
 
 import (
@@ -12,10 +13,17 @@ import (
 	"time"
 )
 
+// Attachment is a file to attach to an email.
+type Attachment struct {
+	Filename    string
+	ContentType string // e.g. "application/pdf"
+	Data        []byte
+}
+
 // BuildMessage renders an RFC 5322 message: a text/HTML alternative, wrapped in
 // multipart/mixed when there are attachments. from, to and replyTo are header
 // values, already formatted (see net/mail.Address.String). It is the raw form
-// the Gmail API sends; SES builds its own.
+// the Gmail API sends.
 func BuildMessage(from, to, replyTo, subject, htmlBody, textBody string, atts ...Attachment) ([]byte, error) {
 	subject = mime.QEncoding.Encode("utf-8", subject)
 	// A line break in a header value would start a new header (Bcc: …) and turn

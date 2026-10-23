@@ -30,7 +30,6 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		Prices: pricing(), SeniorsPct: 10, Suburbs: suburbs, Areas: suburbList,
 		ABN: "12 345 678 901", BankName: "Up The Spout", BankBSB: "000-000", BankAcct: "12345678",
 		ReviewURL: "https://g.page/r/TEST/review"}
-	mail = nil
 
 	sessTok := "sess-" + generateSessionToken()
 	userSessions.Store(sessTok, &userSession{User: &db.User{Email: "james67@gmail.com"}, Expiry: time.Now().Add(time.Hour), CSRF: "csrf1"})

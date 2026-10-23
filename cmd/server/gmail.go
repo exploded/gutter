@@ -25,8 +25,8 @@ import (
 // Gmail sending. Once the primary admin connects their Gmail account from
 // /admin/email, customer emails (confirmations, reminders, invoices, receipts)
 // go out from that account through the Gmail API, so they sit in Vin's Sent
-// mail and replies thread with them. Admin notices stay on SES (see deliver in
-// mail.go). Disconnecting puts everything back on SES.
+// mail and replies thread with them. Admin notices go the same way. Gmail is
+// the only mail route, so disconnecting stops all email.
 //
 // Like calendar sync, connecting is separate from admin sign-in and has its own
 // redirect URI, so the send scope is only ever granted from the settings page.
@@ -67,7 +67,7 @@ type gmailSender struct {
 // gmail is the live connection, nil when Gmail isn't connected.
 var gmail atomic.Pointer[gmailSender]
 
-// gmailFrom is the connected Gmail address, or "" when mail goes through SES.
+// gmailFrom is the connected Gmail address, or "" when Gmail isn't connected.
 func gmailFrom() string {
 	if s := gmail.Load(); s != nil {
 		return s.email
@@ -84,7 +84,9 @@ func loadGmail() {
 	}
 	setGmail(g)
 	if s := gmail.Load(); s != nil {
-		log.Printf("email: customer mail goes from %s via Gmail", s.email)
+		log.Printf("email: mail goes from %s via Gmail", s.email)
+	} else {
+		logWarnf("email: Gmail not connected, so no email is sent (connect it at /admin/email)")
 	}
 }
 
@@ -128,7 +130,7 @@ func (s *gmailSender) post(to, subject, html, text, replyTo string, atts ...mail
 	if err != nil {
 		return err
 	}
-	// Bounded like the SES call, so a stuck request can't hang a handler.
+	// Bounded, so a stuck request can't hang a handler.
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.endpoint, bytes.NewReader(body))
@@ -231,5 +233,5 @@ func handleGmailDisconnect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setGmail(nil)
-	redirectMsg(w, r, "/admin/email", "ok", "Disconnected. Email goes through Amazon SES again.")
+	redirectMsg(w, r, "/admin/email", "ok", "Disconnected. No email is sent until Gmail is connected again.")
 }

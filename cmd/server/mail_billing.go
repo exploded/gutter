@@ -124,7 +124,7 @@ func (d bookingMailData) timeLine() string {
 }
 
 // sendBookingConfirmation emails the customer their (re)scheduled visit with
-// an .ics invite attached. Returns an error if there is no email or SES fails.
+// an .ics invite attached. Returns an error if there is no email or Gmail fails.
 func sendBookingConfirmation(b *db.Booking, rescheduled bool) error {
 	if b.Email == "" {
 		return fmt.Errorf("booking has no email address")

@@ -10,7 +10,7 @@ import (
 )
 
 // GoogleMail holds the Gmail account customer emails are sent from. There is
-// at most one row; nil means "not connected" and email goes through SES.
+// at most one row; nil means "not connected" and no email is sent.
 type GoogleMail struct {
 	AccountEmail string
 	RefreshToken string

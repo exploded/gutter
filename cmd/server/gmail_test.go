@@ -59,9 +59,9 @@ func TestGmailDelivery(t *testing.T) {
 	}
 	defer db.Close()
 	site = siteConfig{Name: businessName, BaseURL: "https://example.test", Email: "vin@example.test"}
-	mail, notifyEmail = nil, "vin@example.test"
+	notifyEmail = "vin@example.test"
 
-	// Not connected and no SES: sends are logged no-ops.
+	// Not connected: sends are logged no-ops.
 	gmail.Store(nil)
 	if err := sendNow("ann@example.test", "Hi", "<p>hi</p>", "hi", site.Email); err != nil {
 		t.Fatalf("disabled send: %v", err)
@@ -98,7 +98,7 @@ func TestGmailDelivery(t *testing.T) {
 		t.Errorf("connection after a send = %+v, want LastSentAt set and no error", g)
 	}
 
-	// The admin notice has no SES to use, so Gmail carries it too.
+	// The admin notice goes through Gmail too.
 	if err := sendNow(notifyEmail, "Booking #1", "<p>x</p>", "x", "ann@example.test"); err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +106,7 @@ func TestGmailDelivery(t *testing.T) {
 		t.Errorf("admin notice not sent through Gmail with the customer as Reply-To")
 	}
 
-	// A refusal comes back as the error (no SES to fall back to) and shows on
+	// A refusal comes back as the error and shows on
 	// the settings page.
 	fake.status = http.StatusUnauthorized
 	err = sendNow("ann@example.test", "Hi", "<p>hi</p>", "hi", "")

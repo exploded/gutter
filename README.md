@@ -106,7 +106,7 @@ The scheduler (on when `PROD` is set) sends the day-before reminder, the
 3. **Admin accounts**: `ADMIN_EMAIL=upthespoutguttercleaning@gmail.com,james67@gmail.com`. Connect
    Google Calendar from `/admin/calendar/settings` and Gmail from `/admin/email`,
    both with the business Gmail. Once Gmail is connected, customer emails go from
-   it, and so do admin notices. The business doesn't use Amazon SES.
+   it, and so do admin notices. Gmail is the only way the app sends email.
 4. **Backups**: `AWS_PROFILE=… scripts/s3-backup-setup.sh`.
 
 ## Domains

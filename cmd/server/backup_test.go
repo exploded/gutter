@@ -46,7 +46,7 @@ func TestBackupJob(t *testing.T) {
 	}
 	defer db.Close()
 	site = siteConfig{BaseURL: "https://example.test", Email: "me@example.test"}
-	mail, notifyEmail = nil, "me@example.test"
+	notifyEmail = "me@example.test"
 	if _, err := db.InsertBooking(&db.Booking{Name: "Snap", Phone: "0400 111 222", Email: "snap@example.test", Suburb: "Warrandyte", PropertyType: "single", Issue: "x"}); err != nil {
 		t.Fatal(err)
 	}

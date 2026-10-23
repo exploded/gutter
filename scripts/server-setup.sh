@@ -57,7 +57,7 @@ GOOGLE_CLIENT_SECRET=
 # Address autocomplete on /book (Mappify). Without it the booking form can't be submitted.
 MAPPIFY_API_KEY=
 
-# Region for the S3 backups. Email goes through Gmail only, not Amazon SES.
+# Region for the S3 backups.
 AWS_REGION=ap-southeast-2
 
 # Background scheduler (reminders, digest, nightly backup). Runs when PROD is set; 0 disables.

@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS google_calendar (
 );
 
 -- Gmail sending: a single row (id = 1) holding the refresh token for the account
--- customer emails are sent from. Deleting the row puts sending back on SES.
+-- customer emails are sent from. Deleting the row stops all email.
 CREATE TABLE IF NOT EXISTS google_mail (
     id             INTEGER PRIMARY KEY CHECK (id = 1),
     account_email  TEXT NOT NULL DEFAULT '',   -- must match the primary ADMIN_EMAIL

@@ -43,7 +43,6 @@ func TestMailTemplatesRender(t *testing.T) {
 		t.Errorf("empty bookingSummary = %q, %q", property, price)
 	}
 	// nil mailer is a no-op
-	mail = nil
 	notifyBooking(1, b, false)
 }
 

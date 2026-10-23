@@ -112,7 +112,6 @@ func TestBillingMailTemplates(t *testing.T) {
 		t.Errorf("ics without a service:\n%s", ics)
 	}
 	// nil mailer: sends are no-ops that succeed.
-	mail = nil
 	if err := sendBookingConfirmation(b, false); err != nil {
 		t.Errorf("confirmation with nil mailer: %v", err)
 	}

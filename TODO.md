@@ -7,7 +7,7 @@ In priority order. `[ ]` to do · ✅ done.
 The full list for James and Vin is the launch checklist doc (private; not in
 this public repo). The code-side items:
 
-- [x] Business Gmail `upthespoutguttercleaning@gmail.com` in the server `.env` (no SES: all mail through Gmail)
+- [x] Business Gmail `upthespoutguttercleaning@gmail.com` in the server `.env` (all mail goes through Gmail)
 - [ ] Connect the business Gmail at `/admin/email` and Google Calendar at `/admin/calendar/settings`
 - [ ] Fill `.env`: `PHONE`, `CONTACT_EMAIL`, `ADMIN_EMAIL`, bank details
 - [ ] Business cards (`tools/bizcard`) once the phone number is final

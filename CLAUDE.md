@@ -62,7 +62,8 @@ Module `gutter`. Fonts: Lilita One (headings, wordmark) + Figtree (body), self-h
   reached); only the optional jetting add-on, with the customer's OK. Don't
   claim roof valleys are cleared either (guides may still advise homeowners
   about them).
-- **No Amazon SES.** All email goes through the connected business Gmail.
+- **Gmail is the only mail route.** All email, admin notices included, goes
+  through the connected business Gmail. Don't add a second sender.
 - **Make no claims we can't back up**: no "fully insured", years of experience,
   ratings or review counts until they're true.
 - No GST is charged (sole trader, under the threshold). Invoices must not say

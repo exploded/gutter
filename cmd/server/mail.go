@@ -2,47 +2,36 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
-	"os"
 	"strings"
 
 	"gutter/db"
 	"gutter/mailer"
 )
 
-// ── Email notifications (Gmail once connected; SES is an unused fallback) ──
+// ── Email notifications (Gmail only) ──
 //
-// All mail goes out through the business Gmail the admin connects (gmail.go),
-// and notifications go to CONTACT_EMAIL. The business doesn't use Amazon SES:
-// without AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY the SES route stays off.
-// With neither configured every notify* call is a silent no-op, so local dev
-// works without any AWS or Google setup.
+// All mail goes out through the business Gmail the admin connects (gmail.go):
+// customer confirmations, reminders, invoices and receipts, and the admin
+// notices to CONTACT_EMAIL. Until Gmail is connected every notify* call is a
+// silent no-op, so local dev works without any Google setup.
+//
+// CONTACT_EMAIL should be the connected Gmail address itself. If it were a
+// forward into that account, Gmail would drop the forwarded copy of a message
+// it has already filed in Sent, and booking alerts would never reach the inbox.
 
-var (
-	mail        *mailer.Mailer
-	notifyEmail string // where booking notifications go
-)
+var notifyEmail string // where booking notifications go
 
 func initMail() {
-	region := os.Getenv("AWS_REGION")
-	if region == "" {
-		region = "ap-southeast-2"
-	}
-	from := site.Name + " <" + site.Email + ">"
 	notifyEmail = site.Email
-	mail = mailer.New(region, os.Getenv("AWS_ACCESS_KEY_ID"), os.Getenv("AWS_SECRET_ACCESS_KEY"), from)
-	if mail.Enabled() {
-		log.Printf("email: SES enabled, from=%q notify=%q region=%s", from, notifyEmail, region)
-	} else {
-		logWarnf("email: not configured (set AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) — notifications disabled")
-	}
 }
 
-// mailEnabled reports whether any route can send.
+// mailEnabled reports whether mail can be sent: Gmail is connected.
 func mailEnabled() bool {
-	return mail.Enabled() || gmail.Load() != nil
+	return gmail.Load() != nil
 }
 
 // send delivers an email in the background and logs failures. Callers must
@@ -73,26 +62,18 @@ func sendNow(to, subject, html, text, replyTo string, atts ...mailer.Attachment)
 	return deliver(to, subject, html, text, replyTo, atts...)
 }
 
-// deliver picks the route for one message. Customer mail goes through Gmail
-// when it's connected, falling back to SES if Gmail fails. Admin notices stay
-// on SES: CONTACT_EMAIL forwards to the same Gmail account, and Gmail drops a
-// forwarded copy of a message it has already filed in Sent, so a booking alert
-// sent from that account would never reach the inbox.
+// deliver sends one message through the connected Gmail.
 func deliver(to, subject, html, text, replyTo string, atts ...mailer.Attachment) error {
 	g := gmail.Load()
-	if g != nil && (!mail.Enabled() || !strings.EqualFold(to, notifyEmail)) {
-		// Replies should land straight in the Gmail thread, not take the long
-		// way round through the CONTACT_EMAIL forward.
-		if strings.EqualFold(replyTo, site.Email) {
-			replyTo = ""
-		}
-		err := g.send(to, subject, html, text, replyTo, atts...)
-		if err == nil || !mail.Enabled() {
-			return err
-		}
-		logWarnf("email: Gmail failed, sending %q to %s through SES instead", subject, to)
+	if g == nil {
+		return errors.New("email: Gmail is not connected")
 	}
-	return mail.SendWithAttachments(to, subject, html, text, replyTo, atts...)
+	// Replies should land straight in the Gmail thread, not take the long way
+	// round through CONTACT_EMAIL.
+	if strings.EqualFold(replyTo, site.Email) {
+		replyTo = ""
+	}
+	return g.send(to, subject, html, text, replyTo, atts...)
 }
 
 const mailTmplSrc = `

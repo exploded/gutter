@@ -41,17 +41,10 @@
                 <p class="admin-note">
                     Booking confirmations, reminders, invoices and receipts go to customers from
                     <strong>{{$d.Conn.AccountEmail}}</strong>. They show up in its Sent mail, and replies come
-                    straight back to it.
-                    {{if $d.SESOn}}If Gmail ever refuses a message, it goes through Amazon SES from
-                    {{$d.SiteEmail}} instead, and the error shows here.{{else}}<strong>Amazon SES isn't set up</strong>,
-                    so if Gmail refuses a message, it isn't sent.{{end}}
+                    straight back to it. New-booking alerts and the morning digest to {{$d.NotifyEmail}} go
+                    the same way. Gmail is the only way mail goes out, so if it refuses a message, that
+                    message isn't sent, and the error shows here.
                 </p>
-                {{if $d.SESOn}}
-                <p class="admin-note admin-note--small">
-                    New-booking alerts and the morning digest to {{$d.NotifyEmail}} still come through Amazon SES.
-                    Gmail hides a forwarded copy of mail it has already sent, so they'd never reach your inbox.
-                </p>
-                {{end}}
                 <div class="admin-actions">
                     {{/* Only the message changes, so the main swap is none. */}}
                     <form method="post" action="/admin/email/test"
@@ -60,7 +53,7 @@
                         <button class="btn btn--ghost btn--sm" type="submit">Send me a test email</button>
                     </form>
                     <form method="post" action="/admin/email/disconnect"
-                          onsubmit="return confirm('Disconnect Gmail? Customer emails will go through Amazon SES again.')">
+                          onsubmit="return confirm('Disconnect Gmail? No email will be sent until you connect it again.')">
                         <input type="hidden" name="csrf" value="{{.CSRF}}">
                         <button class="btn btn--ghost btn--sm" type="submit">Disconnect</button>
                     </form>
@@ -72,11 +65,10 @@
             <div class="admin-card">
                 <h2 class="admin-card-title">Not connected</h2>
                 <p class="admin-note">
-                    {{if $d.SESOn}}Customer emails go out through Amazon SES from {{$d.SiteEmail}}.{{else}}No email is
-                    being sent: neither Gmail nor Amazon SES is set up.{{end}}
-                    Connect <strong>{{$d.AdminEmail}}</strong> to send booking confirmations, reminders, invoices and
-                    receipts from your own Gmail instead. They'll sit in your Sent mail, and customer replies
-                    thread with them.
+                    <strong>No email is being sent.</strong>
+                    Connect <strong>{{$d.AdminEmail}}</strong> to send booking confirmations, reminders, invoices,
+                    receipts and new-booking alerts from your own Gmail. They'll sit in your Sent mail, and customer
+                    replies thread with them.
                 </p>
                 <p class="admin-note">
                     The app can only <em>send</em> as you. It can't read, search or delete anything in your mailbox.
