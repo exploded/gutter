@@ -60,13 +60,6 @@
                                     <input class="admin-input" id="suburb" name="suburb" value="{{$f.Suburb}}" maxlength="80">
                                     {{with $e.suburb}}<span class="field-error">{{.}}</span>{{end}}
                                 </div>
-                                <div class="admin-field admin-field--wide">
-                                    <label for="service">Service</label>
-                                    <select class="admin-input" id="service" name="service">
-                                        <option value="">Not sure / something else</option>
-                                        {{range $d.Services}}<option value="{{.Slug}}"{{if eq .Slug $f.Service}} selected{{end}}>{{.Title}}</option>{{end}}
-                                    </select>
-                                </div>
                             </div>
                             <div class="admin-form-inline">
                                 <div class="admin-field admin-field--wide">

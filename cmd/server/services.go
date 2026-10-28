@@ -57,6 +57,10 @@ func relatedServices(s *Service) []*Service {
 // single is the price-list row most copy quotes as the example.
 var single = propertyTypesBySlugInit("single")
 
+// defaultService is the service every booking gets unless a link to /book
+// named another. No form asks: the work is always a gutter clean.
+const defaultService = "gutter-cleaning"
+
 // propertyTypesBySlugInit looks a row up during package initialisation, before
 // the init() that fills propertyTypesBySlug has run.
 func propertyTypesBySlugInit(slug string) *PropertyType {

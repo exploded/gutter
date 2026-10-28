@@ -467,28 +467,27 @@ func handleAdminBookingFollowup(w http.ResponseWriter, r *http.Request) {
 
 // phoneBookingForm holds the new-booking form values for re-rendering on error.
 type phoneBookingForm struct {
-	Name, Phone, Email, Suburb, Service, Issue string
-	PropertyType                               string // price-list row; "" = not known yet
-	Plan                                       bool
-	Notes                                      string // private admin notes, saved with the booking
-	Address                                    string // the visible autocomplete field
-	AddrStreet, AddrSuburb                     string // hidden structured parts, set only when a suggestion is picked
-	AddrState, AddrPostcode                    string
-	Source                                     string // how they found us; defaults to a phone call
+	Name, Phone, Email, Suburb, Issue string
+	PropertyType                      string // price-list row; "" = not known yet
+	Plan                              bool
+	Notes                             string // private admin notes, saved with the booking
+	Address                           string // the visible autocomplete field
+	AddrStreet, AddrSuburb            string // hidden structured parts, set only when a suggestion is picked
+	AddrState, AddrPostcode           string
+	Source                            string // how they found us; defaults to a phone call
 }
 
 type adminBookingNewData struct {
-	Flash    flash
-	Form     phoneBookingForm
-	Errors   map[string]string
-	Services []Service
-	Types    []PropertyType
-	Sources  []db.BookingSource
+	Flash   flash
+	Form    phoneBookingForm
+	Errors  map[string]string
+	Types   []PropertyType
+	Sources []db.BookingSource
 }
 
 func handleAdminBookingNew(w http.ResponseWriter, r *http.Request) {
 	render(w, r, "admin-booking-new", adminBookingNewData{
-		Flash: readFlash(r), Services: services, Types: propertyTypes, Errors: map[string]string{},
+		Flash: readFlash(r), Types: propertyTypes, Errors: map[string]string{},
 		Sources: db.BookingSources, Form: phoneBookingForm{Source: db.SourcePhone},
 	})
 }
@@ -500,7 +499,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 	trim := func(k string) string { return strings.TrimSpace(r.FormValue(k)) }
 	f := phoneBookingForm{
 		Name: trim("name"), Phone: trim("phone"), Email: trim("email"),
-		Suburb: trim("suburb"), Service: trim("service"), Issue: trim("issue"),
+		Suburb: trim("suburb"), Issue: trim("issue"),
 		Address: trim("address"), AddrStreet: trim("addr_street"), AddrSuburb: trim("addr_suburb"),
 		AddrState: strings.ToUpper(trim("addr_state")), AddrPostcode: trim("addr_postcode"),
 		Source: trim("source"), Notes: trim("notes"),
@@ -540,12 +539,9 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 	if rs := []rune(f.Notes); len(rs) > 5000 {
 		f.Notes = string(rs[:5000])
 	}
-	if _, ok := findService(f.Service); !ok {
-		f.Service = ""
-	}
 	if len(errs) > 0 {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		render(w, r, "admin-booking-new", adminBookingNewData{Form: f, Errors: errs, Services: services, Types: propertyTypes, Sources: db.BookingSources})
+		render(w, r, "admin-booking-new", adminBookingNewData{Form: f, Errors: errs, Types: propertyTypes, Sources: db.BookingSources})
 		return
 	}
 	if f.Issue == "" {
@@ -575,7 +571,7 @@ func handleAdminBookingCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	nb := &db.Booking{
 		CustomerID: customerID, Name: f.Name, Phone: f.Phone, Email: f.Email,
-		Suburb: f.Suburb, Address: fullAddress, ServiceSlug: f.Service, Issue: f.Issue,
+		Suburb: f.Suburb, Address: fullAddress, ServiceSlug: defaultService, Issue: f.Issue,
 		Source: f.Source, AdminNotes: f.Notes,
 	}
 	if pt, ok := findPropertyType(f.PropertyType); ok {

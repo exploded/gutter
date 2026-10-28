@@ -161,7 +161,7 @@ func TestBookPrefill(t *testing.T) {
 		"&email=jane%40example.com&issue=Side+gate+code+1234&preferred_time=Tue+am").Body.String()
 	for _, want := range []string{
 		`value="Jane"`, `value="0400000000"`, `value="jane@example.com"`, `value="Tue am"`,
-		`value="bushfire-preparation" selected`,
+		`name="service" value="bushfire-preparation"`,
 		`value="double" data-price="395" checked`,
 		`name="plan" value="1" checked`,
 		`id="price-total">$348<`,
@@ -188,10 +188,10 @@ func TestBookPrefill(t *testing.T) {
 		t.Error("service=fire-ready-plan should tick the plan")
 	}
 
-	// Unknown service slug is blanked — only the placeholder option is selected.
+	// Unknown service slug is blanked, never echoed.
 	body = get(mux, "/book?service=not-a-real-slug").Body.String()
-	if !strings.Contains(body, `<option value="" selected>`) || strings.Contains(body, `"not-a-real-slug"`) {
-		t.Error("unknown service slug should fall back to the empty option")
+	if !strings.Contains(body, `name="service" value=""`) || strings.Contains(body, `"not-a-real-slug"`) {
+		t.Error("unknown service slug should be blanked")
 	}
 
 	// Address params must be ignored: the address gate depends on autocomplete.

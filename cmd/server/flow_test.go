@@ -398,20 +398,16 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		t.Fatal("customer edit/search")
 	}
 	// New booking straight from the customer page: unscheduled, linked, uses saved details.
-	loc = post(cpath+"/bookings", url.Values{"service": {"downpipe-unblocking"}, "issue": {"Back downpipe overflowing again"}})
+	// There's no service picker: it's a gutter clean.
+	loc = post(cpath+"/bookings", url.Values{"issue": {"Back downpipe overflowing again"}})
 	nid := lastSeg(strings.SplitN(loc, "?", 2)[0])
 	nb, _ := db.GetBooking(nid)
-	if nb == nil || nb.CustomerID != b.CustomerID || nb.Status != db.BookingNew || nb.ServiceSlug != "downpipe-unblocking" ||
+	if nb == nil || nb.CustomerID != b.CustomerID || nb.Status != db.BookingNew || nb.ServiceSlug != defaultService ||
 		nb.Name != "Zoë O'Brien" || nb.Email != "zoe@example.test" || nb.Suburb != "Donvale" || !nb.StartAt.IsZero() {
 		t.Fatalf("customer booking: %+v", nb)
 	}
 	if !strings.Contains(get(cpath), "/admin/bookings/"+itoa(nid)) {
 		t.Fatal("customer page should list the new booking")
-	}
-	// Unknown service slug is dropped, not rejected.
-	loc = post(cpath+"/bookings", url.Values{"service": {"nope"}, "issue": {"x"}})
-	if nb, _ = db.GetBooking(lastSeg(strings.SplitN(loc, "?", 2)[0])); nb == nil || nb.ServiceSlug != "" {
-		t.Fatalf("bad slug should be blanked: %+v", nb)
 	}
 	// Cancel the follow-up with an email (nil mailer).
 	post("/admin/bookings/"+itoa(fid)+"/status", url.Values{"status": {"cancelled"}, "notify": {"1"}, "reason": {"house sold"}})
@@ -440,7 +436,7 @@ func TestBookingToInvoiceFlow(t *testing.T) {
 		"name": {"Rex Kramer"}, "phone": {"0400 000 099"},
 		"address": {"9 Sample St, Warranwood VIC 3134"}, "addr_street": {"9 Sample St"},
 		"addr_suburb": {"Warranwood"}, "addr_state": {"VIC"}, "addr_postcode": {"3134"},
-		"service": {"gutter-cleaning"}, "property": {"large"},
+		"property": {"large"},
 		"issue": {"Gutters overflowing at the back"},
 		"notes": {"Dog in the yard; use the side gate."},
 	})

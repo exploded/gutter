@@ -43,11 +43,11 @@ func TestTemplatesRender(t *testing.T) {
 			Related []*Service
 			Guides  []*Guide
 		}{svc, relatedServices(svc), guidesForService(svc.Slug)},
-		"book": bookPageData{Services: services, Types: propertyTypes,
+		"book": bookPageData{Types: propertyTypes,
 			Form:   bookForm{PropertyType: "double", Plan: true, Service: "fire-ready-plan"},
 			Errors: map[string]string{"name": "x", "contact": "y", "property": "p", "address": "a", "issue": "i"}, TS: 1},
 		"book-plain": newBookPage(bookForm{PropertyType: defaultPropertyType}, map[string]string{}),
-		"book-slots": bookPageData{Services: services, Types: propertyTypes, CanBook: true, Days: sampleSlotDays(),
+		"book-slots": bookPageData{Types: propertyTypes, CanBook: true, Days: sampleSlotDays(),
 			Form:   bookForm{PropertyType: "single", When: whenSlot, Slot: sampleSlotDays()[0].Slots[0].Key()},
 			Errors: map[string]string{"slot": "taken"}, TS: 1},
 		"pricing":            nil,
@@ -87,7 +87,7 @@ func TestTemplatesRender(t *testing.T) {
 		"admin-booking-new": adminBookingNewData{Flash: flash{OK: "x"},
 			Form: phoneBookingForm{Name: "Ann", Address: "1 Example Ct, Donvale VIC 3111", AddrStreet: "1 Example Ct", AddrSuburb: "Donvale", AddrState: "VIC", AddrPostcode: "3111",
 				PropertyType: "large", Plan: true, Source: db.SourcePhone},
-			Errors: map[string]string{"contact": "y", "address": "z"}, Services: services, Types: propertyTypes, Sources: db.BookingSources},
+			Errors: map[string]string{"contact": "y", "address": "z"}, Types: propertyTypes, Sources: db.BookingSources},
 		"admin-calendar": calendarData{WeekStart: time.Now(), WeekLabel: "w", Prev: "p", Next: "n", ThisWeek: "t", Hours: []int{7, 8},
 			SlotPx: 14, ColPx: 672, ForID: 1, ForName: "Ann", BusyOn: true, BusyErr: "google says no",
 			Days: []calDay{{Date: time.Now(), Label: "Mon 17", IsToday: true, Slots: []calSlot{{Time: "07:00", OnHour: true, Href: "/x"}, {Time: "07:15"}},
@@ -129,7 +129,7 @@ func TestTemplatesRender(t *testing.T) {
 		"admin-customer-new": adminCustomerNewData{Flash: flash{Err: "already on file"},
 			Form:   customerForm{Name: "Ann", Email: "ann@x", Phone: "0400 000 000", Suburb: "Donvale"},
 			Errors: map[string]string{"contact": "y", "email": "z"}},
-		"admin-customer": adminCustomerData{C: cust, Bookings: bookingRows([]db.Booking{booked}), Invoices: []invoiceRow{{Invoice: *inv, Ref: "INV-1001", CustName: "Ann", Issued: "20 Aug 2026"}}, Services: services},
+		"admin-customer": adminCustomerData{C: cust, Bookings: bookingRows([]db.Booking{booked}), Invoices: []invoiceRow{{Invoice: *inv, Ref: "INV-1001", CustName: "Ann", Issued: "20 Aug 2026"}}},
 		"invoice-public": func() invoicePublicData {
 			v := sampleInvoiceView(db.InvoiceSent)
 			return invoicePublicData{V: v, Ref: "INV-1001", Total: "$279.00", Lines: []invoiceLine{{"Gutter clean — Unit or townhouse", "1", "219.00", "$219.00", "$219.00"}}, Issued: "20 Aug 2026", Due: "27 Aug 2026", When: "Thu 20 Aug"}

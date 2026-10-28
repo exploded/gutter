@@ -101,17 +101,7 @@
 
                     <div class="quote-group">
                         <h2 class="quote-group-title">The job</h2>
-                        <div class="quote-fields">
-                            <div class="quote-field">
-                                <label for="service">Main reason</label>
-                                <select id="service" name="service">
-                                    <option value=""{{if not $f.Service}} selected{{end}}>Just a regular clean</option>
-                                    {{range .PageData.Services}}
-                                    <option value="{{.Slug}}"{{if eq .Slug $f.Service}} selected{{end}}>{{.Title}}</option>
-                                    {{end}}
-                                </select>
-                            </div>
-                        </div>
+                        <input type="hidden" name="service" value="{{$f.Service}}">
                         <div class="quote-field quote-field--full{{if $e.issue}} quote-field--error{{end}}">
                             <label for="issue">Anything we should know? <span class="label-optional">(optional)</span></label>
                             <textarea id="issue" name="issue" rows="4" maxlength="2000" placeholder="e.g. Side gate is locked — code 1234. Friendly dog. Solar panels on the north side. Council fire notice due 15 Dec.">{{$f.Issue}}</textarea>

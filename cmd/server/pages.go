@@ -208,18 +208,17 @@ func (f bookForm) Price() int {
 }
 
 type bookPageData struct {
-	Services []Service
-	Types    []PropertyType
-	Form     bookForm
-	Errors   map[string]string
-	TS       int64
-	Days     []slotDay // free arrival windows; empty when none can be offered
-	CanBook  bool      // the calendar could be checked, so windows may be offered
+	Types   []PropertyType
+	Form    bookForm
+	Errors  map[string]string
+	TS      int64
+	Days    []slotDay // free arrival windows; empty when none can be offered
+	CanBook bool      // the calendar could be checked, so windows may be offered
 }
 
 func newBookPage(f bookForm, errs map[string]string) bookPageData {
 	days, ok := openSlots(time.Now())
-	d := bookPageData{Services: services, Types: propertyTypes, Form: f, Errors: errs, TS: time.Now().Unix(),
+	d := bookPageData{Types: propertyTypes, Form: f, Errors: errs, TS: time.Now().Unix(),
 		Days: days, CanBook: ok && len(days) > 0}
 	if !d.CanBook {
 		d.Form.When = whenDiscuss
@@ -396,7 +395,7 @@ func handleBookSubmit(w http.ResponseWriter, r *http.Request) {
 		errs["preferred_time"] = "Please keep this short."
 	}
 	if _, ok := findService(f.Service); !ok {
-		f.Service = ""
+		f.Service = defaultService
 	}
 	var slot bookingSlot
 	if f.When == whenSlot {
